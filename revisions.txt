@@ -1,0 +1,5 @@
+go mod init project name
+
+atlas schema inspect -u "mysql://root:MysQl1998@localhost:3306/kmtc" --format '{{ sql . }}' > kmtc.sql
+
+atlas schema inspect -u "mysql://phpmyadmin:`Phpmyadmin_123#`@localhost:3306/kmtc">kmtc.hcl
