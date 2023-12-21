@@ -29,8 +29,29 @@ CREATE TABLE companies (
   id SERIAL PRIMARY KEY,
   name VARCHAR(255) NOT NULL,
   type INTEGER, -- 1 FOR GREEN CORPORATES || 2 FOR AGGREGATOR COMPANIES
+  logo VARCHAR(255),
+  location VARCHAR(255),
+  has_group BOOLEAN DEFAULT FALSE,
   meta JSON,
   is_active BOOLEAN DEFAULT TRUE
+);
+
+CREATE TABLE company_regionals (
+  id SERIAL PRIMARY KEY,
+  company_id INTEGER,
+  FOREIGN Key (company_id) REFERENCES companies(id),
+  region VARCHAR(255),
+  created_at TIMESTAMP NOT NULL DEFAULT NOW()
+);
+CREATE TABLE company_branches (
+  id SERIAL PRIMARY KEY,
+  company_id INTEGER,
+  FOREIGN Key (company_id) REFERENCES companies(id),
+  region_id INTEGER NULL,
+  FOREIGN Key (region_id) REFERENCES company_regionals(id),
+  branch VARCHAR(255),
+  branch_location VARCHAR(255),
+  created_at TIMESTAMP NOT NULL DEFAULT NOW()
 );
 
 -- Create "users" table
@@ -41,12 +62,16 @@ CREATE TABLE users(
     provider VARCHAR(255),
     role_id INTEGER,
     FOREIGN Key (role_id) REFERENCES roles(id),
-    company_id INTEGER NULL,
-    FOREIGN Key (company_id) REFERENCES companies(id),
+    user_company_id INTEGER NULL,
+    FOREIGN Key (user_company_id) REFERENCES companies(id),
+    user_region_id INTEGER NULL,
+    FOREIGN Key (user_region_id) REFERENCES company_regionals(id),
+    user_company_branch_id INTEGER NULL,
+    FOREIGN Key (user_company_branch_id) REFERENCES company_branches(id),
     email VARCHAR(255) DEFAULT NULL UNIQUE,
     password TEXT DEFAULT NULL,
     avatar_url TEXT NULL,
-    user_type SMALLINT,
+    user_type SMALLINT, -- 1 for TTNM ADMINS || 2 AGG GLOBAL ADMINS || 3 AGG ADMINS || 4 AGG USERS || 5 AGG COLLECTORS || 6 EXTERNAL COLLECTORS || 7 GREEN CHAMPIONS
     is_active BOOLEAN DEFAULT TRUE,
     calling_code VARCHAR(6) NULL,
     phone VARCHAR(15) NULL DEFAULT NULL,
@@ -126,13 +151,17 @@ CREATE TABLE waste_transactions (
   total_amount VARCHAR NOT NULL,
   payment_method_id INTEGER,
   FOREIGN KEY (payment_method_id) REFERENCES payment_methods(id),
-  merchant_request_id NULL,
-  checkout_request_id NULL,
-  mpesa_result_code NULL,
-  mpesa_result_desc NULL,
-  mpesa_receipt_code NULL,
+  merchant_request_id VARCHAR(255) NULL,
+  checkout_request_id VARCHAR(255) NULL,
+  mpesa_result_code VARCHAR(255) NULL,
+  mpesa_result_desc VARCHAR(255) NULL,
+  mpesa_receipt_code VARCHAR(255) NULL,
   time_paid VARCHAR(255) NULL,
   is_paid BOOLEAN DEFAULT FALSE,
   created_at TIMESTAMP NOT NULL DEFAULT NOW(),
-  updated_at TIMESTAMP NOT NULL
+  updated_at TIMESTAMP NOT NULL DEFAULT NOW()
 );
+
+-- INVENTORY IS FOR COLLECTORS AND AGGREGATOR COMPANIES
+
+--CREATE TABLE waste_inventory ()
