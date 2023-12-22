@@ -3,7 +3,7 @@ package controllers
 import (
 	"net/http"
 	"strconv"
-	"tutorial/gen"
+	"ttnmwastemanagementsystem/gen"
 
 	"github.com/gin-gonic/gin"
 	_ "github.com/gin-gonic/gin"

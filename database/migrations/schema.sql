@@ -28,29 +28,31 @@ CREATE TABLE role_has_permissions (
 CREATE TABLE companies (
   id SERIAL PRIMARY KEY,
   name VARCHAR(255) NOT NULL,
-  type INTEGER, -- 1 FOR GREEN CORPORATES || 2 FOR AGGREGATOR COMPANIES
-  logo VARCHAR(255),
+  companytype INTEGER NOT NULL, -- 1 FOR GREEN CORPORATES/CHAMPIONS || 2 FOR AGGREGATOR COMPANIES
+  logo VARCHAR(255) NULL,
   location VARCHAR(255),
-  has_group BOOLEAN DEFAULT FALSE,
-  meta JSON,
-  is_active BOOLEAN DEFAULT TRUE
+  has_regions BOOLEAN NOT NULL, -- 1 for yes || 0 for No
+  has_branches BOOLEAN NOT NULL, -- 1 for yes || 0 for No
+  is_active BOOLEAN NOT NULL DEFAULT TRUE,
+  created_at TIMESTAMP NOT NULL DEFAULT NOW()
 );
 
 CREATE TABLE company_regionals (
   id SERIAL PRIMARY KEY,
-  company_id INTEGER,
+  company_id INTEGER NOT NULL,
   FOREIGN Key (company_id) REFERENCES companies(id),
-  region VARCHAR(255),
+  region VARCHAR(255) NOT NULL,
   created_at TIMESTAMP NOT NULL DEFAULT NOW()
 );
 CREATE TABLE company_branches (
   id SERIAL PRIMARY KEY,
-  company_id INTEGER,
+  company_id INTEGER NOT NULL,
   FOREIGN Key (company_id) REFERENCES companies(id),
   region_id INTEGER NULL,
   FOREIGN Key (region_id) REFERENCES company_regionals(id),
-  branch VARCHAR(255),
-  branch_location VARCHAR(255),
+  branch VARCHAR(255) NOT NULL,
+  branch_location VARCHAR(255) NOT NULL,
+  is_active BOOLEAN NOT NULL DEFAULT TRUE,
   created_at TIMESTAMP NOT NULL DEFAULT NOW()
 );
 
@@ -105,7 +107,9 @@ CREATE TABLE email_verification_token (
 
 CREATE TABLE waste_groups (
   id SERIAL PRIMARY KEY,
-  name VARCHAR(255)
+  name VARCHAR(255) NOT NULL,
+  category VARCHAR(255) NOT NULL,
+  created_at TIMESTAMP NOT NULL DEFAULT NOW()
 );
 
 CREATE TABLE waste_collections (

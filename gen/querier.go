@@ -6,13 +6,39 @@ package gen
 
 import (
 	"context"
+	"database/sql"
 )
 
 type Querier interface {
+	// company_branches.sql
+	GetAllBranches(ctx context.Context) ([]GetAllBranchesRow, error)
+	// companies.sql
+	GetAllCompanies(ctx context.Context) ([]Company, error)
+	// companiescompany_regionals.sql
+	GetAllCompaniesRegions(ctx context.Context) ([]GetAllCompaniesRegionsRow, error)
+	GetAllCompanyBranches(ctx context.Context, companyID int32) ([]GetAllCompanyBranchesRow, error)
+	GetAllCompanyRegions(ctx context.Context, companyID int32) ([]GetAllCompanyRegionsRow, error)
 	GetAllUsers(ctx context.Context) ([]User, error)
+	// waste_groups.sql
+	GetAllWasteGroups(ctx context.Context) ([]WasteGroup, error)
+	GetBranchesForARegion(ctx context.Context, regionID sql.NullInt32) ([]GetBranchesForARegionRow, error)
+	GetCompany(ctx context.Context, id int32) (Company, error)
+	GetOneCompanyBranch(ctx context.Context, id int32) (GetOneCompanyBranchRow, error)
+	GetOneCompanyRegion(ctx context.Context, id int32) (GetOneCompanyRegionRow, error)
+	GetOneWasteGroup(ctx context.Context, id int32) (WasteGroup, error)
 	GetUser(ctx context.Context, id int32) (User, error)
 	GetUsersWithRole(ctx context.Context) ([]GetUsersWithRoleRow, error)
+	InsertCompany(ctx context.Context, arg InsertCompanyParams) (Company, error)
+	InsertCompanyBranch(ctx context.Context, arg InsertCompanyBranchParams) (CompanyBranch, error)
+	InsertCompanyRegion(ctx context.Context, arg InsertCompanyRegionParams) (CompanyRegional, error)
+	InsertWasteGroup(ctx context.Context, arg InsertWasteGroupParams) (WasteGroup, error)
+	UpdateCompanyBranchData(ctx context.Context, arg UpdateCompanyBranchDataParams) error
+	UpdateCompanyBranchStatus(ctx context.Context, arg UpdateCompanyBranchStatusParams) error
+	UpdateCompanyData(ctx context.Context, arg UpdateCompanyDataParams) error
+	UpdateCompanyRegionData(ctx context.Context, arg UpdateCompanyRegionDataParams) error
+	UpdateCompanyStatus(ctx context.Context, arg UpdateCompanyStatusParams) error
 	UpdateUser(ctx context.Context, arg UpdateUserParams) error
+	UpdateWasteGroup(ctx context.Context, arg UpdateWasteGroupParams) error
 }
 
 var _ Querier = (*Queries)(nil)

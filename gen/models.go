@@ -7,13 +7,50 @@ package gen
 import (
 	"database/sql"
 	"time"
+
+	"github.com/sqlc-dev/pqtype"
 )
+
+type Company struct {
+	ID          int32          `json:"id"`
+	Name        string         `json:"name"`
+	Companytype int32          `json:"companytype"`
+	Logo        sql.NullString `json:"logo"`
+	Location    sql.NullString `json:"location"`
+	HasRegions  bool           `json:"has_regions"`
+	HasBranches bool           `json:"has_branches"`
+	IsActive    bool           `json:"is_active"`
+	CreatedAt   time.Time      `json:"created_at"`
+}
+
+type CompanyBranch struct {
+	ID             int32         `json:"id"`
+	CompanyID      int32         `json:"company_id"`
+	RegionID       sql.NullInt32 `json:"region_id"`
+	Branch         string        `json:"branch"`
+	BranchLocation string        `json:"branch_location"`
+	IsActive       bool          `json:"is_active"`
+	CreatedAt      time.Time     `json:"created_at"`
+}
+
+type CompanyRegional struct {
+	ID        int32     `json:"id"`
+	CompanyID int32     `json:"company_id"`
+	Region    string    `json:"region"`
+	CreatedAt time.Time `json:"created_at"`
+}
 
 type EmailVerificationToken struct {
 	ID        int32     `json:"id"`
 	Token     string    `json:"token"`
 	Email     string    `json:"email"`
 	CreatedAt time.Time `json:"created_at"`
+}
+
+type PaymentMethod struct {
+	ID            int32     `json:"id"`
+	PaymentMethod string    `json:"payment_method"`
+	CreatedAt     time.Time `json:"created_at"`
 }
 
 type Permission struct {
@@ -50,25 +87,76 @@ type RoleHasPermission struct {
 }
 
 type User struct {
-	ID                 int32          `json:"id"`
-	FirstName          sql.NullString `json:"first_name"`
-	LastName           sql.NullString `json:"last_name"`
-	Provider           sql.NullString `json:"provider"`
-	RoleID             sql.NullInt32  `json:"role_id"`
-	Email              sql.NullString `json:"email"`
-	Password           sql.NullString `json:"password"`
-	AvatarUrl          sql.NullString `json:"avatar_url"`
-	UserType           sql.NullInt16  `json:"user_type"`
-	IsActive           sql.NullBool   `json:"is_active"`
-	CallingCode        sql.NullString `json:"calling_code"`
-	Phone              sql.NullString `json:"phone"`
-	PhoneConfirmedAt   sql.NullTime   `json:"phone_confirmed_at"`
-	ConfirmedAt        sql.NullTime   `json:"confirmed_at"`
-	ConfirmationToken  sql.NullString `json:"confirmation_token"`
-	ConfirmationSentAt sql.NullTime   `json:"confirmation_sent_at"`
-	RecoveryToken      sql.NullString `json:"recovery_token"`
-	RecoverySentAt     sql.NullTime   `json:"recovery_sent_at"`
-	LastLogin          sql.NullTime   `json:"last_login"`
-	CreatedAt          time.Time      `json:"created_at"`
-	UpdatedAt          time.Time      `json:"updated_at"`
+	ID                  int32          `json:"id"`
+	FirstName           sql.NullString `json:"first_name"`
+	LastName            sql.NullString `json:"last_name"`
+	Provider            sql.NullString `json:"provider"`
+	RoleID              sql.NullInt32  `json:"role_id"`
+	UserCompanyID       sql.NullInt32  `json:"user_company_id"`
+	UserRegionID        sql.NullInt32  `json:"user_region_id"`
+	UserCompanyBranchID sql.NullInt32  `json:"user_company_branch_id"`
+	Email               sql.NullString `json:"email"`
+	Password            sql.NullString `json:"password"`
+	AvatarUrl           sql.NullString `json:"avatar_url"`
+	UserType            sql.NullInt16  `json:"user_type"`
+	IsActive            sql.NullBool   `json:"is_active"`
+	CallingCode         sql.NullString `json:"calling_code"`
+	Phone               sql.NullString `json:"phone"`
+	PhoneConfirmedAt    sql.NullTime   `json:"phone_confirmed_at"`
+	ConfirmedAt         sql.NullTime   `json:"confirmed_at"`
+	ConfirmationToken   sql.NullString `json:"confirmation_token"`
+	ConfirmationSentAt  sql.NullTime   `json:"confirmation_sent_at"`
+	RecoveryToken       sql.NullString `json:"recovery_token"`
+	RecoverySentAt      sql.NullTime   `json:"recovery_sent_at"`
+	LastLogin           sql.NullTime   `json:"last_login"`
+	CreatedAt           time.Time      `json:"created_at"`
+	UpdatedAt           time.Time      `json:"updated_at"`
+}
+
+type WasteBuyer struct {
+	ID      int32                 `json:"id"`
+	BuyerID sql.NullInt32         `json:"buyer_id"`
+	Rates   pqtype.NullRawMessage `json:"rates"`
+}
+
+type WasteCollection struct {
+	ID          int32                 `json:"id"`
+	Date        time.Time             `json:"date"`
+	ChampionID  sql.NullInt32         `json:"champion_id"`
+	CollectorID sql.NullInt32         `json:"collector_id"`
+	Waste       pqtype.NullRawMessage `json:"waste"`
+	IsCollected sql.NullBool          `json:"is_collected"`
+	CreatedAt   time.Time             `json:"created_at"`
+}
+
+type WasteForSale struct {
+	ID     int32                 `json:"id"`
+	Seller sql.NullInt32         `json:"seller"`
+	Waste  pqtype.NullRawMessage `json:"waste"`
+}
+
+type WasteGroup struct {
+	ID        int32     `json:"id"`
+	Name      string    `json:"name"`
+	Category  string    `json:"category"`
+	CreatedAt time.Time `json:"created_at"`
+}
+
+type WasteTransaction struct {
+	ID                int32                 `json:"id"`
+	Date              time.Time             `json:"date"`
+	BuyerID           sql.NullInt32         `json:"buyer_id"`
+	SellerID          sql.NullInt32         `json:"seller_id"`
+	WasteProducts     pqtype.NullRawMessage `json:"waste_products"`
+	TotalAmount       string                `json:"total_amount"`
+	PaymentMethodID   sql.NullInt32         `json:"payment_method_id"`
+	MerchantRequestID sql.NullString        `json:"merchant_request_id"`
+	CheckoutRequestID sql.NullString        `json:"checkout_request_id"`
+	MpesaResultCode   sql.NullString        `json:"mpesa_result_code"`
+	MpesaResultDesc   sql.NullString        `json:"mpesa_result_desc"`
+	MpesaReceiptCode  sql.NullString        `json:"mpesa_receipt_code"`
+	TimePaid          sql.NullString        `json:"time_paid"`
+	IsPaid            sql.NullBool          `json:"is_paid"`
+	CreatedAt         time.Time             `json:"created_at"`
+	UpdatedAt         time.Time             `json:"updated_at"`
 }
