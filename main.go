@@ -15,6 +15,7 @@ func main()  {
 	companiesController:=controllers.CompaniesController{}
 	wasteGroupController:=controllers.WasteGroupsController{}
 	companyRegionsController:=controllers.CompanyRegionsController{}
+	companyBranchesController:=controllers.CompanyBranchesController{}
 	apiGroup := router.Group("/api:BVaDN9hl")
 
 	apiGroup.GET("/users",usersController.GetAllUsers)
@@ -31,6 +32,8 @@ func main()  {
 	apiGroup.GET("companies/regions", companyRegionsController.GetAllCompaniesRegions)
 	apiGroup.GET("companies/company/region/:id", companyRegionsController.GetOneCompanyRegion)
 	apiGroup.POST("companies/regions/update", companyRegionsController.UpdateCompanyRegionData)
+	apiGroup.POST("companies/branch/create",  companyBranchesController.InsertCompanyBranch)
+	apiGroup.POST("companies/branch/status", companyBranchesController.UpdateCompanyBranchStatus)
 	apiGroup.POST("settings/wastegroups/create", wasteGroupController.InsertWasteGroup)
 	apiGroup.POST("settings/wastegroups/update", wasteGroupController.UpdateWasteGroup)
 	apiGroup.GET("settings/wastegroups/all", wasteGroupController.GetAllWasteGroups)

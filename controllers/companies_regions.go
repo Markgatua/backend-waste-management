@@ -53,7 +53,7 @@ func (companyRegionsController CompanyRegionsController) InsertCompanyRegion(con
 	context.JSON(http.StatusOK, gin.H{
 		"error":   false,
 		"message": "Successfully Created Company Region",
-		"company": companyRegion, // Include the company details in the response
+		"company region": companyRegion, // Include the company details in the response
 	})
 }
 
