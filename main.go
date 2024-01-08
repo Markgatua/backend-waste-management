@@ -47,7 +47,7 @@ func runProgram() {
 	companiesController := controllers.CompaniesController{}
 	wasteGroupController := controllers.WasteGroupsController{}
 	organzationController := controllers.OrgnizationController{}
-	
+
 	apiGroup := router.Group("/api:BVaDN9hl")
 
 	apiGroup.GET("/users", usersController.GetAllUsers)
@@ -56,10 +56,11 @@ func runProgram() {
 	apiGroup.GET("/user/:id", usersController.GetUser)
 
 	//---------------------------organization----------------------------------------------------
-	apiGroup.POST("organization/add",organzationController.InsertOrganization)
-	apiGroup.PUT("organization/update",organzationController.UpdateOrganization)
-	apiGroup.GET("organization",organzationController.GetAllOrganizations)
-	apiGroup.GET("organization/:id",organzationController.GetOrganization)
+	apiGroup.POST("organization/add", organzationController.InsertOrganization)
+	apiGroup.PUT("organization/update", organzationController.UpdateOrganization)
+	apiGroup.GET("organization", organzationController.GetAllOrganizations)
+	apiGroup.DELETE("organization/:id", organzationController.DeleteOrganization)
+	apiGroup.GET("organization/:id", organzationController.GetOrganization)
 	//-------------------------------------------------------------------------------------------
 
 	//---------------------------companies ------------------------------------------------------
@@ -67,6 +68,7 @@ func runProgram() {
 	apiGroup.GET("companies/allcompanies", companiesController.GetAllCompanies)
 	apiGroup.GET("companies/company/:id", companiesController.GetCompany)
 	apiGroup.POST("companies/status", companiesController.UpdateCompanyStatus)
+	apiGroup.DELETE("companies/:id", companiesController.DeleteCompany)
 	apiGroup.POST("companies/update", companiesController.UpdateCompany)
 	//-------------------------------------------------------------------------------------------
 

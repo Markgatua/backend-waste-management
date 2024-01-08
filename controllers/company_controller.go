@@ -120,7 +120,7 @@ func (companiesController CompaniesController) GetCompany(context *gin.Context) 
 	})
 }
 
-func (c OrgnizationController) DeleteCompany(context *gin.Context) {
+func (c CompaniesController) DeleteCompany(context *gin.Context) {
 	id := context.Param("id")
 	id_, _ := strconv.ParseUint(id, 10, 32)
 	println("------------------------------", id_)
