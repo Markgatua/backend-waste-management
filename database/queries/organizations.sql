@@ -1,10 +1,10 @@
 -- regions.sql
 
 -- name: GetAllOrganizations :many
-SELECT * from organizations;
+SELECT organizations.*,countries.name as country from organizations left join countries on countries.id=organizations.country_id;
 
 -- name: GetOrganization :one
-SELECT * FROM organizations WHERE ID = $1;
+SELECT organizations.*,countries.name as country FROM organizations left join countries on countries.id=organizations.country_id WHERE organizations.id = $1;
 
 -- name: InsertOrganization :one
 insert into

@@ -53,14 +53,14 @@ func (c OrgnizationController) InsertOrganization(context *gin.Context) {
 	if insertError != nil {
 		context.JSON(http.StatusUnprocessableEntity, gin.H{
 			"error":   true,
-			"message": "Failed to add Company Region",
+			"message": "Failed to add organization",
 		})
 		return
 	}
 
 	context.JSON(http.StatusOK, gin.H{
 		"error":   false,
-		"message": "Successfully Created Company Region",
+		"message": "Successfully created organization",
 		"content": ogranization,
 	})
 }

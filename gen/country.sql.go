@@ -96,6 +96,52 @@ func (q *Queries) CreateCountry(ctx context.Context, arg CreateCountryParams) er
 	return err
 }
 
+const getAllCountries = `-- name: GetAllCountries :many
+select id, name, currency_code, capital, citizenship, country_code, currency, currency_sub_unit, currency_symbol, currency_decimals, full_name, iso_3166_2, iso_3166_3, region_code, sub_region_code, eea, calling_code, flag from countries
+`
+
+func (q *Queries) GetAllCountries(ctx context.Context) ([]Country, error) {
+	rows, err := q.db.QueryContext(ctx, getAllCountries)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	items := []Country{}
+	for rows.Next() {
+		var i Country
+		if err := rows.Scan(
+			&i.ID,
+			&i.Name,
+			&i.CurrencyCode,
+			&i.Capital,
+			&i.Citizenship,
+			&i.CountryCode,
+			&i.Currency,
+			&i.CurrencySubUnit,
+			&i.CurrencySymbol,
+			&i.CurrencyDecimals,
+			&i.FullName,
+			&i.Iso31662,
+			&i.Iso31663,
+			&i.RegionCode,
+			&i.SubRegionCode,
+			&i.Eea,
+			&i.CallingCode,
+			&i.Flag,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
 const getCountryBeCountryCode = `-- name: GetCountryBeCountryCode :many
 SELECT id, name, currency_code, capital, citizenship, country_code, currency, currency_sub_unit, currency_symbol, currency_decimals, full_name, iso_3166_2, iso_3166_3, region_code, sub_region_code, eea, calling_code, flag FROM countries WHERE country_code = $1
 `

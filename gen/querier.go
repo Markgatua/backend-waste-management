@@ -15,8 +15,9 @@ type Querier interface {
 	DeleteOrganization(ctx context.Context, id int32) error
 	// companies.sql
 	GetAllCompanies(ctx context.Context) ([]Company, error)
+	GetAllCountries(ctx context.Context) ([]Country, error)
 	// regions.sql
-	GetAllOrganizations(ctx context.Context) ([]Organization, error)
+	GetAllOrganizations(ctx context.Context) ([]GetAllOrganizationsRow, error)
 	GetAllPermissions(ctx context.Context) ([]Permission, error)
 	GetAllUsers(ctx context.Context) ([]User, error)
 	// waste_groups.sql
@@ -27,7 +28,7 @@ type Querier interface {
 	GetDuplicateCompaniesWithoutID(ctx context.Context, arg GetDuplicateCompaniesWithoutIDParams) ([]Company, error)
 	GetDuplicateOrganization(ctx context.Context, arg GetDuplicateOrganizationParams) ([]Organization, error)
 	GetOneWasteGroup(ctx context.Context, id int32) (WasteGroup, error)
-	GetOrganization(ctx context.Context, id int32) (Organization, error)
+	GetOrganization(ctx context.Context, id int32) (GetOrganizationRow, error)
 	GetOrganizationCountWithNameAndCountry(ctx context.Context, arg GetOrganizationCountWithNameAndCountryParams) ([]Organization, error)
 	GetUser(ctx context.Context, id int32) (User, error)
 	GetUsersWithRole(ctx context.Context) ([]GetUsersWithRoleRow, error)

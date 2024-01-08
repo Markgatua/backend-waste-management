@@ -42,3 +42,6 @@ VALUES
 
 -- name: GetCountryBeCountryCode :many
 SELECT * FROM countries WHERE country_code = $1;
+
+-- name: GetAllCountries :many
+select * from countries;

@@ -7,6 +7,7 @@ package gen
 
 import (
 	"context"
+	"database/sql"
 )
 
 const deleteOrganization = `-- name: DeleteOrganization :exec
@@ -20,20 +21,32 @@ func (q *Queries) DeleteOrganization(ctx context.Context, id int32) error {
 
 const getAllOrganizations = `-- name: GetAllOrganizations :many
 
-SELECT id, name, country_id from organizations
+SELECT organizations.id, organizations.name, organizations.country_id,countries.name as country from organizations left join countries on countries.id=organizations.country_id
 `
 
+type GetAllOrganizationsRow struct {
+	ID        int32          `json:"id"`
+	Name      string         `json:"name"`
+	CountryID int32          `json:"country_id"`
+	Country   sql.NullString `json:"country"`
+}
+
 // regions.sql
-func (q *Queries) GetAllOrganizations(ctx context.Context) ([]Organization, error) {
+func (q *Queries) GetAllOrganizations(ctx context.Context) ([]GetAllOrganizationsRow, error) {
 	rows, err := q.db.QueryContext(ctx, getAllOrganizations)
 	if err != nil {
 		return nil, err
 	}
 	defer rows.Close()
-	items := []Organization{}
+	items := []GetAllOrganizationsRow{}
 	for rows.Next() {
-		var i Organization
-		if err := rows.Scan(&i.ID, &i.Name, &i.CountryID); err != nil {
+		var i GetAllOrganizationsRow
+		if err := rows.Scan(
+			&i.ID,
+			&i.Name,
+			&i.CountryID,
+			&i.Country,
+		); err != nil {
 			return nil, err
 		}
 		items = append(items, i)
@@ -86,13 +99,25 @@ func (q *Queries) GetDuplicateOrganization(ctx context.Context, arg GetDuplicate
 }
 
 const getOrganization = `-- name: GetOrganization :one
-SELECT id, name, country_id FROM organizations WHERE ID = $1
+SELECT organizations.id, organizations.name, organizations.country_id,countries.name as country FROM organizations left join countries on countries.id=organizations.country_id WHERE organizations.id = $1
 `
 
-func (q *Queries) GetOrganization(ctx context.Context, id int32) (Organization, error) {
+type GetOrganizationRow struct {
+	ID        int32          `json:"id"`
+	Name      string         `json:"name"`
+	CountryID int32          `json:"country_id"`
+	Country   sql.NullString `json:"country"`
+}
+
+func (q *Queries) GetOrganization(ctx context.Context, id int32) (GetOrganizationRow, error) {
 	row := q.db.QueryRowContext(ctx, getOrganization, id)
-	var i Organization
-	err := row.Scan(&i.ID, &i.Name, &i.CountryID)
+	var i GetOrganizationRow
+	err := row.Scan(
+		&i.ID,
+		&i.Name,
+		&i.CountryID,
+		&i.Country,
+	)
 	return i, err
 }
 
