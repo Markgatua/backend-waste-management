@@ -38,39 +38,81 @@ func (q *Queries) GetAllOrganizations(ctx context.Context) ([]Organization, erro
 	return items, nil
 }
 
-const getOneOrganization = `-- name: GetOneOrganization :one
+const getDuplicateOrganization = `-- name: GetDuplicateOrganization :many
+SELECT id, name, country_id
+FROM organizations
+where
+    id != $1
+    and LOWER(name) = $2
+    and country_id = $3
+`
+
+type GetDuplicateOrganizationParams struct {
+	ID        int32  `json:"id"`
+	Name      string `json:"name"`
+	CountryID int32  `json:"country_id"`
+}
+
+func (q *Queries) GetDuplicateOrganization(ctx context.Context, arg GetDuplicateOrganizationParams) ([]Organization, error) {
+	rows, err := q.db.QueryContext(ctx, getDuplicateOrganization, arg.ID, arg.Name, arg.CountryID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	items := []Organization{}
+	for rows.Next() {
+		var i Organization
+		if err := rows.Scan(&i.ID, &i.Name, &i.CountryID); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const getOrganization = `-- name: GetOrganization :one
 SELECT id, name, country_id FROM organizations WHERE ID = $1
 `
 
-func (q *Queries) GetOneOrganization(ctx context.Context, id int32) (Organization, error) {
-	row := q.db.QueryRowContext(ctx, getOneOrganization, id)
+func (q *Queries) GetOrganization(ctx context.Context, id int32) (Organization, error) {
+	row := q.db.QueryRowContext(ctx, getOrganization, id)
 	var i Organization
 	err := row.Scan(&i.ID, &i.Name, &i.CountryID)
 	return i, err
 }
 
 const getOrganizationCountWithNameAndCountry = `-- name: GetOrganizationCountWithNameAndCountry :many
-SELECT count(*) from organizations where LOWER(name) = LOWER($1) and country_id = $2
+SELECT id, name, country_id
+from organizations
+where
+    LOWER(name) = $1
+    and country_id = $2
 `
 
 type GetOrganizationCountWithNameAndCountryParams struct {
-	Lower     string `json:"lower"`
+	Name      string `json:"name"`
 	CountryID int32  `json:"country_id"`
 }
 
-func (q *Queries) GetOrganizationCountWithNameAndCountry(ctx context.Context, arg GetOrganizationCountWithNameAndCountryParams) ([]int64, error) {
-	rows, err := q.db.QueryContext(ctx, getOrganizationCountWithNameAndCountry, arg.Lower, arg.CountryID)
+func (q *Queries) GetOrganizationCountWithNameAndCountry(ctx context.Context, arg GetOrganizationCountWithNameAndCountryParams) ([]Organization, error) {
+	rows, err := q.db.QueryContext(ctx, getOrganizationCountWithNameAndCountry, arg.Name, arg.CountryID)
 	if err != nil {
 		return nil, err
 	}
 	defer rows.Close()
-	items := []int64{}
+	items := []Organization{}
 	for rows.Next() {
-		var count int64
-		if err := rows.Scan(&count); err != nil {
+		var i Organization
+		if err := rows.Scan(&i.ID, &i.Name, &i.CountryID); err != nil {
 			return nil, err
 		}
-		items = append(items, count)
+		items = append(items, i)
 	}
 	if err := rows.Close(); err != nil {
 		return nil, err
@@ -82,7 +124,9 @@ func (q *Queries) GetOrganizationCountWithNameAndCountry(ctx context.Context, ar
 }
 
 const insertOrganization = `-- name: InsertOrganization :one
-insert into organizations(name, country_id) values($1, $2) returning id, name, country_id
+insert into
+    organizations(name, country_id)
+values($1, $2) returning id, name, country_id
 `
 
 type InsertOrganizationParams struct {
@@ -95,4 +139,19 @@ func (q *Queries) InsertOrganization(ctx context.Context, arg InsertOrganization
 	var i Organization
 	err := row.Scan(&i.ID, &i.Name, &i.CountryID)
 	return i, err
+}
+
+const updateOrganization = `-- name: UpdateOrganization :exec
+update organizations set name=$1,country_id=$2 where id=$3
+`
+
+type UpdateOrganizationParams struct {
+	Name      string `json:"name"`
+	CountryID int32  `json:"country_id"`
+	ID        int32  `json:"id"`
+}
+
+func (q *Queries) UpdateOrganization(ctx context.Context, arg UpdateOrganizationParams) error {
+	_, err := q.db.ExecContext(ctx, updateOrganization, arg.Name, arg.CountryID, arg.ID)
+	return err
 }
