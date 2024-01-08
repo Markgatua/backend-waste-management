@@ -3,38 +3,38 @@ package controllers
 import (
 	"net/http"
 	"strconv"
+	"strings"
 	"ttnmwastemanagementsystem/gen"
+
 	"github.com/gin-gonic/gin"
 	"github.com/guregu/null"
 )
 
 type CompaniesController struct{}
 
-
 type CreateCompanyParams struct {
-	Name      string `json:"name"  binding:"required"`
-	Companytype int32 `json:"companytype"  binding:"required"`
-	Logo      string `json:"logo"`
-	Location  string `json:"location"  binding:"required"`
-	HasRegions  string   `json:"has_regions"  binding:"required"`
-	HasBranches  string   `json:"has_branches"  binding:"required"`
-
+	Name           string `json:"name"  binding:"required"`
+	Companytype    int32  `json:"company_type"  binding:"required"`
+	Location       string `json:"location"  binding:"required"`
+	OrganizationID int32  `json:"organization_id"  binding:"required"`
+	IsActive       bool   `json:"is_active"  binding:"required"`
+	Region         string `json:"region"  binding:"required"`
 }
 
 type UpdateCompanyDataParams struct {
-	ID        int    `json:"id"`
-	Name      string `json:"name"  binding:"required"`
-	Logo      string `json:"logo"`
-	Location  string `json:"location"  binding:"required"`
-	HasRegions  string   `json:"has_regions"  binding:"required"`
-	HasBranches  string   `json:"has_branches"  binding:"required"`
+	Name           string `json:"name"  binding:"required"`
+	Companytype    int32  `json:"company_type"  binding:"required"`
+	Location       string `json:"location"  binding:"required"`
+	OrganizationID int32  `json:"organization_id"  binding:"required"`
+	IsActive       bool   `json:"is_active"  binding:"required"`
+	ID             int64  `json:"id"  binding:"required"`
+	Region         string `json:"region"  binding:"required"`
 }
 
 type UpdateCompanyStatusParams struct {
-	ID     	int `json:"id"  binding:"required"`
-	IsActive 	string `json:"status"  binding:"required"`
+	ID       int    `json:"id"  binding:"required"`
+	IsActive string `json:"status"  binding:"required"`
 }
-
 
 func (companiesController CompaniesController) InsertCompany(context *gin.Context) {
 	var params CreateCompanyParams
@@ -47,35 +47,24 @@ func (companiesController CompaniesController) InsertCompany(context *gin.Contex
 		return
 	}
 
-
-	// Convert HasRegions from string to bool
-	hasRegions, err := strconv.ParseBool(params.HasRegions)
-	if err != nil {
+	count, err := gen.REPO.GetDuplicateCompanies(context, gen.GetDuplicateCompaniesParams{
+		Name:           strings.ToLower(params.Name),
+		OrganizationID: params.OrganizationID,
+	})
+	if len(count) > 0 {
 		context.JSON(http.StatusUnprocessableEntity, gin.H{
 			"error":   true,
-			"message": "Invalid value for 'has_regions'",
+			"message": "Another company has the same name withing the organization",
 		})
 		return
 	}
-
-	// Convert HasBranches from string to bool
-	hasBranches, err := strconv.ParseBool(params.HasBranches)
-	if err != nil {
-		context.JSON(http.StatusUnprocessableEntity, gin.H{
-			"error":   true,
-			"message": "Invalid value for 'has_branches'",
-		})
-		return
-	}
-
 
 	company, insertError := gen.REPO.InsertCompany(context, gen.InsertCompanyParams{
-		Name:		 params.Name,
+		Name:        params.Name,
 		Location:    null.StringFrom(params.Location).NullString,
-		Companytype: params.Companytype,
-		HasRegions:  hasRegions,
-		HasBranches: hasBranches,
-		Logo:        null.StringFrom(params.Logo).NullString,
+		IsActive:    params.IsActive,
+		Region:      null.StringFrom(params.Region).NullString,
+		CompanyType: params.Companytype,
 	})
 
 	if insertError != nil {
@@ -94,40 +83,39 @@ func (companiesController CompaniesController) InsertCompany(context *gin.Contex
 	})
 }
 
-
-func(companiesController  CompaniesController) GetAllCompanies(context *gin.Context){
+func (companiesController CompaniesController) GetAllCompanies(context *gin.Context) {
 	companies, err := gen.REPO.GetAllCompanies(context)
-	if err!=nil{
-		context.JSON(http.StatusUnprocessableEntity,gin.H{
-		   "error":true,
-		   "message":err.Error(),	
+	if err != nil {
+		context.JSON(http.StatusUnprocessableEntity, gin.H{
+			"error":   true,
+			"message": err.Error(),
 		})
 		return
 	}
-	
-	context.JSON(http.StatusOK,gin.H{
-		"error":false,
-		"companies":companies,
+
+	context.JSON(http.StatusOK, gin.H{
+		"error":     false,
+		"companies": companies,
 	})
 }
 
-func(companiesController CompaniesController) GetCompany(context *gin.Context){
-	id :=  context.Param("id")
+func (companiesController CompaniesController) GetCompany(context *gin.Context) {
+	id := context.Param("id")
 
-	id_,_ :=strconv.ParseUint(id,10,32);
-	println("------------------------------",id_)
+	id_, _ := strconv.ParseUint(id, 10, 32)
+	println("------------------------------", id_)
 	company, err := gen.REPO.GetCompany(context, int32(id_))
 
-	if err!=nil{
-		context.JSON(http.StatusUnprocessableEntity,gin.H{
-			"error":true,
-			"message":err.Error(),
+	if err != nil {
+		context.JSON(http.StatusUnprocessableEntity, gin.H{
+			"error":   true,
+			"message": err.Error(),
 		})
 		return
 	}
 
-	context.JSON(http.StatusOK,gin.H{
-		"error":  false,
+	context.JSON(http.StatusOK, gin.H{
+		"error":   false,
 		"company": company,
 	})
 }
@@ -156,7 +144,7 @@ func (companiesController CompaniesController) UpdateCompanyStatus(context *gin.
 	// Update company status
 	updateError := gen.REPO.UpdateCompanyStatus(context, gen.UpdateCompanyStatusParams{
 		IsActive: status,
-		ID:     int32(params.ID),
+		ID:       int32(params.ID),
 	})
 	if updateError != nil {
 		context.JSON(http.StatusUnprocessableEntity, gin.H{
@@ -173,7 +161,6 @@ func (companiesController CompaniesController) UpdateCompanyStatus(context *gin.
 	})
 }
 
-
 func (companiesController CompaniesController) UpdateCompany(context *gin.Context) {
 	var params UpdateCompanyDataParams
 	err := context.ShouldBindJSON(&params)
@@ -185,34 +172,28 @@ func (companiesController CompaniesController) UpdateCompany(context *gin.Contex
 		return
 	}
 
-	// Convert HasRegions from string to bool
-	hasRegions, err := strconv.ParseBool(params.HasRegions)
-	if err != nil {
+	count, err := gen.REPO.GetDuplicateCompaniesWithoutID(context, gen.GetDuplicateCompaniesWithoutIDParams{
+		Name:           strings.ToLower(params.Name),
+		ID:             int32(params.ID),
+		OrganizationID: params.OrganizationID,
+	})
+	if len(count) > 0 {
 		context.JSON(http.StatusUnprocessableEntity, gin.H{
 			"error":   true,
-			"message": "Invalid value for 'has_regions'",
-		})
-		return
-	}
-
-	// Convert HasBranches from string to bool
-	hasBranches, err := strconv.ParseBool(params.HasBranches)
-	if err != nil {
-		context.JSON(http.StatusUnprocessableEntity, gin.H{
-			"error":   true,
-			"message": "Invalid value for 'has_branches'",
+			"message": "Another company has the same name withing the organization",
 		})
 		return
 	}
 
 	// Update company status
-	updateError := gen.REPO.UpdateCompanyData(context, gen.UpdateCompanyDataParams{
-		HasBranches: hasBranches,
-		HasRegions: hasRegions,
-		Name: params.Name,
-		Location: null.StringFrom(params.Location).NullString,
-		Logo: null.StringFrom(params.Logo).NullString,
-		ID:     int32(params.ID),
+	updateError := gen.REPO.UpdateCompany(context, gen.UpdateCompanyParams{
+		IsActive:       params.IsActive,
+		Name:           params.Name,
+		Location:       null.StringFrom(params.Location).NullString,
+		Region:         null.StringFrom(params.Region).NullString,
+		OrganizationID: params.OrganizationID,
+		CompanyType:    params.Companytype,
+		ID:             int32(params.ID),
 	})
 	if updateError != nil {
 		context.JSON(http.StatusUnprocessableEntity, gin.H{

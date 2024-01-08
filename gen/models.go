@@ -18,14 +18,8 @@ type Company struct {
 	OrganizationID int32          `json:"organization_id"`
 	Region         sql.NullString `json:"region"`
 	Location       sql.NullString `json:"location"`
-	Logo           sql.NullString `json:"logo"`
 	IsActive       bool           `json:"is_active"`
 	CreatedAt      time.Time      `json:"created_at"`
-}
-
-type CompanyType struct {
-	ID   int32  `json:"id"`
-	Type string `json:"type"`
 }
 
 type Country struct {
@@ -99,6 +93,15 @@ type Role struct {
 type RoleHasPermission struct {
 	PermissionID sql.NullInt32 `json:"permission_id"`
 	RoleID       sql.NullInt32 `json:"role_id"`
+}
+
+type Upload struct {
+	ID           int32                 `json:"id"`
+	ItemID       sql.NullInt32         `json:"item_id"`
+	Type         sql.NullString        `json:"type"`
+	Path         sql.NullString        `json:"path"`
+	RelatedTable sql.NullString        `json:"related_table"`
+	Meta         pqtype.NullRawMessage `json:"meta"`
 }
 
 type User struct {

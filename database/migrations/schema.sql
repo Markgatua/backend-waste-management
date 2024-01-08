@@ -8,6 +8,15 @@ CREATE TABLE roles (
   deleted_at timestamp NULL DEFAULT NULL
 );
 
+CREATE TABLE uploads(
+    id SERIAL PRIMARY KEY,
+    item_id INTEGER, 
+    type VARCHAR(100),
+    path TEXT,
+    related_table VARCHAR(150),
+    meta JSON NULL
+);
+
 CREATE TABLE permissions (
   id SERIAL PRIMARY KEY,
   name varchar(255) NOT NULL,
@@ -16,12 +25,6 @@ CREATE TABLE permissions (
   updated_at timestamp NULL DEFAULT NULL,
   module varchar(255) NOT NULL,
   submodule VARCHAR(255) NULL
-);
-
--- 1 FOR GREEN CORPORATES/CHAMPIONS || 2 FOR AGGREGATOR COMPANIES
-CREATE TABLE company_types(
-  id SERIAL PRIMARY KEY,
-  type VARCHAR(255) NOT NULL
 );
 
 CREATE TABLE countries (
@@ -62,11 +65,10 @@ CREATE TABLE organizations(
 CREATE TABLE companies (
   id SERIAL PRIMARY KEY,
   name VARCHAR(255) NOT NULL,
-  company_type INTEGER NOT NULL, 
+  company_type INTEGER NOT NULL,  -- 1 FOR GREEN CORPORATES/CHAMPIONS || 2 FOR AGGREGATOR COMPANIES
   organization_id INTEGER NOT NULL,
   region VARCHAR(255) NULL,
   location VARCHAR(255),
-  logo VARCHAR(255) NULL,
   is_active BOOLEAN NOT NULL DEFAULT TRUE,
   created_at TIMESTAMP NOT NULL DEFAULT NOW(),
   FOREIGN Key (organization_id) REFERENCES organizations(id)
