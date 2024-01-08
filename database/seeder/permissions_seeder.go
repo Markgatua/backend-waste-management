@@ -2,15 +2,13 @@ package seeder
 
 import (
 	"context"
+	"database/sql"
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
 	"os"
-	"scms/database/queries"
-	"scms/src/logger"
-	_ "scms/src/utils"
-
-	"github.com/jackc/pgtype"
+	"ttnmwastemanagementsystem/gen"
+	"ttnmwastemanagementsystem/logger"
 )
 
 type PermissionsSeeder struct{}
@@ -39,7 +37,7 @@ type PermissionElement struct {
 	Action    string `json:"action"`
 }
 
-func (permissionsSeeder PermissionsSeeder) Run(q *queries.DBQuerier) {
+func (permissionsSeeder PermissionsSeeder) Run(q *gen.Queries) {
 	logger.Log("[SEEDER/PERMISSIONS SEEDER]", "======= Seeding permissions======", logger.LOG_LEVEL_INFO)
 
 	jsonFile, err := os.Open("assets/data/permissions.json")
@@ -55,11 +53,12 @@ func (permissionsSeeder PermissionsSeeder) Run(q *queries.DBQuerier) {
 		for _, v := range permissions {
 
 			for _, permissionElement := range v.Permissions {
-				q.CreatePermission(context.Background(), queries.CreatePermissionParams{
-					Name: pgtype.Varchar{String: permissionElement.Name,Status: pgtype.Present},
-					GuardName: pgtype.Varchar{String: permissionElement.Action,Status: pgtype.Present},
-					Module: pgtype.Varchar{String: v.Module,Status: pgtype.Present},
-					Submodule: pgtype.Varchar{String: permissionElement.SubModule,Status: pgtype.Present},
+
+				q.CreatePermission(context.Background(), gen.CreatePermissionParams{
+					Name:      permissionElement.Name,
+					GuardName: permissionElement.Action,
+					Module:    v.Module,
+					Submodule: sql.NullString{String:fmt.Sprint(permissionElement.SubModule),Valid: true},
 				})
 			}
 

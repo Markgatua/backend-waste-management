@@ -1,12 +1,13 @@
 package seeder
 
 import (
-	"context"
+	"database/sql"
 	"fmt"
-	"github.com/jackc/pgx/v5"
-	_ "github.com/jackc/pgx/v5/pgtype"
+	"ttnmwastemanagementsystem/gen"
 	"ttnmwastemanagementsystem/logger"
 	"ttnmwastemanagementsystem/utils"
+
+	_ "github.com/lib/pq"
 )
 
 func Run() {
@@ -15,14 +16,14 @@ func Run() {
 		logger.Log("SEEDER", "Error getting app settings", logger.LOG_LEVEL_ERROR)
 		return
 	}
-
-	conn, err := pgx.Connect(context.Background(), appSettings.DBMasterConnectionString)
-	defer conn.Close(context.Background())
+	conn, err := sql.Open("postgres", appSettings.DBMasterConnectionString)
+	defer conn.Close()
 	if err != nil {
 		logger.Log("SEEDER", fmt.Sprint("Unable to connect to database: %v", err), logger.LOG_LEVEL_ERROR)
 	} else {
-		queries := New(conn)
+		queries := gen.New(conn)
+		CountriesSeeder{}.Run(queries)
+		PermissionsSeeder{}.Run(queries)
 	}
 
 }
-

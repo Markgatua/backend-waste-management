@@ -10,10 +10,12 @@ import (
 
 type Querier interface {
 	CreateCountry(ctx context.Context, arg CreateCountryParams) error
+	CreatePermission(ctx context.Context, arg CreatePermissionParams) error
 	// companies.sql
 	GetAllCompanies(ctx context.Context) ([]Company, error)
 	// regions.sql
 	GetAllOrganizations(ctx context.Context) ([]Organization, error)
+	GetAllPermissions(ctx context.Context) ([]Permission, error)
 	GetAllUsers(ctx context.Context) ([]User, error)
 	// waste_groups.sql
 	GetAllWasteGroups(ctx context.Context) ([]WasteGroup, error)
