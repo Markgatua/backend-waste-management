@@ -7,16 +7,118 @@ package gen
 
 import (
 	"context"
+	"database/sql"
+	"time"
 )
+
+const deleteCompany = `-- name: DeleteCompany :exec
+delete from companies where id=$1
+`
+
+func (q *Queries) DeleteCompany(ctx context.Context, id int32) error {
+	_, err := q.db.ExecContext(ctx, deleteCompany, id)
+	return err
+}
 
 const getAllCompanies = `-- name: GetAllCompanies :many
 
-select id, name, company_type, organization_id, region, location, logo, is_active, created_at from companies
+select companies.id, companies.name, companies.company_type, companies.organization_id, companies.region, companies.location, companies.is_active, companies.created_at,organizations.name as organization_name from companies left join organizations on organizations.id=companies.organization_id
 `
 
+type GetAllCompaniesRow struct {
+	ID               int32          `json:"id"`
+	Name             string         `json:"name"`
+	CompanyType      int32          `json:"company_type"`
+	OrganizationID   int32          `json:"organization_id"`
+	Region           sql.NullString `json:"region"`
+	Location         sql.NullString `json:"location"`
+	IsActive         bool           `json:"is_active"`
+	CreatedAt        time.Time      `json:"created_at"`
+	OrganizationName sql.NullString `json:"organization_name"`
+}
+
 // companies.sql
-func (q *Queries) GetAllCompanies(ctx context.Context) ([]Company, error) {
+func (q *Queries) GetAllCompanies(ctx context.Context) ([]GetAllCompaniesRow, error) {
 	rows, err := q.db.QueryContext(ctx, getAllCompanies)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	items := []GetAllCompaniesRow{}
+	for rows.Next() {
+		var i GetAllCompaniesRow
+		if err := rows.Scan(
+			&i.ID,
+			&i.Name,
+			&i.CompanyType,
+			&i.OrganizationID,
+			&i.Region,
+			&i.Location,
+			&i.IsActive,
+			&i.CreatedAt,
+			&i.OrganizationName,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const getCompany = `-- name: GetCompany :one
+select companies.id, companies.name, companies.company_type, companies.organization_id, companies.region, companies.location, companies.is_active, companies.created_at,organizations.name as organization_name from companies left join organizations on organizations.id=companies.organization_id where companies.id = $1
+`
+
+type GetCompanyRow struct {
+	ID               int32          `json:"id"`
+	Name             string         `json:"name"`
+	CompanyType      int32          `json:"company_type"`
+	OrganizationID   int32          `json:"organization_id"`
+	Region           sql.NullString `json:"region"`
+	Location         sql.NullString `json:"location"`
+	IsActive         bool           `json:"is_active"`
+	CreatedAt        time.Time      `json:"created_at"`
+	OrganizationName sql.NullString `json:"organization_name"`
+}
+
+func (q *Queries) GetCompany(ctx context.Context, id int32) (GetCompanyRow, error) {
+	row := q.db.QueryRowContext(ctx, getCompany, id)
+	var i GetCompanyRow
+	err := row.Scan(
+		&i.ID,
+		&i.Name,
+		&i.CompanyType,
+		&i.OrganizationID,
+		&i.Region,
+		&i.Location,
+		&i.IsActive,
+		&i.CreatedAt,
+		&i.OrganizationName,
+	)
+	return i, err
+}
+
+const getDuplicateCompanies = `-- name: GetDuplicateCompanies :many
+select id, name, company_type, organization_id, region, location, is_active, created_at
+from companies
+where
+    lower(name) = $1
+    and organization_id = $2
+`
+
+type GetDuplicateCompaniesParams struct {
+	Name           string `json:"name"`
+	OrganizationID int32  `json:"organization_id"`
+}
+
+func (q *Queries) GetDuplicateCompanies(ctx context.Context, arg GetDuplicateCompaniesParams) ([]Company, error) {
+	rows, err := q.db.QueryContext(ctx, getDuplicateCompanies, arg.Name, arg.OrganizationID)
 	if err != nil {
 		return nil, err
 	}
@@ -31,7 +133,6 @@ func (q *Queries) GetAllCompanies(ctx context.Context) ([]Company, error) {
 			&i.OrganizationID,
 			&i.Region,
 			&i.Location,
-			&i.Logo,
 			&i.IsActive,
 			&i.CreatedAt,
 		); err != nil {
@@ -48,12 +149,84 @@ func (q *Queries) GetAllCompanies(ctx context.Context) ([]Company, error) {
 	return items, nil
 }
 
-const getCompany = `-- name: GetCompany :one
-select id, name, company_type, organization_id, region, location, logo, is_active, created_at from companies where id=$1
+const getDuplicateCompaniesWithoutID = `-- name: GetDuplicateCompaniesWithoutID :many
+select id, name, company_type, organization_id, region, location, is_active, created_at
+from companies
+where
+    id = $1
+    and lower(name) = $2
+    and organization_id = $3
 `
 
-func (q *Queries) GetCompany(ctx context.Context, id int32) (Company, error) {
-	row := q.db.QueryRowContext(ctx, getCompany, id)
+type GetDuplicateCompaniesWithoutIDParams struct {
+	ID             int32  `json:"id"`
+	Name           string `json:"name"`
+	OrganizationID int32  `json:"organization_id"`
+}
+
+func (q *Queries) GetDuplicateCompaniesWithoutID(ctx context.Context, arg GetDuplicateCompaniesWithoutIDParams) ([]Company, error) {
+	rows, err := q.db.QueryContext(ctx, getDuplicateCompaniesWithoutID, arg.ID, arg.Name, arg.OrganizationID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	items := []Company{}
+	for rows.Next() {
+		var i Company
+		if err := rows.Scan(
+			&i.ID,
+			&i.Name,
+			&i.CompanyType,
+			&i.OrganizationID,
+			&i.Region,
+			&i.Location,
+			&i.IsActive,
+			&i.CreatedAt,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const insertCompany = `-- name: InsertCompany :one
+insert into
+    companies(
+        name,
+        company_type,
+        organization_id,
+        region,
+        location,
+        is_active
+    )
+values ($1, $2, $3, $4, $5, $6) returning id, name, company_type, organization_id, region, location, is_active, created_at
+`
+
+type InsertCompanyParams struct {
+	Name           string         `json:"name"`
+	CompanyType    int32          `json:"company_type"`
+	OrganizationID int32          `json:"organization_id"`
+	Region         sql.NullString `json:"region"`
+	Location       sql.NullString `json:"location"`
+	IsActive       bool           `json:"is_active"`
+}
+
+func (q *Queries) InsertCompany(ctx context.Context, arg InsertCompanyParams) (Company, error) {
+	row := q.db.QueryRowContext(ctx, insertCompany,
+		arg.Name,
+		arg.CompanyType,
+		arg.OrganizationID,
+		arg.Region,
+		arg.Location,
+		arg.IsActive,
+	)
 	var i Company
 	err := row.Scan(
 		&i.ID,
@@ -62,15 +235,49 @@ func (q *Queries) GetCompany(ctx context.Context, id int32) (Company, error) {
 		&i.OrganizationID,
 		&i.Region,
 		&i.Location,
-		&i.Logo,
 		&i.IsActive,
 		&i.CreatedAt,
 	)
 	return i, err
 }
 
+const updateCompany = `-- name: UpdateCompany :exec
+update companies
+set
+    name = $1,
+    company_type = $2,
+    organization_id = $3,
+    region = $4,
+    location = $5,
+    is_active = $6
+where id = $7
+`
+
+type UpdateCompanyParams struct {
+	Name           string         `json:"name"`
+	CompanyType    int32          `json:"company_type"`
+	OrganizationID int32          `json:"organization_id"`
+	Region         sql.NullString `json:"region"`
+	Location       sql.NullString `json:"location"`
+	IsActive       bool           `json:"is_active"`
+	ID             int32          `json:"id"`
+}
+
+func (q *Queries) UpdateCompany(ctx context.Context, arg UpdateCompanyParams) error {
+	_, err := q.db.ExecContext(ctx, updateCompany,
+		arg.Name,
+		arg.CompanyType,
+		arg.OrganizationID,
+		arg.Region,
+		arg.Location,
+		arg.IsActive,
+		arg.ID,
+	)
+	return err
+}
+
 const updateCompanyStatus = `-- name: UpdateCompanyStatus :exec
-update companies set is_active=$2 where id=$1
+update companies set is_active = $2 where id = $1
 `
 
 type UpdateCompanyStatusParams struct {

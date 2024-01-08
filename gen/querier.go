@@ -11,24 +11,33 @@ import (
 type Querier interface {
 	CreateCountry(ctx context.Context, arg CreateCountryParams) error
 	CreatePermission(ctx context.Context, arg CreatePermissionParams) error
+	DeleteCompany(ctx context.Context, id int32) error
+	DeleteOrganization(ctx context.Context, id int32) error
 	// companies.sql
-	GetAllCompanies(ctx context.Context) ([]Company, error)
+	GetAllCompanies(ctx context.Context) ([]GetAllCompaniesRow, error)
+	GetAllCountries(ctx context.Context) ([]Country, error)
 	// regions.sql
-	GetAllOrganizations(ctx context.Context) ([]Organization, error)
+	GetAllOrganizations(ctx context.Context) ([]GetAllOrganizationsRow, error)
 	GetAllPermissions(ctx context.Context) ([]Permission, error)
 	GetAllUsers(ctx context.Context) ([]User, error)
 	// waste_groups.sql
 	GetAllWasteGroups(ctx context.Context) ([]WasteGroup, error)
-	GetCompany(ctx context.Context, id int32) (Company, error)
+	GetCompany(ctx context.Context, id int32) (GetCompanyRow, error)
 	GetCountryBeCountryCode(ctx context.Context, countryCode string) ([]Country, error)
-	GetOneOrganization(ctx context.Context, id int32) (Organization, error)
+	GetDuplicateCompanies(ctx context.Context, arg GetDuplicateCompaniesParams) ([]Company, error)
+	GetDuplicateCompaniesWithoutID(ctx context.Context, arg GetDuplicateCompaniesWithoutIDParams) ([]Company, error)
+	GetDuplicateOrganization(ctx context.Context, arg GetDuplicateOrganizationParams) ([]Organization, error)
 	GetOneWasteGroup(ctx context.Context, id int32) (WasteGroup, error)
-	GetOrganizationCountWithNameAndCountry(ctx context.Context, arg GetOrganizationCountWithNameAndCountryParams) ([]int64, error)
+	GetOrganization(ctx context.Context, id int32) (GetOrganizationRow, error)
+	GetOrganizationCountWithNameAndCountry(ctx context.Context, arg GetOrganizationCountWithNameAndCountryParams) ([]Organization, error)
 	GetUser(ctx context.Context, id int32) (User, error)
 	GetUsersWithRole(ctx context.Context) ([]GetUsersWithRoleRow, error)
+	InsertCompany(ctx context.Context, arg InsertCompanyParams) (Company, error)
 	InsertOrganization(ctx context.Context, arg InsertOrganizationParams) (Organization, error)
 	InsertWasteGroup(ctx context.Context, arg InsertWasteGroupParams) (WasteGroup, error)
+	UpdateCompany(ctx context.Context, arg UpdateCompanyParams) error
 	UpdateCompanyStatus(ctx context.Context, arg UpdateCompanyStatusParams) error
+	UpdateOrganization(ctx context.Context, arg UpdateOrganizationParams) error
 	UpdateUser(ctx context.Context, arg UpdateUserParams) error
 	UpdateWasteGroup(ctx context.Context, arg UpdateWasteGroupParams) error
 }

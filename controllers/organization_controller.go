@@ -4,6 +4,7 @@ import (
 	"net/http"
 	"strconv"
 	_ "strconv"
+	"strings"
 	"ttnmwastemanagementsystem/gen"
 
 	"github.com/gin-gonic/gin"
@@ -22,7 +23,7 @@ type UpdateOrganizationParams struct {
 	Name      string `json:"name"  binding:"required"`
 }
 
-func (companyRegionsController OrgnizationController) InsertOrganization(context *gin.Context) {
+func (c OrgnizationController) InsertOrganization(context *gin.Context) {
 	var params InsertOrganizationParam
 	err := context.ShouldBindJSON(&params)
 	if err != nil {
@@ -32,49 +33,40 @@ func (companyRegionsController OrgnizationController) InsertOrganization(context
 		})
 		return
 	}
+	count, err := gen.REPO.GetOrganizationCountWithNameAndCountry(context, gen.GetOrganizationCountWithNameAndCountryParams{
+		Name:      strings.ToLower(params.Name),
+		CountryID: params.CountryID,
+	})
+	if len(count) > 0 {
+		context.JSON(http.StatusUnprocessableEntity, gin.H{
+			"error":   true,
+			"message": "Organization with the same name in the country already exists",
+		})
+		return
+	}
 
-	count,err := gen.Re
-
-	ogranization, insertError := gen.REPO.InsertCompanyRegion(context, gen.InsertCompanyRegionParams{
-		Region:    params.Region,
-		CompanyID: int32(params.CompanyID),
+	ogranization, insertError := gen.REPO.InsertOrganization(context, gen.InsertOrganizationParams{
+		Name:      params.Name,
+		CountryID: params.CountryID,
 	})
 
 	if insertError != nil {
 		context.JSON(http.StatusUnprocessableEntity, gin.H{
 			"error":   true,
-			"message": "Failed to add Company Region",
+			"message": "Failed to add organization",
 		})
 		return
 	}
 
-	// If you want to return the created company as part of the response
 	context.JSON(http.StatusOK, gin.H{
-		"error":          false,
-		"message":        "Successfully Created Company Region",
-		"company region": companyRegion, // Include the company details in the response
+		"error":   false,
+		"message": "Successfully created organization",
+		"content": ogranization,
 	})
 }
 
-func (c *CompanyRegionsController) GetAllCompanyRegions(context *gin.Context) {
-	// Extract company_id from the request URL
-	CompanyID := context.Param("company_id")
-
-	// Convert company_id to uint
-	CompanyID_, err := strconv.ParseUint(CompanyID, 10, 32)
-	if err != nil {
-		context.JSON(http.StatusBadRequest, gin.H{
-			"error":   true,
-			"message": "Invalid company_id",
-		})
-		return
-	}
-
-	// Convert uint to int32
-	CompanyIDInt32 := int32(CompanyID_)
-
-	// Call the repository method with the int32 CompanyID
-	companyRegions, err := gen.REPO.GetAllCompanyRegions(context, CompanyIDInt32)
+func (c OrgnizationController) GetAllOrganizations(context *gin.Context) {
+	organizations, err := gen.REPO.GetAllOrganizations(context)
 	if err != nil {
 		context.JSON(http.StatusUnprocessableEntity, gin.H{
 			"error":   true,
@@ -82,20 +74,17 @@ func (c *CompanyRegionsController) GetAllCompanyRegions(context *gin.Context) {
 		})
 		return
 	}
-
 	context.JSON(http.StatusOK, gin.H{
-		"error":           false,
-		"Company Regions": companyRegions,
+		"error":   false,
+		"content": organizations,
 	})
 }
 
-func (companyRegionsController CompanyRegionsController) GetOneCompanyRegion(context *gin.Context) {
+func (c OrgnizationController) GetOrganization(context *gin.Context) {
 	id := context.Param("id")
-
 	id_, _ := strconv.ParseUint(id, 10, 32)
 	println("------------------------------", id_)
-	companyRegion, err := gen.REPO.GetOneCompanyRegion(context, int32(id_))
-
+	organization, err := gen.REPO.GetOrganization(context, int32(id_))
 	if err != nil {
 		context.JSON(http.StatusUnprocessableEntity, gin.H{
 			"error":   true,
@@ -103,15 +92,17 @@ func (companyRegionsController CompanyRegionsController) GetOneCompanyRegion(con
 		})
 		return
 	}
-
 	context.JSON(http.StatusOK, gin.H{
-		"error":           false,
-		"Company Regions": companyRegion,
+		"error":        false,
+		"organization": organization,
 	})
 }
 
-func (companyRegionsController CompanyRegionsController) GetAllCompaniesRegions(context *gin.Context) {
-	companies_regions, err := gen.REPO.GetAllCompaniesRegions(context)
+func (c OrgnizationController) DeleteOrganization(context *gin.Context) {
+	id := context.Param("id")
+	id_, _ := strconv.ParseUint(id, 10, 32)
+	println("------------------------------", id_)
+	err := gen.REPO.DeleteOrganization(context, int32(id_))
 	if err != nil {
 		context.JSON(http.StatusUnprocessableEntity, gin.H{
 			"error":   true,
@@ -119,15 +110,14 @@ func (companyRegionsController CompanyRegionsController) GetAllCompaniesRegions(
 		})
 		return
 	}
-
 	context.JSON(http.StatusOK, gin.H{
-		"error":             false,
-		"Companies Regions": companies_regions,
+		"error":   false,
+		"message": "Organization successfully deleted",
 	})
 }
 
-func (companyRegionsController CompanyRegionsController) UpdateCompanyRegionData(context *gin.Context) {
-	var params UpdateCompanyRegionDataParams
+func (c OrgnizationController) UpdateOrganization(context *gin.Context) {
+	var params UpdateOrganizationParams
 	err := context.ShouldBindJSON(&params)
 	if err != nil {
 		context.JSON(http.StatusUnprocessableEntity, gin.H{
@@ -137,10 +127,24 @@ func (companyRegionsController CompanyRegionsController) UpdateCompanyRegionData
 		return
 	}
 
+	count, err := gen.REPO.GetDuplicateOrganization(context, gen.GetDuplicateOrganizationParams{
+		Name:      strings.ToLower(params.Name),
+		CountryID: int32(params.CountryID),
+		ID:        int32(params.ID),
+	})
+	if len(count) > 0 {
+		context.JSON(http.StatusUnprocessableEntity, gin.H{
+			"error":   true,
+			"message": "Organization with the same name in the country already exists",
+		})
+		return
+	}
+
 	// Update Waste Group
-	updateError := gen.REPO.UpdateCompanyRegionData(context, gen.UpdateCompanyRegionDataParams{
-		Region: params.Region,
-		ID:     int32(params.ID),
+	updateError := gen.REPO.UpdateOrganization(context, gen.UpdateOrganizationParams{
+		Name:      params.Name,
+		CountryID: int32(params.CountryID),
+		ID:        int32(params.ID),
 	})
 	if updateError != nil {
 		context.JSON(http.StatusUnprocessableEntity, gin.H{
@@ -152,6 +156,6 @@ func (companyRegionsController CompanyRegionsController) UpdateCompanyRegionData
 
 	context.JSON(http.StatusOK, gin.H{
 		"error":   false,
-		"message": "Successfully updated Company Region",
+		"message": "Successfully updated Organization",
 	})
 }

@@ -18,7 +18,7 @@ func main() {
 	   ------------
 	   1) To run seeder run "go run main.go seeder"
 	   2) To run master table migration run "go run main.go master_table_migration"
-	   3) To run the school system run "go run main.go scms"
+	   3) To run the system run "go run main.go program"
 	`
 
 	if len(os.Args) == 1 {
@@ -46,30 +46,43 @@ func runProgram() {
 	usersController := controllers.UsersController{}
 	companiesController := controllers.CompaniesController{}
 	wasteGroupController := controllers.WasteGroupsController{}
-	companyRegionsController := controllers.CompanyRegionsController{}
-	companyBranchesController := controllers.CompanyBranchesController{}
+	organzationController := controllers.OrgnizationController{}
+	geoController := controllers.GeoController{}
+
 	apiGroup := router.Group("/api:BVaDN9hl")
 
 	apiGroup.GET("/users", usersController.GetAllUsers)
 	// apiGroup.POST("update/user",usersController.UpdateUSer)
 	// apiGroup.GET("/users/roles",usersController.GetUsersWithRole)
 	apiGroup.GET("/user/:id", usersController.GetUser)
-	apiGroup.POST("companies/addcompany", companiesController.InsertCompany)
-	apiGroup.GET("companies/allcompanies", companiesController.GetAllCompanies)
-	apiGroup.GET("companies/company/:id", companiesController.GetCompany)
+	
+	//---------------------------countries-------------------------------------------------------
+	apiGroup.GET("countries",geoController.GetAllCountries)
+	//-------------------------------------------------------------------------------------------
+
+	//---------------------------organization----------------------------------------------------
+	apiGroup.POST("organization/add", organzationController.InsertOrganization)
+	apiGroup.PUT("organization/update", organzationController.UpdateOrganization)
+	apiGroup.GET("organizations", organzationController.GetAllOrganizations)
+	apiGroup.DELETE("organization/:id", organzationController.DeleteOrganization)
+	apiGroup.GET("organization/:id", organzationController.GetOrganization)
+	//-------------------------------------------------------------------------------------------
+
+	//---------------------------companies ------------------------------------------------------
+	apiGroup.POST("companies/add", companiesController.InsertCompany)
+	apiGroup.GET("companies", companiesController.GetAllCompanies)
+	apiGroup.GET("company/:id", companiesController.GetCompany)
 	apiGroup.POST("companies/status", companiesController.UpdateCompanyStatus)
+	apiGroup.DELETE("company/:id", companiesController.DeleteCompany)
 	apiGroup.POST("companies/update", companiesController.UpdateCompany)
-	apiGroup.POST("companies/regions/create", companyRegionsController.InsertCompanyRegion)
-	apiGroup.GET("companies/company/regions/:company_id", companyRegionsController.GetAllCompanyRegions)
-	apiGroup.GET("companies/regions", companyRegionsController.GetAllCompaniesRegions)
-	apiGroup.GET("companies/company/region/:id", companyRegionsController.GetOneCompanyRegion)
-	apiGroup.POST("companies/regions/update", companyRegionsController.UpdateCompanyRegionData)
-	apiGroup.POST("companies/branch/create", companyBranchesController.InsertCompanyBranch)
-	apiGroup.POST("companies/branch/status", companyBranchesController.UpdateCompanyBranchStatus)
+	//-------------------------------------------------------------------------------------------
+
+	//--------------------------- wastegroups-----------------------------------------------------
 	apiGroup.POST("settings/wastegroups/create", wasteGroupController.InsertWasteGroup)
 	apiGroup.POST("settings/wastegroups/update", wasteGroupController.UpdateWasteGroup)
 	apiGroup.GET("settings/wastegroups/all", wasteGroupController.GetAllWasteGroups)
 	apiGroup.GET("settings/wastegroups/wastegroup/:id", wasteGroupController.GetOneWasteGroup)
+	//--------------------------------------------------------------------------------------------
 	router.Run()
 	//fmt.Println("Hello dabid")
 }

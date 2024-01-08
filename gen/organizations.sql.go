@@ -7,16 +7,76 @@ package gen
 
 import (
 	"context"
+	"database/sql"
 )
+
+const deleteOrganization = `-- name: DeleteOrganization :exec
+delete from organizations where id = $1
+`
+
+func (q *Queries) DeleteOrganization(ctx context.Context, id int32) error {
+	_, err := q.db.ExecContext(ctx, deleteOrganization, id)
+	return err
+}
 
 const getAllOrganizations = `-- name: GetAllOrganizations :many
 
-SELECT id, name, country_id from organizations
+SELECT organizations.id, organizations.name, organizations.country_id,countries.name as country from organizations left join countries on countries.id=organizations.country_id
 `
 
+type GetAllOrganizationsRow struct {
+	ID        int32          `json:"id"`
+	Name      string         `json:"name"`
+	CountryID int32          `json:"country_id"`
+	Country   sql.NullString `json:"country"`
+}
+
 // regions.sql
-func (q *Queries) GetAllOrganizations(ctx context.Context) ([]Organization, error) {
+func (q *Queries) GetAllOrganizations(ctx context.Context) ([]GetAllOrganizationsRow, error) {
 	rows, err := q.db.QueryContext(ctx, getAllOrganizations)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	items := []GetAllOrganizationsRow{}
+	for rows.Next() {
+		var i GetAllOrganizationsRow
+		if err := rows.Scan(
+			&i.ID,
+			&i.Name,
+			&i.CountryID,
+			&i.Country,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const getDuplicateOrganization = `-- name: GetDuplicateOrganization :many
+SELECT id, name, country_id
+FROM organizations
+where
+    id != $1
+    and LOWER(name) = $2
+    and country_id = $3
+`
+
+type GetDuplicateOrganizationParams struct {
+	ID        int32  `json:"id"`
+	Name      string `json:"name"`
+	CountryID int32  `json:"country_id"`
+}
+
+func (q *Queries) GetDuplicateOrganization(ctx context.Context, arg GetDuplicateOrganizationParams) ([]Organization, error) {
+	rows, err := q.db.QueryContext(ctx, getDuplicateOrganization, arg.ID, arg.Name, arg.CountryID)
 	if err != nil {
 		return nil, err
 	}
@@ -38,39 +98,55 @@ func (q *Queries) GetAllOrganizations(ctx context.Context) ([]Organization, erro
 	return items, nil
 }
 
-const getOneOrganization = `-- name: GetOneOrganization :one
-SELECT id, name, country_id FROM organizations WHERE ID = $1
+const getOrganization = `-- name: GetOrganization :one
+SELECT organizations.id, organizations.name, organizations.country_id,countries.name as country FROM organizations left join countries on countries.id=organizations.country_id WHERE organizations.id = $1
 `
 
-func (q *Queries) GetOneOrganization(ctx context.Context, id int32) (Organization, error) {
-	row := q.db.QueryRowContext(ctx, getOneOrganization, id)
-	var i Organization
-	err := row.Scan(&i.ID, &i.Name, &i.CountryID)
+type GetOrganizationRow struct {
+	ID        int32          `json:"id"`
+	Name      string         `json:"name"`
+	CountryID int32          `json:"country_id"`
+	Country   sql.NullString `json:"country"`
+}
+
+func (q *Queries) GetOrganization(ctx context.Context, id int32) (GetOrganizationRow, error) {
+	row := q.db.QueryRowContext(ctx, getOrganization, id)
+	var i GetOrganizationRow
+	err := row.Scan(
+		&i.ID,
+		&i.Name,
+		&i.CountryID,
+		&i.Country,
+	)
 	return i, err
 }
 
 const getOrganizationCountWithNameAndCountry = `-- name: GetOrganizationCountWithNameAndCountry :many
-SELECT count(*) from organizations where LOWER(name) = LOWER($1) and country_id = $2
+SELECT id, name, country_id
+from organizations
+where
+    LOWER(name) = $1
+    and country_id = $2
 `
 
 type GetOrganizationCountWithNameAndCountryParams struct {
-	Lower     string `json:"lower"`
+	Name      string `json:"name"`
 	CountryID int32  `json:"country_id"`
 }
 
-func (q *Queries) GetOrganizationCountWithNameAndCountry(ctx context.Context, arg GetOrganizationCountWithNameAndCountryParams) ([]int64, error) {
-	rows, err := q.db.QueryContext(ctx, getOrganizationCountWithNameAndCountry, arg.Lower, arg.CountryID)
+func (q *Queries) GetOrganizationCountWithNameAndCountry(ctx context.Context, arg GetOrganizationCountWithNameAndCountryParams) ([]Organization, error) {
+	rows, err := q.db.QueryContext(ctx, getOrganizationCountWithNameAndCountry, arg.Name, arg.CountryID)
 	if err != nil {
 		return nil, err
 	}
 	defer rows.Close()
-	items := []int64{}
+	items := []Organization{}
 	for rows.Next() {
-		var count int64
-		if err := rows.Scan(&count); err != nil {
+		var i Organization
+		if err := rows.Scan(&i.ID, &i.Name, &i.CountryID); err != nil {
 			return nil, err
 		}
-		items = append(items, count)
+		items = append(items, i)
 	}
 	if err := rows.Close(); err != nil {
 		return nil, err
@@ -82,7 +158,9 @@ func (q *Queries) GetOrganizationCountWithNameAndCountry(ctx context.Context, ar
 }
 
 const insertOrganization = `-- name: InsertOrganization :one
-insert into organizations(name, country_id) values($1, $2) returning id, name, country_id
+insert into
+    organizations(name, country_id)
+values($1, $2) returning id, name, country_id
 `
 
 type InsertOrganizationParams struct {
@@ -95,4 +173,19 @@ func (q *Queries) InsertOrganization(ctx context.Context, arg InsertOrganization
 	var i Organization
 	err := row.Scan(&i.ID, &i.Name, &i.CountryID)
 	return i, err
+}
+
+const updateOrganization = `-- name: UpdateOrganization :exec
+update organizations set name = $1, country_id = $2 where id = $3
+`
+
+type UpdateOrganizationParams struct {
+	Name      string `json:"name"`
+	CountryID int32  `json:"country_id"`
+	ID        int32  `json:"id"`
+}
+
+func (q *Queries) UpdateOrganization(ctx context.Context, arg UpdateOrganizationParams) error {
+	_, err := q.db.ExecContext(ctx, updateOrganization, arg.Name, arg.CountryID, arg.ID)
+	return err
 }
