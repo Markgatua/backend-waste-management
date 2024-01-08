@@ -18,6 +18,33 @@ CREATE TABLE permissions (
   submodule VARCHAR(255) NULL
 );
 
+-- 1 FOR GREEN CORPORATES/CHAMPIONS || 2 FOR AGGREGATOR COMPANIES
+CREATE TABLE company_types(
+  id SERIAL PRIMARY KEY,
+  type VARCHAR(255) NOT NULL
+);
+
+CREATE TABLE countries (
+  id SERIAL PRIMARY KEY,
+  name varchar(255) NOT NULL,
+  currency_code varchar(255) NULL,
+  capital varchar(255) NULL,
+  citizenship  varchar(255) NOT NULL,
+  country_code varchar(3) NOT NULL UNIQUE,
+  currency varchar(255) NULL,
+  currency_sub_unit varchar(255) NULL,
+  currency_symbol varchar(3)  NULL,
+  currency_decimals SMALLINT  NULL,
+  full_name varchar(255)  NULL,
+  iso_3166_2 varchar(2) NOT NULL DEFAULT '',
+  iso_3166_3 varchar(3) NOT NULL DEFAULT '',
+  region_code varchar(3) NOT NULL DEFAULT '',
+  sub_region_code varchar(3) NOT NULL DEFAULT '',
+  eea SMALLINT  DEFAULT 0,
+  calling_code varchar(3) NULL,
+  flag varchar(6) DEFAULT NULL
+);
+
 CREATE TABLE role_has_permissions (
   permission_id INTEGER,
   role_id INTEGER,
@@ -25,35 +52,24 @@ CREATE TABLE role_has_permissions (
   FOREIGN Key (role_id) REFERENCES roles(id) on delete CASCADE
 );
 
+CREATE TABLE organizations(
+  id SERIAL PRIMARY KEY,
+  name VARCHAR(255) NOT NULL,
+  country_id INTEGER NOT NULL,
+  FOREIGN Key (country_id) REFERENCES countries(id) on delete set null
+);
+
 CREATE TABLE companies (
   id SERIAL PRIMARY KEY,
   name VARCHAR(255) NOT NULL,
-  companytype INTEGER NOT NULL, -- 1 FOR GREEN CORPORATES/CHAMPIONS || 2 FOR AGGREGATOR COMPANIES
-  logo VARCHAR(255) NULL,
+  company_type INTEGER NOT NULL, 
+  organization_id INTEGER NOT NULL,
+  region VARCHAR(255) NULL,
   location VARCHAR(255),
-  has_regions BOOLEAN NOT NULL, -- 1 for yes || 0 for No
-  has_branches BOOLEAN NOT NULL, -- 1 for yes || 0 for No
+  logo VARCHAR(255) NULL,
   is_active BOOLEAN NOT NULL DEFAULT TRUE,
-  created_at TIMESTAMP NOT NULL DEFAULT NOW()
-);
-
-CREATE TABLE company_regionals (
-  id SERIAL PRIMARY KEY,
-  company_id INTEGER NOT NULL,
-  FOREIGN Key (company_id) REFERENCES companies(id),
-  region VARCHAR(255) NOT NULL,
-  created_at TIMESTAMP NOT NULL DEFAULT NOW()
-);
-CREATE TABLE company_branches (
-  id SERIAL PRIMARY KEY,
-  company_id INTEGER NOT NULL,
-  FOREIGN Key (company_id) REFERENCES companies(id),
-  region_id INTEGER NULL,
-  FOREIGN Key (region_id) REFERENCES company_regionals(id),
-  branch VARCHAR(255) NOT NULL,
-  branch_location VARCHAR(255) NOT NULL,
-  is_active BOOLEAN NOT NULL DEFAULT TRUE,
-  created_at TIMESTAMP NOT NULL DEFAULT NOW()
+  created_at TIMESTAMP NOT NULL DEFAULT NOW(),
+  FOREIGN Key (organization_id) REFERENCES organizations(id)
 );
 
 -- Create "users" table
@@ -66,10 +82,6 @@ CREATE TABLE users(
     FOREIGN Key (role_id) REFERENCES roles(id),
     user_company_id INTEGER NULL,
     FOREIGN Key (user_company_id) REFERENCES companies(id),
-    user_region_id INTEGER NULL,
-    FOREIGN Key (user_region_id) REFERENCES company_regionals(id),
-    user_company_branch_id INTEGER NULL,
-    FOREIGN Key (user_company_branch_id) REFERENCES company_branches(id),
     email VARCHAR(255) DEFAULT NULL UNIQUE,
     password TEXT DEFAULT NULL,
     avatar_url TEXT NULL,

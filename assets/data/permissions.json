@@ -1,0 +1,18 @@
+[
+    {
+        "module": "TTNM_ADMIN",
+        "key": "ttnm_admin",
+        "permissions": [
+            {
+                "name": "Add organization",
+                "sub_module": "Organization",
+                "action": "add_staff"
+            },
+            {
+                "name": "Add companies",
+                "sub_module": "Companies",
+                "action": "add_companies"
+            }
+        ]
+    }
+]
