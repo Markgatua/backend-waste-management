@@ -21,25 +21,8 @@ func Run() {
 	if err != nil {
 		logger.Log("SEEDER", fmt.Sprint("Unable to connect to database: %v", err), logger.LOG_LEVEL_ERROR)
 	} else {
-		queries := db.New(conn)
+		queries := New(conn)
 	}
 
-	// for _, v := range appSettings.Connections {
-	// 	fmt.Println("===================>", v.ConnectionString)
-	// 	conn, err := pgx.Connect(context.Background(), v.ConnectionString)
-	// 	if err != nil {
-	// 		logger.Log("SEEDER", fmt.Sprint("Unable to connect to database: %v", err), logger.LOG_LEVEL_ERROR)
-	// 	} else {
-	// 		q := queries.NewQuerier(conn)
-	// 		BloodGroupSeeder{}.Run(q)
-	// 		FamilyReltionSeeder{}.Run(q)
-	// 		ReligionSeeder{}.Run(q)
-	// 		GenderSeeder{}.Run(q)
-	// 		UserTitlesSeeder{}.Run(q)
-	// 		CountriesSeeder{}.Run(q)
-	// 		PermissionsSeeder{}.Run(q)
-	// 	}
-	// 	defer conn.Close(context.Background())
-	// }
-
 }
+

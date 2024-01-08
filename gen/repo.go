@@ -21,13 +21,6 @@ type Cat struct{
 }
 
 func LoadRepo(){
-
-	// cat := Cat{
-	// 	Legs: 45,
-	// 	FurColor: "red",
-	// }
-	// cat.FurColor
-	// cat.Legs
 	var databaseUrl = "postgres://gakobo:Psql4321@localhost/ttnm_waste?sslmode=disable"
 	fmt.Println("Connecting to database --- ",databaseUrl);
 	connection,err := sql.Open("postgres",databaseUrl)
