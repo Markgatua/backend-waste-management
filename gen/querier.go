@@ -23,8 +23,10 @@ type Querier interface {
 	GetCountryBeCountryCode(ctx context.Context, countryCode string) ([]Country, error)
 	GetOneOrganization(ctx context.Context, id int32) (Organization, error)
 	GetOneWasteGroup(ctx context.Context, id int32) (WasteGroup, error)
+	GetOrganizationCountWithNameAndCountry(ctx context.Context, arg GetOrganizationCountWithNameAndCountryParams) ([]int64, error)
 	GetUser(ctx context.Context, id int32) (User, error)
 	GetUsersWithRole(ctx context.Context) ([]GetUsersWithRoleRow, error)
+	InsertOrganization(ctx context.Context, arg InsertOrganizationParams) (Organization, error)
 	InsertWasteGroup(ctx context.Context, arg InsertWasteGroupParams) (WasteGroup, error)
 	UpdateCompanyStatus(ctx context.Context, arg UpdateCompanyStatusParams) error
 	UpdateUser(ctx context.Context, arg UpdateUserParams) error

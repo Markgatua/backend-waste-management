@@ -39,12 +39,59 @@ func (q *Queries) GetAllOrganizations(ctx context.Context) ([]Organization, erro
 }
 
 const getOneOrganization = `-- name: GetOneOrganization :one
-
-SELECT id, name, country_id FROM organizations WHERE ID=$1
+SELECT id, name, country_id FROM organizations WHERE ID = $1
 `
 
 func (q *Queries) GetOneOrganization(ctx context.Context, id int32) (Organization, error) {
 	row := q.db.QueryRowContext(ctx, getOneOrganization, id)
+	var i Organization
+	err := row.Scan(&i.ID, &i.Name, &i.CountryID)
+	return i, err
+}
+
+const getOrganizationCountWithNameAndCountry = `-- name: GetOrganizationCountWithNameAndCountry :many
+SELECT count(*) from organizations where LOWER(name) = LOWER($1) and country_id = $2
+`
+
+type GetOrganizationCountWithNameAndCountryParams struct {
+	Lower     string `json:"lower"`
+	CountryID int32  `json:"country_id"`
+}
+
+func (q *Queries) GetOrganizationCountWithNameAndCountry(ctx context.Context, arg GetOrganizationCountWithNameAndCountryParams) ([]int64, error) {
+	rows, err := q.db.QueryContext(ctx, getOrganizationCountWithNameAndCountry, arg.Lower, arg.CountryID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	items := []int64{}
+	for rows.Next() {
+		var count int64
+		if err := rows.Scan(&count); err != nil {
+			return nil, err
+		}
+		items = append(items, count)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const insertOrganization = `-- name: InsertOrganization :one
+insert into organizations(name, country_id) values($1, $2) returning id, name, country_id
+`
+
+type InsertOrganizationParams struct {
+	Name      string `json:"name"`
+	CountryID int32  `json:"country_id"`
+}
+
+func (q *Queries) InsertOrganization(ctx context.Context, arg InsertOrganizationParams) (Organization, error) {
+	row := q.db.QueryRowContext(ctx, insertOrganization, arg.Name, arg.CountryID)
 	var i Organization
 	err := row.Scan(&i.ID, &i.Name, &i.CountryID)
 	return i, err
