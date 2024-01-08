@@ -10,14 +10,21 @@ import (
 
 type Querier interface {
 	CreateCountry(ctx context.Context, arg CreateCountryParams) error
+	// companies.sql
+	GetAllCompanies(ctx context.Context) ([]Company, error)
+	// regions.sql
+	GetAllOrganizations(ctx context.Context) ([]Organization, error)
 	GetAllUsers(ctx context.Context) ([]User, error)
 	// waste_groups.sql
 	GetAllWasteGroups(ctx context.Context) ([]WasteGroup, error)
+	GetCompany(ctx context.Context, id int32) (Company, error)
 	GetCountryBeCountryCode(ctx context.Context, countryCode string) ([]Country, error)
+	GetOneOrganization(ctx context.Context, id int32) (Organization, error)
 	GetOneWasteGroup(ctx context.Context, id int32) (WasteGroup, error)
 	GetUser(ctx context.Context, id int32) (User, error)
 	GetUsersWithRole(ctx context.Context) ([]GetUsersWithRoleRow, error)
 	InsertWasteGroup(ctx context.Context, arg InsertWasteGroupParams) (WasteGroup, error)
+	UpdateCompanyStatus(ctx context.Context, arg UpdateCompanyStatusParams) error
 	UpdateUser(ctx context.Context, arg UpdateUserParams) error
 	UpdateWasteGroup(ctx context.Context, arg UpdateWasteGroupParams) error
 }
