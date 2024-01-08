@@ -98,6 +98,24 @@ func (c OrgnizationController) GetOrganization(context *gin.Context) {
 	})
 }
 
+func (c OrgnizationController) DeleteOrganization(context *gin.Context) {
+	id := context.Param("id")
+	id_, _ := strconv.ParseUint(id, 10, 32)
+	println("------------------------------", id_)
+	err := gen.REPO.DeleteOrganization(context, int32(id_))
+	if err != nil {
+		context.JSON(http.StatusUnprocessableEntity, gin.H{
+			"error":   true,
+			"message": err.Error(),
+		})
+		return
+	}
+	context.JSON(http.StatusOK, gin.H{
+		"error":   false,
+		"message": "Organization successfully deleted",
+	})
+}
+
 func (c OrgnizationController) UpdateOrganization(context *gin.Context) {
 	var params UpdateOrganizationParams
 	err := context.ShouldBindJSON(&params)

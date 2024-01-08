@@ -11,6 +11,8 @@ import (
 type Querier interface {
 	CreateCountry(ctx context.Context, arg CreateCountryParams) error
 	CreatePermission(ctx context.Context, arg CreatePermissionParams) error
+	DeleteCompany(ctx context.Context, id int32) error
+	DeleteOrganization(ctx context.Context, id int32) error
 	// companies.sql
 	GetAllCompanies(ctx context.Context) ([]Company, error)
 	// regions.sql

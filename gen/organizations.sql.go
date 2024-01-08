@@ -9,6 +9,15 @@ import (
 	"context"
 )
 
+const deleteOrganization = `-- name: DeleteOrganization :exec
+delete from organizations where id = $1
+`
+
+func (q *Queries) DeleteOrganization(ctx context.Context, id int32) error {
+	_, err := q.db.ExecContext(ctx, deleteOrganization, id)
+	return err
+}
+
 const getAllOrganizations = `-- name: GetAllOrganizations :many
 
 SELECT id, name, country_id from organizations
@@ -142,7 +151,7 @@ func (q *Queries) InsertOrganization(ctx context.Context, arg InsertOrganization
 }
 
 const updateOrganization = `-- name: UpdateOrganization :exec
-update organizations set name=$1,country_id=$2 where id=$3
+update organizations set name = $1, country_id = $2 where id = $3
 `
 
 type UpdateOrganizationParams struct {

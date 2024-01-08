@@ -27,4 +27,7 @@ where
     and country_id = $3;
 
 -- name: UpdateOrganization :exec
-update organizations set name=$1,country_id=$2 where id=$3;
+update organizations set name = $1, country_id = $2 where id = $3;
+
+-- name: DeleteOrganization :exec
+delete from organizations where id = $1;

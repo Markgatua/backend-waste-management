@@ -46,3 +46,6 @@ where
     id = $1
     and lower(name) = $2
     and organization_id = $3;
+
+-- name: DeleteCompany :exec
+delete from companies where id=$1;

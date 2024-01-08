@@ -120,6 +120,24 @@ func (companiesController CompaniesController) GetCompany(context *gin.Context) 
 	})
 }
 
+func (c OrgnizationController) DeleteCompany(context *gin.Context) {
+	id := context.Param("id")
+	id_, _ := strconv.ParseUint(id, 10, 32)
+	println("------------------------------", id_)
+	err := gen.REPO.DeleteCompany(context, int32(id_))
+	if err != nil {
+		context.JSON(http.StatusUnprocessableEntity, gin.H{
+			"error":   true,
+			"message": err.Error(),
+		})
+		return
+	}
+	context.JSON(http.StatusOK, gin.H{
+		"error":   false,
+		"message": "Company successfully deleted",
+	})
+}
+
 func (companiesController CompaniesController) UpdateCompanyStatus(context *gin.Context) {
 	var params UpdateCompanyStatusParams
 	err := context.ShouldBindJSON(&params)

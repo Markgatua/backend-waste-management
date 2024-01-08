@@ -10,6 +10,15 @@ import (
 	"database/sql"
 )
 
+const deleteCompany = `-- name: DeleteCompany :exec
+delete from companies where id=$1
+`
+
+func (q *Queries) DeleteCompany(ctx context.Context, id int32) error {
+	_, err := q.db.ExecContext(ctx, deleteCompany, id)
+	return err
+}
+
 const getAllCompanies = `-- name: GetAllCompanies :many
 
 select id, name, company_type, organization_id, region, location, is_active, created_at from companies
