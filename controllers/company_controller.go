@@ -63,6 +63,7 @@ func (companiesController CompaniesController) InsertCompany(context *gin.Contex
 		Name:        params.Name,
 		Location:    null.StringFrom(params.Location).NullString,
 		IsActive:    params.IsActive,
+		OrganizationID: params.OrganizationID,
 		Region:      null.StringFrom(params.Region).NullString,
 		CompanyType: params.Companytype,
 	})

@@ -69,7 +69,7 @@ func runProgram() {
 	//-------------------------------------------------------------------------------------------
 
 	//---------------------------companies ------------------------------------------------------
-	apiGroup.POST("companies/addcompany", companiesController.InsertCompany)
+	apiGroup.POST("companies/add", companiesController.InsertCompany)
 	apiGroup.GET("companies/allcompanies", companiesController.GetAllCompanies)
 	apiGroup.GET("companies/company/:id", companiesController.GetCompany)
 	apiGroup.POST("companies/status", companiesController.UpdateCompanyStatus)
