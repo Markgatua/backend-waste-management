@@ -18,7 +18,7 @@ func main() {
 	   ------------
 	   1) To run seeder run "go run main.go seeder"
 	   2) To run master table migration run "go run main.go master_table_migration"
-	   3) To run the school system run "go run main.go scms"
+	   3) To run the system run "go run main.go program"
 	`
 
 	if len(os.Args) == 1 {
