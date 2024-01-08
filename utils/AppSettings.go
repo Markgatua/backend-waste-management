@@ -20,15 +20,9 @@ func (r *AppSettings) Marshal() ([]byte, error) {
 
 type AppSettings struct {
 	Debug                    bool         `json:"debug"`
-	Connections              []Connection `json:"connections"`
 	DBMasterConnectionString string       `json:"db_master_connection_string"`
 }
 
-type Connection struct {
-	SchoolName       string `json:"school_name"`
-	SchoolID         string  `json:"school_id"`
-	ConnectionString string `json:"connection_string"`
-}
 
 func GetAppSettings() (AppSettings, error) {
 	jsonFile, err := os.Open(".app_settings.json")
