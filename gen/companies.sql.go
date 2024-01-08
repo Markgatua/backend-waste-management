@@ -8,6 +8,7 @@ package gen
 import (
 	"context"
 	"database/sql"
+	"time"
 )
 
 const deleteCompany = `-- name: DeleteCompany :exec
@@ -21,19 +22,31 @@ func (q *Queries) DeleteCompany(ctx context.Context, id int32) error {
 
 const getAllCompanies = `-- name: GetAllCompanies :many
 
-select id, name, company_type, organization_id, region, location, is_active, created_at from companies
+select companies.id, companies.name, companies.company_type, companies.organization_id, companies.region, companies.location, companies.is_active, companies.created_at,organizations.name as organization_name from companies left join organizations on organizations.id=companies.organization_id
 `
 
+type GetAllCompaniesRow struct {
+	ID               int32          `json:"id"`
+	Name             string         `json:"name"`
+	CompanyType      int32          `json:"company_type"`
+	OrganizationID   int32          `json:"organization_id"`
+	Region           sql.NullString `json:"region"`
+	Location         sql.NullString `json:"location"`
+	IsActive         bool           `json:"is_active"`
+	CreatedAt        time.Time      `json:"created_at"`
+	OrganizationName sql.NullString `json:"organization_name"`
+}
+
 // companies.sql
-func (q *Queries) GetAllCompanies(ctx context.Context) ([]Company, error) {
+func (q *Queries) GetAllCompanies(ctx context.Context) ([]GetAllCompaniesRow, error) {
 	rows, err := q.db.QueryContext(ctx, getAllCompanies)
 	if err != nil {
 		return nil, err
 	}
 	defer rows.Close()
-	items := []Company{}
+	items := []GetAllCompaniesRow{}
 	for rows.Next() {
-		var i Company
+		var i GetAllCompaniesRow
 		if err := rows.Scan(
 			&i.ID,
 			&i.Name,
@@ -43,6 +56,7 @@ func (q *Queries) GetAllCompanies(ctx context.Context) ([]Company, error) {
 			&i.Location,
 			&i.IsActive,
 			&i.CreatedAt,
+			&i.OrganizationName,
 		); err != nil {
 			return nil, err
 		}
@@ -58,12 +72,24 @@ func (q *Queries) GetAllCompanies(ctx context.Context) ([]Company, error) {
 }
 
 const getCompany = `-- name: GetCompany :one
-select id, name, company_type, organization_id, region, location, is_active, created_at from companies where id = $1
+select companies.id, companies.name, companies.company_type, companies.organization_id, companies.region, companies.location, companies.is_active, companies.created_at,organizations.name as organization_name from companies left join organizations on organizations.id=companies.organization_id where companies.id = $1
 `
 
-func (q *Queries) GetCompany(ctx context.Context, id int32) (Company, error) {
+type GetCompanyRow struct {
+	ID               int32          `json:"id"`
+	Name             string         `json:"name"`
+	CompanyType      int32          `json:"company_type"`
+	OrganizationID   int32          `json:"organization_id"`
+	Region           sql.NullString `json:"region"`
+	Location         sql.NullString `json:"location"`
+	IsActive         bool           `json:"is_active"`
+	CreatedAt        time.Time      `json:"created_at"`
+	OrganizationName sql.NullString `json:"organization_name"`
+}
+
+func (q *Queries) GetCompany(ctx context.Context, id int32) (GetCompanyRow, error) {
 	row := q.db.QueryRowContext(ctx, getCompany, id)
-	var i Company
+	var i GetCompanyRow
 	err := row.Scan(
 		&i.ID,
 		&i.Name,
@@ -73,6 +99,7 @@ func (q *Queries) GetCompany(ctx context.Context, id int32) (Company, error) {
 		&i.Location,
 		&i.IsActive,
 		&i.CreatedAt,
+		&i.OrganizationName,
 	)
 	return i, err
 }

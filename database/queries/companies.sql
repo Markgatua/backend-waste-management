@@ -1,10 +1,10 @@
 -- companies.sql
 
 -- name: GetAllCompanies :many
-select * from companies;
+select companies.*,organizations.name as organization_name from companies left join organizations on organizations.id=companies.organization_id;
 
 -- name: GetCompany :one
-select * from companies where id = $1;
+select companies.*,organizations.name as organization_name from companies left join organizations on organizations.id=companies.organization_id where companies.id = $1;
 
 -- name: UpdateCompanyStatus :exec
 update companies set is_active = $2 where id = $1;
