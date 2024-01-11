@@ -1,0 +1,57 @@
+{
+    "1":{
+        "name": "TTNM Admin",
+        "description": "",
+        "guard_name": "api"
+    },
+    "2":{
+        "name": "Aggregator Global Admin",
+        "description": "",
+        "guard_name": "api"
+    },
+    "3":{
+        "name": "Aggregator Admin",
+        "description": "",
+        "guard_name": "api"
+    },
+    "4":{
+        "name": "Aggregator System User",
+        "description": "",
+        "guard_name": "api"
+    },
+    "5":{
+        "name": "Aggregator Collector",
+        "description": "",
+        "guard_name": "api"
+    },
+    "6":{
+        "name": "External Collector",
+        "description": "",
+        "guard_name": "api"
+    },
+    "7":{
+        "name": "Green Champion",
+        "description": "",
+        "guard_name": "api"
+    },
+    "8":{
+        "name": "Corporate Global Admin",
+        "description": "",
+        "guard_name": "api"
+    },
+    "9":{
+        "name": "Corporate Admin",
+        "description": "",
+        "guard_name": "api"
+    },
+    "10":{
+        "name": "Corporate System User",
+        "description": "",
+        "guard_name": "api"
+    },
+    "11":{
+        "name": "Green Regulator",
+        "description": "",
+        "guard_name": "api"
+    }
+}

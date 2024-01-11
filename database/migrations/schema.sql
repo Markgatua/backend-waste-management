@@ -62,6 +62,24 @@ CREATE TABLE organizations(
   FOREIGN Key (country_id) REFERENCES countries(id) on delete set null
 );
 
+CREATE TABLE ttnm_organization(
+  id SERIAL PRIMARY KEY,
+  organization_id VARCHAR(255) NOT NULL,
+  name VARCHAR(255) NOT NULL,
+  tag_line TEXT NOT NULL,
+  about_us TEXT NOT NULL,
+  logo_path TEXT NOT NULL,
+  app_appstore_link TEXT NOT NULL,
+  app_google_playstore_link TEXT NOT NULL,
+  website_url TEXT NOT NULL,
+  city TEXT NOT NULL,
+  state TEXT NOT NULL,
+  zip TEXT NOT NULL,
+  country TEXT NOT NULL,
+  created_at TIMESTAMP NOT NULL DEFAULT NOW(),
+  updated_at TIMESTAMP NOT NULL DEFAULT NOW()
+);
+
 CREATE TABLE companies (
   id SERIAL PRIMARY KEY,
   name VARCHAR(255) NOT NULL,
@@ -88,7 +106,7 @@ CREATE TABLE users(
     email VARCHAR(255) DEFAULT NULL UNIQUE,
     password TEXT DEFAULT NULL,
     avatar_url TEXT NULL,
-    user_type SMALLINT, -- 1 for TTNM ADMINS || 2 AGG GLOBAL ADMINS || 3 AGG ADMINS || 4 AGG USERS || 5 AGG COLLECTORS || 6 EXTERNAL COLLECTORS || 7 GREEN CHAMPIONS
+    user_type SMALLINT, -- 1 for TTNM ADMINS || 2 AGG GLOBAL ADMINS || 3 AGG ADMINS || 4 AGG USERS || 5 AGG COLLECTORS || 6 EXTERNAL COLLECTORS || 7 GREEN CHAMPIONS 
     is_active BOOLEAN DEFAULT TRUE,
     calling_code VARCHAR(6) NULL,
     phone VARCHAR(15) NULL DEFAULT NULL,
@@ -117,6 +135,16 @@ CREATE TABLE email_verification_token (
   id SERIAL PRIMARY KEY,
   token TEXT NOT NULL,
   email TEXT NOT NULL UNIQUE,
+  created_at TIMESTAMP NOT NULL DEFAULT NOW()
+);
+
+-- Create "champion_assigned_aggregator" table
+CREATE TABLE champion_aggregator_assignments (
+  id SERIAL PRIMARY KEY,
+  champion_id INTEGER,
+  FOREIGN Key (champion_id) REFERENCES companies(id),
+  collector_id INTEGER,
+  FOREIGN Key (collector_id) REFERENCES companies(id),
   created_at TIMESTAMP NOT NULL DEFAULT NOW()
 );
 

@@ -12,6 +12,11 @@
                 "name": "Add companies",
                 "sub_module": "Companies",
                 "action": "add_companies"
+            },
+            {
+                "name":"Assign aggregators to green champions",
+                "sub_module":"",
+                "action":"assign_aggregators_to_green_champions"
             }
         ]
     }
