@@ -18,6 +18,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/golang-module/carbon"
 	// "gopkg.in/guregu/null.v3"
+	// "gopkg.in/guregu/null.v3"
 )
 
 const TAG string = "controllers/Auth"
@@ -688,7 +689,6 @@ func (auth AuthController) LoginEmail(context *gin.Context) {
 		return
 	}
 	user, err := GetEmailUser(loginUserEmailParam.Email)
-
 	if user == nil {
 		context.JSON(http.StatusUnprocessableEntity, gin.H{
 			"error":   true,
@@ -705,6 +705,14 @@ func (auth AuthController) LoginEmail(context *gin.Context) {
 		context.JSON(http.StatusUnauthorized, gin.H{
 			"error":   true,
 			"message": "Incorrect credentials",
+		})
+		return
+	}
+
+	if user.ConfirmedAt.Time.IsZero(){
+		context.JSON(http.StatusUnauthorized, gin.H{
+			"error":   true,
+			"message": "Confirm Your Email",
 		})
 		return
 	}
@@ -774,7 +782,6 @@ func (auth AuthController) RegisterUserEmail(context *gin.Context) {
 		})
 	}
 
-	fmt.Println(err.Error())
 	if err != nil {
 		context.JSON(http.StatusUnprocessableEntity, gin.H{
 			"error":   true,

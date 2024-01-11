@@ -10,15 +10,27 @@ import (
 	"database/sql"
 )
 
-const getRole = `-- name: GetRole :one
-SELECT id, name, guard_name, created_at, updated_at, description, deleted_at FROM roles WHERE id = $1 AND deleted_at IS NULL
+const getDuplicateRole = `-- name: GetDuplicateRole :one
+select count(*) from roles where role_id=$1 and deleted_at IS null
 `
 
-func (q *Queries) GetRole(ctx context.Context, id int32) (Role, error) {
-	row := q.db.QueryRowContext(ctx, getRole, id)
+func (q *Queries) GetDuplicateRole(ctx context.Context, roleID int32) (int64, error) {
+	row := q.db.QueryRowContext(ctx, getDuplicateRole, roleID)
+	var count int64
+	err := row.Scan(&count)
+	return count, err
+}
+
+const getRole = `-- name: GetRole :one
+SELECT id, role_id, name, guard_name, created_at, updated_at, description, deleted_at FROM roles WHERE role_id = $1 AND deleted_at IS NULL
+`
+
+func (q *Queries) GetRole(ctx context.Context, roleID int32) (Role, error) {
+	row := q.db.QueryRowContext(ctx, getRole, roleID)
 	var i Role
 	err := row.Scan(
 		&i.ID,
+		&i.RoleID,
 		&i.Name,
 		&i.GuardName,
 		&i.CreatedAt,
@@ -30,7 +42,7 @@ func (q *Queries) GetRole(ctx context.Context, id int32) (Role, error) {
 }
 
 const getRoles = `-- name: GetRoles :many
-select id, name, guard_name, created_at, updated_at, description, deleted_at from roles where deleted_at IS NULL
+select id, role_id, name, guard_name, created_at, updated_at, description, deleted_at from roles where deleted_at IS NULL
 `
 
 func (q *Queries) GetRoles(ctx context.Context) ([]Role, error) {
@@ -44,6 +56,7 @@ func (q *Queries) GetRoles(ctx context.Context) ([]Role, error) {
 		var i Role
 		if err := rows.Scan(
 			&i.ID,
+			&i.RoleID,
 			&i.Name,
 			&i.GuardName,
 			&i.CreatedAt,
@@ -65,27 +78,33 @@ func (q *Queries) GetRoles(ctx context.Context) ([]Role, error) {
 }
 
 const insertRole = `-- name: InsertRole :exec
-insert into roles (name,guard_name,description) VALUES($1,$2,$3)
+insert into roles (name,role_id,guard_name,description) VALUES($1,$2,$3,$4)
 `
 
 type InsertRoleParams struct {
 	Name        string         `json:"name"`
+	RoleID      int32          `json:"role_id"`
 	GuardName   string         `json:"guard_name"`
 	Description sql.NullString `json:"description"`
 }
 
 func (q *Queries) InsertRole(ctx context.Context, arg InsertRoleParams) error {
-	_, err := q.db.ExecContext(ctx, insertRole, arg.Name, arg.GuardName, arg.Description)
+	_, err := q.db.ExecContext(ctx, insertRole,
+		arg.Name,
+		arg.RoleID,
+		arg.GuardName,
+		arg.Description,
+	)
 	return err
 }
 
 const updateRole = `-- name: UpdateRole :exec
 
-update roles set name=$2, guard_name=$3, description=$4, deleted_at=$5 where id=$1
+update roles set name=$2, guard_name=$3, description=$4, deleted_at=$5 where role_id=$1
 `
 
 type UpdateRoleParams struct {
-	ID          int32          `json:"id"`
+	RoleID      int32          `json:"role_id"`
 	Name        string         `json:"name"`
 	GuardName   string         `json:"guard_name"`
 	Description sql.NullString `json:"description"`
@@ -95,7 +114,7 @@ type UpdateRoleParams struct {
 // roles.sql
 func (q *Queries) UpdateRole(ctx context.Context, arg UpdateRoleParams) error {
 	_, err := q.db.ExecContext(ctx, updateRole,
-		arg.ID,
+		arg.RoleID,
 		arg.Name,
 		arg.GuardName,
 		arg.Description,

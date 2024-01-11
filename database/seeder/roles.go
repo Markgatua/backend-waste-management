@@ -13,7 +13,6 @@ import (
 
 type RolesSeeder struct{}
 
-
 func (rolesSeeder RolesSeeder) Run(q *gen.Queries) {
 	logger.Log("[SEEDER/ROLES SEEDER]", "=======Seeding ROLES======", logger.LOG_LEVEL_INFO)
 
@@ -25,16 +24,30 @@ func (rolesSeeder RolesSeeder) Run(q *gen.Queries) {
 		if unmarshalError == nil {
 			for _, v := range result {
 				name := v["name"]
+				roleId := v["role_id"]
 				description := v["description"]
 				guardName := v["guard_name"]
-		
 
-				q.InsertRole(context.Background(), gen.InsertRoleParams{
-					Name:            fmt.Sprint(name),
-					Description:     sql.NullString{String: fmt.Sprint(description), Valid: true},
-					GuardName: 		 fmt.Sprint(guardName),
+				count, err := q.GetDuplicateRole(context.Background(), int32(roleId.(float64)))
+				if err == nil {
+					// var Role gen.Role
+					if count == 0 {
+						q.InsertRole(context.Background(), gen.InsertRoleParams{
+							RoleID:      int32(roleId.(float64)),
+							Name:        fmt.Sprint(name),
+							Description: sql.NullString{String: fmt.Sprint(description), Valid: true},
+							GuardName:   fmt.Sprint(guardName),
+						})
+					} else {
+						q.UpdateRole(context.Background(), gen.UpdateRoleParams{
+							RoleID:      int32(roleId.(float64)),
+							Name:        fmt.Sprint(name),
+							Description: sql.NullString{String: fmt.Sprint(description), Valid: true},
+							GuardName:   fmt.Sprint(guardName),
+						})
 
-				})
+					}
+				}
 				//fmt.Println(err.Error())
 			}
 		} else {

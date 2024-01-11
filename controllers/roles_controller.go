@@ -1,7 +1,6 @@
 package controllers
 
 import (
-	"fmt"
 	"net/http"
 	"strconv"
 	"time"
@@ -15,6 +14,7 @@ type RolesController struct{}
 
 type UpdateRoleParams struct {
 	ID     		  int `json:"id"  binding:"required"`
+	RoleId 		  int `json:"role_id" binding:"required"`
 	Name 		  string `json:"name"  binding:"required"`
 	GuardName     string `json:"guard_name"  binding:"required"`
 	Description   string `json:"description"  binding:"required"`
@@ -69,7 +69,6 @@ func (rolesController RolesController) UpdateRole(context *gin.Context) {
 		return
 	}
 
-	fmt.Println(params.DeletedAt)
 	var isToDelete null.Time
 
 	if (params.DeletedAt == true) {
@@ -80,7 +79,7 @@ func (rolesController RolesController) UpdateRole(context *gin.Context) {
 
 	updateError := gen.REPO.UpdateRole(context, gen.UpdateRoleParams{
 		Name: params.Name,
-		ID:     int32(params.ID),
+		RoleID:     int32(params.RoleId),
 		GuardName: params.GuardName,
 		Description: null.StringFrom(params.Description).NullString,
 		DeletedAt: isToDelete.NullTime,

@@ -8,6 +8,8 @@ type User struct {
 	LastName           null.String `db:"last_name" json:"last_name"`
 	Provider           null.String `db:"provider" json:"provider"`
 	Email              null.String `db:"email" json:"email"`
+	RoleId				null.Int	   `db:"role_id" json:"role_id"`
+	UserCompanyId       null.Int	   `db:"user_company_id"  json:"user_company_id"`
 	Password           null.String `db:"password" json:"-"`
 	IsActive           null.Bool   `db:"is_active" json:"is_active"`
 	CallingCode        null.String `db:"calling_code" json:"calling_code"`

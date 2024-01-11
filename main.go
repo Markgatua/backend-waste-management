@@ -8,6 +8,7 @@ import (
 	"ttnmwastemanagementsystem/controllers"
 	"ttnmwastemanagementsystem/database/seeder"
 	"ttnmwastemanagementsystem/gen"
+	"ttnmwastemanagementsystem/middlewares"
 
 	"github.com/gin-gonic/gin"
 	"github.com/muesli/cache2go"
@@ -57,7 +58,35 @@ func runProgram() {
 
 	router.LoadHTMLGlob("templates/**/*")
 
+	auth := router.Group("/auth")
+	{
+		authController := controllers.AuthController{}
+		auth.GET("/challenge/password_reset_success/email/web", authController.PassWordResetSuccess)
+		auth.POST("/challenge/submit_new_password/email/web", authController.SubmitNewPassword)
+		auth.GET("/challenge/enter_new_password/web", authController.EnterNewPassword)
+		auth.POST("/reset_password/email/web", authController.ResetPassword)
+
+		auth.POST("/register/email", authController.RegisterUserEmail)
+		auth.GET("/challenge/verify_email/web", authController.VerifyEmail)
+		auth.POST("/challenge/send_email_verfication/web", authController.SendVerificationMail)
+		auth.POST("/login/email", authController.LoginEmail)
+
+		auth.POST("/challenge/register/send_otp_code_phone", authController.RegisterPhoneSendOTPCode)
+		auth.POST("/login/phone", authController.LoginPhone)
+		auth.POST("/challenge/register/verify_otp_code_phone", authController.RegisterVerifyOTPCodePhone)
+		auth.POST("/challenge/register/verify_otp_code_phone_create_wallet", authController.RegisterVerifyOTPCodePhoneAndCreateWallet)
+
+		auth.POST("/challenge/forgot_pin/send_otp_phone", authController.ForgotPinSendOTPPhone)
+		auth.POST("/challenge/forgot_pin/verify_otp_phone", authController.ForgotPinVerifyOTPPhone)
+		auth.POST("/challenge/forgot_pin/enter_new_pin", authController.ForgotPinEnterNewPin)
+
+	}
+
+
 	apiGroup := router.Group("/api:BVaDN9hl")
+
+	apiGroup.Use(middlewares.JwtAuthMiddleware())
+	apiGroup.Use(middlewares.PermissionMiddleware())
 
 	apiGroup.GET("/users", usersController.GetAllUsers)
 	// apiGroup.POST("update/user",usersController.UpdateUSer)
@@ -100,6 +129,7 @@ func runProgram() {
 	apiGroup.POST("settings/wastegroups/create", wasteGroupController.InsertWasteGroup)
 	apiGroup.POST("settings/wastegroups/update", wasteGroupController.UpdateWasteGroup)
 	apiGroup.GET("settings/wastegroups/all", wasteGroupController.GetAllWasteGroups)
+	apiGroup.GET("settings/wastegroups/user", wasteGroupController.GetUsersWasteGroups)
 	apiGroup.GET("settings/wastegroups/wastegroup/:id", wasteGroupController.GetOneWasteGroup)
 	//--------------------------------------------------------------------------------------------
 
@@ -112,29 +142,7 @@ func runProgram() {
 	// apiGroup.GET("settings/wastegroups/wastegroup/:id", wasteGroupController.GetOneWasteGroup)
 	//--------------------------------------------------------------------------------------------
 
-	auth := router.Group("/auth")
-	{
-		authController := controllers.AuthController{}
-		auth.GET("/challenge/password_reset_success/email/web", authController.PassWordResetSuccess)
-		auth.POST("/challenge/submit_new_password/email/web", authController.SubmitNewPassword)
-		auth.GET("/challenge/enter_new_password/web", authController.EnterNewPassword)
-		auth.POST("/reset_password/email/web", authController.ResetPassword)
-
-		auth.POST("/register/email", authController.RegisterUserEmail)
-		auth.GET("/challenge/verify_email/web", authController.VerifyEmail)
-		auth.POST("/challenge/send_email_verfication/web", authController.SendVerificationMail)
-		auth.POST("/login/email", authController.LoginEmail)
-
-		auth.POST("/challenge/register/send_otp_code_phone", authController.RegisterPhoneSendOTPCode)
-		auth.POST("/login/phone", authController.LoginPhone)
-		auth.POST("/challenge/register/verify_otp_code_phone", authController.RegisterVerifyOTPCodePhone)
-		auth.POST("/challenge/register/verify_otp_code_phone_create_wallet", authController.RegisterVerifyOTPCodePhoneAndCreateWallet)
-
-		auth.POST("/challenge/forgot_pin/send_otp_phone", authController.ForgotPinSendOTPPhone)
-		auth.POST("/challenge/forgot_pin/verify_otp_phone", authController.ForgotPinVerifyOTPPhone)
-		auth.POST("/challenge/forgot_pin/enter_new_pin", authController.ForgotPinEnterNewPin)
-
-	}
+	
 	router.Run()
 	//fmt.Println("Hello dabid")
 }

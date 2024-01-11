@@ -1,5 +1,6 @@
 CREATE TABLE roles (
   id SERIAL PRIMARY KEY,
+  role_id INTEGER NOT NULL UNIQUE,
   name varchar(255) NOT NULL,
   guard_name varchar(255) NOT NULL,
   created_at timestamp NULL DEFAULT NULL,
@@ -52,7 +53,7 @@ CREATE TABLE role_has_permissions (
   permission_id INTEGER,
   role_id INTEGER,
   FOREIGN Key (permission_id) REFERENCES permissions(id),
-  FOREIGN Key (role_id) REFERENCES roles(id) on delete CASCADE
+  FOREIGN Key (role_id) REFERENCES roles(role_id) on delete CASCADE
 );
 
 CREATE TABLE organizations(
@@ -152,7 +153,8 @@ CREATE TABLE waste_groups (
   id SERIAL PRIMARY KEY,
   name VARCHAR(255) NOT NULL,
   category VARCHAR(255) NOT NULL,
-  created_at TIMESTAMP NOT NULL DEFAULT NOW()
+  created_at TIMESTAMP NOT NULL DEFAULT NOW(),
+  deleted_at timestamp NULL DEFAULT NULL
 );
 
 CREATE TABLE waste_collections (

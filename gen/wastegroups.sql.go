@@ -7,11 +7,12 @@ package gen
 
 import (
 	"context"
+	"database/sql"
 )
 
 const getAllWasteGroups = `-- name: GetAllWasteGroups :many
 
-select id, name, category, created_at from waste_groups
+select id, name, category, created_at, deleted_at from waste_groups
 `
 
 // waste_groups.sql
@@ -29,6 +30,7 @@ func (q *Queries) GetAllWasteGroups(ctx context.Context) ([]WasteGroup, error) {
 			&i.Name,
 			&i.Category,
 			&i.CreatedAt,
+			&i.DeletedAt,
 		); err != nil {
 			return nil, err
 		}
@@ -44,7 +46,7 @@ func (q *Queries) GetAllWasteGroups(ctx context.Context) ([]WasteGroup, error) {
 }
 
 const getOneWasteGroup = `-- name: GetOneWasteGroup :one
-select id, name, category, created_at from waste_groups where id=$1
+select id, name, category, created_at, deleted_at from waste_groups where id=$1
 `
 
 func (q *Queries) GetOneWasteGroup(ctx context.Context, id int32) (WasteGroup, error) {
@@ -55,12 +57,46 @@ func (q *Queries) GetOneWasteGroup(ctx context.Context, id int32) (WasteGroup, e
 		&i.Name,
 		&i.Category,
 		&i.CreatedAt,
+		&i.DeletedAt,
 	)
 	return i, err
 }
 
+const getUsersWasteGroups = `-- name: GetUsersWasteGroups :many
+select id, name, category, created_at, deleted_at from waste_groups where deleted_at is NULL
+`
+
+func (q *Queries) GetUsersWasteGroups(ctx context.Context) ([]WasteGroup, error) {
+	rows, err := q.db.QueryContext(ctx, getUsersWasteGroups)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	items := []WasteGroup{}
+	for rows.Next() {
+		var i WasteGroup
+		if err := rows.Scan(
+			&i.ID,
+			&i.Name,
+			&i.Category,
+			&i.CreatedAt,
+			&i.DeletedAt,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
 const insertWasteGroup = `-- name: InsertWasteGroup :one
-INSERT INTO waste_groups (name,category) VALUES ($1,$2) RETURNING id, name, category, created_at
+INSERT INTO waste_groups (name,category) VALUES ($1,$2) RETURNING id, name, category, created_at, deleted_at
 `
 
 type InsertWasteGroupParams struct {
@@ -76,21 +112,28 @@ func (q *Queries) InsertWasteGroup(ctx context.Context, arg InsertWasteGroupPara
 		&i.Name,
 		&i.Category,
 		&i.CreatedAt,
+		&i.DeletedAt,
 	)
 	return i, err
 }
 
 const updateWasteGroup = `-- name: UpdateWasteGroup :exec
-update waste_groups set name=$2, category=$3 where id=$1
+update waste_groups set name=$2, category=$3, deleted_at=$4 where id=$1
 `
 
 type UpdateWasteGroupParams struct {
-	ID       int32  `json:"id"`
-	Name     string `json:"name"`
-	Category string `json:"category"`
+	ID        int32        `json:"id"`
+	Name      string       `json:"name"`
+	Category  string       `json:"category"`
+	DeletedAt sql.NullTime `json:"deleted_at"`
 }
 
 func (q *Queries) UpdateWasteGroup(ctx context.Context, arg UpdateWasteGroupParams) error {
-	_, err := q.db.ExecContext(ctx, updateWasteGroup, arg.ID, arg.Name, arg.Category)
+	_, err := q.db.ExecContext(ctx, updateWasteGroup,
+		arg.ID,
+		arg.Name,
+		arg.Category,
+		arg.DeletedAt,
+	)
 	return err
 }

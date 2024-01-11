@@ -89,6 +89,7 @@ type PhoneVerificationToken struct {
 
 type Role struct {
 	ID          int32          `json:"id"`
+	RoleID      int32          `json:"role_id"`
 	Name        string         `json:"name"`
 	GuardName   string         `json:"guard_name"`
 	CreatedAt   sql.NullTime   `json:"created_at"`
@@ -177,10 +178,11 @@ type WasteForSale struct {
 }
 
 type WasteGroup struct {
-	ID        int32     `json:"id"`
-	Name      string    `json:"name"`
-	Category  string    `json:"category"`
-	CreatedAt time.Time `json:"created_at"`
+	ID        int32        `json:"id"`
+	Name      string       `json:"name"`
+	Category  string       `json:"category"`
+	CreatedAt time.Time    `json:"created_at"`
+	DeletedAt sql.NullTime `json:"deleted_at"`
 }
 
 type WasteTransaction struct {

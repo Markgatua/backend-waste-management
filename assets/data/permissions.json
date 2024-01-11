@@ -1,22 +1,53 @@
 [
     {
-        "module": "TTNM_ADMIN",
-        "key": "ttnm_admin",
+        "module": "Permissions",
+        "key": "permissions",
         "permissions": [
             {
-                "name": "Add organization",
-                "sub_module": "Organization",
-                "action": "add_staff"
+                "name": "Assign Permission",
+                "sub_module": "Permissions",
+                "action": "assign_permission"
+            }
+        ]
+    },
+    {
+        "module": "Settings",
+        "key": "settings",
+        "permissions": [
+            {
+                "name": "View TTNM Profile",
+                "sub_module": "Organization Profile",
+                "action": "view_ttnm_profile"
             },
             {
-                "name": "Add companies",
-                "sub_module": "Companies",
-                "action": "add_companies"
+                "name": "Update TTNM Profile",
+                "sub_module": "Organization Profile",
+                "action": "update_ttnm_profile"
             },
             {
-                "name":"Assign aggregators to green champions",
-                "sub_module":"",
-                "action":"assign_aggregators_to_green_champions"
+                "name": "View Roles",
+                "sub_module": "Roles",
+                "action": "view_roles"
+            },
+            {
+                "name": "Update Roles",
+                "sub_module": "Roles",
+                "action": "update_roles"
+            },
+            {
+                "name": "View Waste Types",
+                "sub_module": "Waste Types",
+                "action": "view_waste_type"
+            },
+            {
+                "name": "Update Waste Type",
+                "sub_module": "Waste Types",
+                "action": "update_waste_type"
+            },
+            {
+                "name": "Create Waste Type",
+                "sub_module": "Waste Types",
+                "action": "create_waste_type"
             }
         ]
     }
