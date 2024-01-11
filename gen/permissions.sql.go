@@ -13,6 +13,7 @@ import (
 const createPermission = `-- name: CreatePermission :exec
 INSERT INTO
     permissions (
+        permission_id,
         name,
         guard_name,
         module,
@@ -22,19 +23,22 @@ VALUES (
         $1,
         $2,
         $3,
-        $4
+        $4,
+        $5
     )
 `
 
 type CreatePermissionParams struct {
-	Name      string         `json:"name"`
-	GuardName string         `json:"guard_name"`
-	Module    string         `json:"module"`
-	Submodule sql.NullString `json:"submodule"`
+	PermissionID int32          `json:"permission_id"`
+	Name         string         `json:"name"`
+	GuardName    string         `json:"guard_name"`
+	Module       string         `json:"module"`
+	Submodule    sql.NullString `json:"submodule"`
 }
 
 func (q *Queries) CreatePermission(ctx context.Context, arg CreatePermissionParams) error {
 	_, err := q.db.ExecContext(ctx, createPermission,
+		arg.PermissionID,
 		arg.Name,
 		arg.GuardName,
 		arg.Module,
@@ -44,7 +48,7 @@ func (q *Queries) CreatePermission(ctx context.Context, arg CreatePermissionPara
 }
 
 const getAllPermissions = `-- name: GetAllPermissions :many
-SELECT id, name, guard_name, created_at, updated_at, module, submodule FROM permissions
+SELECT id, name, guard_name, created_at, updated_at, module, submodule, permission_id FROM permissions
 `
 
 func (q *Queries) GetAllPermissions(ctx context.Context) ([]Permission, error) {
@@ -64,6 +68,7 @@ func (q *Queries) GetAllPermissions(ctx context.Context) ([]Permission, error) {
 			&i.UpdatedAt,
 			&i.Module,
 			&i.Submodule,
+			&i.PermissionID,
 		); err != nil {
 			return nil, err
 		}

@@ -26,6 +26,7 @@ func Run() {
 		PermissionsSeeder{}.Run(queries)
 		TtnmOrganizationSeeder{}.Run(queries)
 		RolesSeeder{}.Run(queries)
+		RoleHasPermissionsSeeder{}.Run(queries)
 	}
 
 }

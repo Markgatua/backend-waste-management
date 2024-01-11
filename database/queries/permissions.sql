@@ -1,6 +1,7 @@
 -- name: CreatePermission :exec
 INSERT INTO
     permissions (
+        permission_id,
         name,
         guard_name,
         module,
@@ -10,7 +11,8 @@ VALUES (
         $1,
         $2,
         $3,
-        $4
+        $4,
+        $5
     );
 
 -- name: GetAllPermissions :many

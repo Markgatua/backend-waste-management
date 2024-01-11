@@ -70,13 +70,14 @@ type PaymentMethod struct {
 }
 
 type Permission struct {
-	ID        int32          `json:"id"`
-	Name      string         `json:"name"`
-	GuardName string         `json:"guard_name"`
-	CreatedAt sql.NullTime   `json:"created_at"`
-	UpdatedAt sql.NullTime   `json:"updated_at"`
-	Module    string         `json:"module"`
-	Submodule sql.NullString `json:"submodule"`
+	ID           int32          `json:"id"`
+	Name         string         `json:"name"`
+	GuardName    string         `json:"guard_name"`
+	CreatedAt    sql.NullTime   `json:"created_at"`
+	UpdatedAt    sql.NullTime   `json:"updated_at"`
+	Module       string         `json:"module"`
+	Submodule    sql.NullString `json:"submodule"`
+	PermissionID int32          `json:"permission_id"`
 }
 
 type PhoneVerificationToken struct {

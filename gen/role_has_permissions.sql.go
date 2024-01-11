@@ -10,8 +10,37 @@ import (
 	"database/sql"
 )
 
-const getRolePermissions = `-- name: GetRolePermissions :many
+const assignPermission = `-- name: AssignPermission :exec
+insert into role_has_permissions (role_id,permission_id) VALUES($1,$2)
+`
 
+type AssignPermissionParams struct {
+	RoleID       sql.NullInt32 `json:"role_id"`
+	PermissionID sql.NullInt32 `json:"permission_id"`
+}
+
+func (q *Queries) AssignPermission(ctx context.Context, arg AssignPermissionParams) error {
+	_, err := q.db.ExecContext(ctx, assignPermission, arg.RoleID, arg.PermissionID)
+	return err
+}
+
+const getDuplicateRoleHasPermission = `-- name: GetDuplicateRoleHasPermission :one
+select count(*) from role_has_permissions where role_id=$1 and permission_id=$2
+`
+
+type GetDuplicateRoleHasPermissionParams struct {
+	RoleID       sql.NullInt32 `json:"role_id"`
+	PermissionID sql.NullInt32 `json:"permission_id"`
+}
+
+func (q *Queries) GetDuplicateRoleHasPermission(ctx context.Context, arg GetDuplicateRoleHasPermissionParams) (int64, error) {
+	row := q.db.QueryRowContext(ctx, getDuplicateRoleHasPermission, arg.RoleID, arg.PermissionID)
+	var count int64
+	err := row.Scan(&count)
+	return count, err
+}
+
+const getRolePermissions = `-- name: GetRolePermissions :many
 
 SELECT permission_id, role_id FROM role_has_permissions WHERE role_id = $1
 `
@@ -38,4 +67,18 @@ func (q *Queries) GetRolePermissions(ctx context.Context, roleID sql.NullInt32) 
 		return nil, err
 	}
 	return items, nil
+}
+
+const revokePermission = `-- name: RevokePermission :exec
+DELETE from role_has_permissions where role_id=$1 AND permission_id=$2
+`
+
+type RevokePermissionParams struct {
+	RoleID       sql.NullInt32 `json:"role_id"`
+	PermissionID sql.NullInt32 `json:"permission_id"`
+}
+
+func (q *Queries) RevokePermission(ctx context.Context, arg RevokePermissionParams) error {
+	_, err := q.db.ExecContext(ctx, revokePermission, arg.RoleID, arg.PermissionID)
+	return err
 }

@@ -4,6 +4,7 @@
         "key": "permissions",
         "permissions": [
             {
+                "permission_id": 100,
                 "name": "Assign Permission",
                 "sub_module": "Permissions",
                 "action": "assign_permission"
@@ -15,36 +16,43 @@
         "key": "settings",
         "permissions": [
             {
+                "permission_id": 101,
                 "name": "View TTNM Profile",
                 "sub_module": "Organization Profile",
                 "action": "view_ttnm_profile"
             },
             {
+                "permission_id": 102,
                 "name": "Update TTNM Profile",
                 "sub_module": "Organization Profile",
                 "action": "update_ttnm_profile"
             },
             {
+                "permission_id": 103,
                 "name": "View Roles",
                 "sub_module": "Roles",
                 "action": "view_roles"
             },
             {
+                "permission_id": 104,
                 "name": "Update Roles",
                 "sub_module": "Roles",
                 "action": "update_roles"
             },
             {
+                "permission_id": 105,
                 "name": "View Waste Types",
                 "sub_module": "Waste Types",
                 "action": "view_waste_type"
             },
             {
+                "permission_id": 106,
                 "name": "Update Waste Type",
                 "sub_module": "Waste Types",
                 "action": "update_waste_type"
             },
             {
+                "permission_id": 107,
                 "name": "Create Waste Type",
                 "sub_module": "Waste Types",
                 "action": "create_waste_type"

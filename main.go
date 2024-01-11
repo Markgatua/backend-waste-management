@@ -55,6 +55,7 @@ func runProgram() {
 	championCollectorController := controllers.ChampionCollectorController{}
 	rolesController := controllers.RolesController{}
 	ttnmOrganizationController := controllers.TtnmOrganizationController{}
+	roleHasPermissionsController := controllers.RoleHasPermissions{}
 
 	router.LoadHTMLGlob("templates/**/*")
 
@@ -123,6 +124,11 @@ func runProgram() {
 	//--------------------------- TTNM Organization ------------------------------------------------------
 	apiGroup.GET("ttnm/profile/:id", ttnmOrganizationController.GetTTNMOrganizations)
 	apiGroup.POST("ttnm/profile/update", ttnmOrganizationController.UpdateTtnmOrganizationProfile)
+	//-------------------------------------------------------------------------------------------
+
+	//--------------------------- Role Has Permissions ------------------------------------------------------
+	apiGroup.POST("permissions/assign", roleHasPermissionsController.AssignPermission)
+	apiGroup.POST("permissions/revoke", roleHasPermissionsController.RevokePermission)
 	//-------------------------------------------------------------------------------------------
 
 	//--------------------------- wastegroups-----------------------------------------------------

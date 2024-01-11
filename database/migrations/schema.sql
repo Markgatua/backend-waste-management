@@ -25,7 +25,8 @@ CREATE TABLE permissions (
   created_at timestamp NULL DEFAULT NULL,
   updated_at timestamp NULL DEFAULT NULL,
   module varchar(255) NOT NULL,
-  submodule VARCHAR(255) NULL
+  submodule VARCHAR(255) NULL,
+  permission_id INTEGER NOT NULL UNIQUE
 );
 
 CREATE TABLE countries (
@@ -52,7 +53,7 @@ CREATE TABLE countries (
 CREATE TABLE role_has_permissions (
   permission_id INTEGER,
   role_id INTEGER,
-  FOREIGN Key (permission_id) REFERENCES permissions(id),
+  FOREIGN Key (permission_id) REFERENCES permissions(permission_id),
   FOREIGN Key (role_id) REFERENCES roles(role_id) on delete CASCADE
 );
 

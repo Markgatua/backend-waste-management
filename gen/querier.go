@@ -11,6 +11,7 @@ import (
 
 type Querier interface {
 	AssignChampionToCollector(ctx context.Context, arg AssignChampionToCollectorParams) (ChampionAggregatorAssignment, error)
+	AssignPermission(ctx context.Context, arg AssignPermissionParams) error
 	CreateCountry(ctx context.Context, arg CreateCountryParams) error
 	CreatePermission(ctx context.Context, arg CreatePermissionParams) error
 	DeleteChampionCollector(ctx context.Context, id int32) error
@@ -35,6 +36,7 @@ type Querier interface {
 	GetDuplicateCompaniesWithoutID(ctx context.Context, arg GetDuplicateCompaniesWithoutIDParams) ([]Company, error)
 	GetDuplicateOrganization(ctx context.Context, arg GetDuplicateOrganizationParams) ([]Organization, error)
 	GetDuplicateRole(ctx context.Context, roleID int32) (int64, error)
+	GetDuplicateRoleHasPermission(ctx context.Context, arg GetDuplicateRoleHasPermissionParams) (int64, error)
 	GetOneWasteGroup(ctx context.Context, id int32) (WasteGroup, error)
 	GetOrganization(ctx context.Context, id int32) (GetOrganizationRow, error)
 	GetOrganizationCountWithNameAndCountry(ctx context.Context, arg GetOrganizationCountWithNameAndCountryParams) ([]Organization, error)
@@ -52,6 +54,7 @@ type Querier interface {
 	InsertRole(ctx context.Context, arg InsertRoleParams) error
 	InsertTTNMOrganization(ctx context.Context, arg InsertTTNMOrganizationParams) error
 	InsertWasteGroup(ctx context.Context, arg InsertWasteGroupParams) (WasteGroup, error)
+	RevokePermission(ctx context.Context, arg RevokePermissionParams) error
 	UpdateChampionCollector(ctx context.Context, arg UpdateChampionCollectorParams) error
 	UpdateCompany(ctx context.Context, arg UpdateCompanyParams) error
 	UpdateCompanyStatus(ctx context.Context, arg UpdateCompanyStatusParams) error

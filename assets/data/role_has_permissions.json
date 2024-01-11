@@ -1,0 +1,34 @@
+{
+    "1":{
+        "role_id":100,
+        "permission_id": 100
+    },
+    "2":{
+        "role_id":100,
+        "permission_id": 101
+    },
+    "3":{
+        "role_id":100,
+        "permission_id": 102
+    },
+    "4":{
+        "role_id":100,
+        "permission_id": 103
+    },
+    "5":{
+        "role_id":100,
+        "permission_id": 104
+    },
+    "6":{
+        "role_id":100,
+        "permission_id": 105
+    },
+    "7":{
+        "role_id":100,
+        "permission_id": 106
+    },
+    "8":{
+        "role_id":100,
+        "permission_id": 107
+    }
+}
