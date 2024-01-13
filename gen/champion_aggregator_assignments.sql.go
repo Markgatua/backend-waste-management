@@ -98,8 +98,8 @@ func (q *Queries) GetAllChampionCollectorsAssignments(ctx context.Context) ([]Ge
 const getAllChampionsForACollector = `-- name: GetAllChampionsForACollector :many
 SELECT 
     champion_aggregator_assignments.id, champion_aggregator_assignments.champion_id, champion_aggregator_assignments.collector_id, champion_aggregator_assignments.created_at,
-    champion.name AS aggregator_name,
-    collector.name AS champion_name
+    champion.name AS champion_name,
+    collector.name AS collector_name
 FROM 
     champion_aggregator_assignments
 LEFT JOIN 
@@ -110,12 +110,12 @@ WHERE collector_id = $1
 `
 
 type GetAllChampionsForACollectorRow struct {
-	ID             int32          `json:"id"`
-	ChampionID     sql.NullInt32  `json:"champion_id"`
-	CollectorID    sql.NullInt32  `json:"collector_id"`
-	CreatedAt      time.Time      `json:"created_at"`
-	AggregatorName sql.NullString `json:"aggregator_name"`
-	ChampionName   sql.NullString `json:"champion_name"`
+	ID            int32          `json:"id"`
+	ChampionID    sql.NullInt32  `json:"champion_id"`
+	CollectorID   sql.NullInt32  `json:"collector_id"`
+	CreatedAt     time.Time      `json:"created_at"`
+	ChampionName  sql.NullString `json:"champion_name"`
+	CollectorName sql.NullString `json:"collector_name"`
 }
 
 func (q *Queries) GetAllChampionsForACollector(ctx context.Context, collectorID sql.NullInt32) ([]GetAllChampionsForACollectorRow, error) {
@@ -132,8 +132,8 @@ func (q *Queries) GetAllChampionsForACollector(ctx context.Context, collectorID 
 			&i.ChampionID,
 			&i.CollectorID,
 			&i.CreatedAt,
-			&i.AggregatorName,
 			&i.ChampionName,
+			&i.CollectorName,
 		); err != nil {
 			return nil, err
 		}
@@ -183,8 +183,8 @@ func (q *Queries) GetAssignedCollectorsToGreenChampion(ctx context.Context, cham
 const getTheCollectorForAChampion = `-- name: GetTheCollectorForAChampion :one
 SELECT 
     champion_aggregator_assignments.id, champion_aggregator_assignments.champion_id, champion_aggregator_assignments.collector_id, champion_aggregator_assignments.created_at,
-    champion.name AS aggregator_name,
-    collector.name AS champion_name
+    champion.name AS champion_name,
+    collector.name AS collector_name
 FROM 
     champion_aggregator_assignments
 LEFT JOIN 
@@ -195,12 +195,12 @@ WHERE champion_id = $1
 `
 
 type GetTheCollectorForAChampionRow struct {
-	ID             int32          `json:"id"`
-	ChampionID     sql.NullInt32  `json:"champion_id"`
-	CollectorID    sql.NullInt32  `json:"collector_id"`
-	CreatedAt      time.Time      `json:"created_at"`
-	AggregatorName sql.NullString `json:"aggregator_name"`
-	ChampionName   sql.NullString `json:"champion_name"`
+	ID            int32          `json:"id"`
+	ChampionID    sql.NullInt32  `json:"champion_id"`
+	CollectorID   sql.NullInt32  `json:"collector_id"`
+	CreatedAt     time.Time      `json:"created_at"`
+	ChampionName  sql.NullString `json:"champion_name"`
+	CollectorName sql.NullString `json:"collector_name"`
 }
 
 func (q *Queries) GetTheCollectorForAChampion(ctx context.Context, championID sql.NullInt32) (GetTheCollectorForAChampionRow, error) {
@@ -211,8 +211,8 @@ func (q *Queries) GetTheCollectorForAChampion(ctx context.Context, championID sq
 		&i.ChampionID,
 		&i.CollectorID,
 		&i.CreatedAt,
-		&i.AggregatorName,
 		&i.ChampionName,
+		&i.CollectorName,
 	)
 	return i, err
 }

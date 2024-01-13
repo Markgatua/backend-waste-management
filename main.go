@@ -143,6 +143,7 @@ func runProgram() {
 	apiGroup.POST("assign_collectors_to_champions/assign", championCollectorController.AssignChampionToCollector)
 	apiGroup.GET("assign_collectors_to_champions/get_champion_collector/:id", championCollectorController.GetTheCollectorForAChampion)
 	apiGroup.GET("assign_collectors_to_champions/get_champions_for_a_collector/:id", championCollectorController.GetAllChampionsForACollector)
+	apiGroup.POST("assign_collectors_to_champions/update", championCollectorController.UpdateChampionCollector)
 	// apiGroup.POST("settings/wastegroups/update", wasteGroupController.UpdateWasteGroup)
 	// apiGroup.GET("settings/wastegroups/all", wasteGroupController.GetAllWasteGroups)
 	// apiGroup.GET("settings/wastegroups/wastegroup/:id", wasteGroupController.GetOneWasteGroup)

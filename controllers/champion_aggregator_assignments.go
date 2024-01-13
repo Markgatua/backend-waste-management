@@ -17,11 +17,10 @@ type AssignChampionToCollectorParams struct {
 	CollectorID int32  `json:"collector_id"  binding:"required"`
 }
 
-// type UpdateWasteGroupParams struct {
-// 	ID     		  int `json:"id"  binding:"required"`
-// 	Name 		  string `json:"name"  binding:"required"`
-// 	Category      string `json:"category"  binding:"required"`
-// }
+type UpdateChampionCollectorParams struct {
+	CollectorID int32 `json:"collector_id" binding:"required"`
+	ID          int32         `json:"id" binding:"required"`
+}
 
 
 func (championCollectorController ChampionCollectorController) AssignChampionToCollector(context *gin.Context) {
@@ -61,7 +60,7 @@ func (championCollectorController ChampionCollectorController) AssignChampionToC
 	context.JSON(http.StatusOK, gin.H{
 		"error":   false,
 		"message": "Successfully Assigned Collector to Champion",
-		"company": ChampionCollector, // Include the company details in the response
+		"Assigned": ChampionCollector, // Include the company details in the response
 	})
 
 }
@@ -118,7 +117,7 @@ func (championCollectorController ChampionCollectorController) GetAllChampionsFo
 	collectorIDNullable := sql.NullInt32{Int32: int32(collectorID), Valid: true}
 
 	// Call the repository method with the champion ID
-	Champions, err := gen.REPO.GetTheCollectorForAChampion(context, collectorIDNullable)
+	Champions, err := gen.REPO.GetAllChampionsForACollector(context, collectorIDNullable)
 	if err != nil {
 		context.JSON(http.StatusUnprocessableEntity, gin.H{
 			"error":   true,
@@ -131,4 +130,37 @@ func (championCollectorController ChampionCollectorController) GetAllChampionsFo
 		"error":        false,
 		"result": Champions,
 	})
+}
+
+
+func (championCollectorController ChampionCollectorController) UpdateChampionCollector(context *gin.Context) {
+	var params UpdateChampionCollectorParams
+	err := context.ShouldBindJSON(&params)
+	if err != nil {
+		context.JSON(http.StatusUnprocessableEntity, gin.H{
+			"error":   true,
+			"message": err.Error(),
+		})
+		return
+	}
+
+
+	insertError := gen.REPO.UpdateChampionCollector(context, gen.UpdateChampionCollectorParams{
+		ID:				params.ID,
+		CollectorID:    sql.NullInt32{Int32: params.CollectorID, Valid: true},
+	})
+
+	if insertError != nil {
+		context.JSON(http.StatusUnprocessableEntity, gin.H{
+			"error":   true,
+			"message": insertError,
+		})
+		return
+	}
+
+	context.JSON(http.StatusOK, gin.H{
+		"error":   false,
+		"message": "Successfully Updated Champion Collector",
+	})
+
 }

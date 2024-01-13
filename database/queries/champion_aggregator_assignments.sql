@@ -18,8 +18,8 @@ insert into champion_aggregator_assignments( champion_id,collector_id ) values (
 -- name: GetAllChampionsForACollector :many
 SELECT 
     champion_aggregator_assignments.*,
-    champion.name AS aggregator_name,
-    collector.name AS champion_name
+    champion.name AS champion_name,
+    collector.name AS collector_name
 FROM 
     champion_aggregator_assignments
 LEFT JOIN 
@@ -31,8 +31,8 @@ WHERE collector_id = $1;
 -- name: GetTheCollectorForAChampion :one
 SELECT 
     champion_aggregator_assignments.*,
-    champion.name AS aggregator_name,
-    collector.name AS champion_name
+    champion.name AS champion_name,
+    collector.name AS collector_name
 FROM 
     champion_aggregator_assignments
 LEFT JOIN 
