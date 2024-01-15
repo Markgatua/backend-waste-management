@@ -102,7 +102,7 @@ func runProgram() {
 	apiGroup.POST("organization/add", organzationController.InsertOrganization)
 	apiGroup.PUT("organization/update", organzationController.UpdateOrganization)
 	apiGroup.GET("organizations", organzationController.GetAllOrganizations)
-	apiGroup.DELETE("organization/:id", organzationController.DeleteOrganization)
+	apiGroup.DELETE("organization/delete/:id", organzationController.DeleteOrganization)
 	apiGroup.GET("organization/:id", organzationController.GetOrganization)
 	//-------------------------------------------------------------------------------------------
 
@@ -111,7 +111,7 @@ func runProgram() {
 	apiGroup.GET("companies", companiesController.GetAllCompanies)
 	apiGroup.GET("company/:id", companiesController.GetCompany)
 	apiGroup.POST("companies/status", companiesController.UpdateCompanyStatus)
-	apiGroup.DELETE("company/:id", companiesController.DeleteCompany)
+	apiGroup.DELETE("company/delete/:id", companiesController.DeleteCompany)
 	apiGroup.POST("companies/update", companiesController.UpdateCompany)
 	//-------------------------------------------------------------------------------------------
 
