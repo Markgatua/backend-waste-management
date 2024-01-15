@@ -71,6 +71,7 @@ func runProgram() {
 		auth.GET("/challenge/verify_email/web", authController.VerifyEmail)
 		auth.POST("/challenge/send_email_verfication/web", authController.SendVerificationMail)
 		auth.POST("/login/email", authController.LoginEmail)
+		auth.POST("/register/phone/update_profile", authController.RegisterPhoneUpdateUserDetails)
 
 		auth.POST("/challenge/register/send_otp_code_phone", authController.RegisterPhoneSendOTPCode)
 		auth.POST("/login/phone", authController.LoginPhone)
