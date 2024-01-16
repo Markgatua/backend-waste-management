@@ -48,7 +48,7 @@ INSERT INTO roles (id,name,guard_name,description,is_active) VALUES (
         $3,
         $4,
         $5
-    ) ON CONFLICT(id) do update set name=EXCLUDED.name,guard_name=EXCLUDED.guard_name,description=EXCLUDED.description,is_active=EXLUDED.is_active returning id, name, guard_name, created_at, updated_at, description, is_active
+    ) ON CONFLICT(id) do update set name=EXCLUDED.name,guard_name=EXCLUDED.guard_name,description=EXCLUDED.description,is_active=EXCLUDED.is_active returning id, name, guard_name, created_at, updated_at, description, is_active
 `
 
 type CreateRoleParams struct {

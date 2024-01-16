@@ -5,7 +5,7 @@ INSERT INTO roles (id,name,guard_name,description,is_active) VALUES (
         sqlc.arg('guard_name'),
         sqlc.arg('description'),
         sqlc.arg('is_active')
-    ) ON CONFLICT(id) do update set name=EXCLUDED.name,guard_name=EXCLUDED.guard_name,description=EXCLUDED.description,is_active=EXLUDED.is_active returning *;
+    ) ON CONFLICT(id) do update set name=EXCLUDED.name,guard_name=EXCLUDED.guard_name,description=EXCLUDED.description,is_active=EXCLUDED.is_active returning *;
 
 
 
