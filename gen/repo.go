@@ -3,8 +3,8 @@ package gen
 import (
 	"fmt"
 	"log"
+	"ttnmwastemanagementsystem/appsettings"
 	"ttnmwastemanagementsystem/logger"
-	"ttnmwastemanagementsystem/utils"
 
 	// _"github.com/go-sql-driver/mysql"
 	"github.com/jmoiron/sqlx"
@@ -19,7 +19,7 @@ type Repo struct{
 }
 
 func LoadRepo(){
-	appSettings, err := utils.GetAppSettings()
+	appSettings, err := appsettings.GetAppSettings()
 	if err != nil {
 		logger.Log("SEEDER", "Error getting app settings", logger.LOG_LEVEL_ERROR)
 		panic("")

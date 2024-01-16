@@ -10,13 +10,21 @@ import (
 )
 
 type Querier interface {
+	ActivateRole(ctx context.Context, roleID int32) error
 	AssignChampionToCollector(ctx context.Context, arg AssignChampionToCollectorParams) (ChampionAggregatorAssignment, error)
 	AssignPermission(ctx context.Context, arg AssignPermissionParams) error
+	AssignPermissionToRole(ctx context.Context, arg AssignPermissionToRoleParams) error
+	CreateAdmin(ctx context.Context, arg CreateAdminParams) error
 	CreateCountry(ctx context.Context, arg CreateCountryParams) error
-	CreatePermission(ctx context.Context, arg CreatePermissionParams) error
+	CreatePermission(ctx context.Context, arg CreatePermissionParams) (Permission, error)
+	CreateRole(ctx context.Context, arg CreateRoleParams) (Role, error)
+	DeactivateRole(ctx context.Context, roleID int32) error
 	DeleteChampionCollector(ctx context.Context, id int32) error
 	DeleteCompany(ctx context.Context, id int32) error
 	DeleteOrganization(ctx context.Context, id int32) error
+	DeletePermissionByActions(ctx context.Context, actions []string) error
+	DeletePermissionByIds(ctx context.Context, permissionIds []int32) error
+	DeleteRole(ctx context.Context, id int32) error
 	// champion_aggregator_assignments.sql
 	GetAllChampionCollectorsAssignments(ctx context.Context) ([]GetAllChampionCollectorsAssignmentsRow, error)
 	GetAllChampionsForACollector(ctx context.Context, collectorID sql.NullInt32) ([]GetAllChampionsForACollectorRow, error)
@@ -35,14 +43,14 @@ type Querier interface {
 	GetDuplicateCompanies(ctx context.Context, arg GetDuplicateCompaniesParams) ([]Company, error)
 	GetDuplicateCompaniesWithoutID(ctx context.Context, arg GetDuplicateCompaniesWithoutIDParams) ([]Company, error)
 	GetDuplicateOrganization(ctx context.Context, arg GetDuplicateOrganizationParams) ([]Organization, error)
-	GetDuplicateRole(ctx context.Context, roleID int32) (int64, error)
 	GetDuplicateRoleHasPermission(ctx context.Context, arg GetDuplicateRoleHasPermissionParams) (int64, error)
 	GetOneWasteGroup(ctx context.Context, id int32) (WasteGroup, error)
 	GetOrganization(ctx context.Context, id int32) (GetOrganizationRow, error)
 	GetOrganizationCountWithNameAndCountry(ctx context.Context, arg GetOrganizationCountWithNameAndCountryParams) ([]Organization, error)
-	GetRole(ctx context.Context, roleID int32) (Role, error)
+	GetPermissionsForRoleID(ctx context.Context, roleID int32) ([]GetPermissionsForRoleIDRow, error)
+	GetRole(ctx context.Context, id int32) (Role, error)
 	// role_has_permissions.sql
-	GetRolePermissions(ctx context.Context, roleID sql.NullInt32) ([]RoleHasPermission, error)
+	GetRolePermissions(ctx context.Context, roleID int32) ([]RoleHasPermission, error)
 	GetRoles(ctx context.Context) ([]Role, error)
 	GetTTNMOrganizations(ctx context.Context, organizationID string) ([]TtnmOrganization, error)
 	GetTheCollectorForAChampion(ctx context.Context, championID sql.NullInt32) (GetTheCollectorForAChampionRow, error)
@@ -51,15 +59,15 @@ type Querier interface {
 	GetUsersWithRole(ctx context.Context) ([]GetUsersWithRoleRow, error)
 	InsertCompany(ctx context.Context, arg InsertCompanyParams) (Company, error)
 	InsertOrganization(ctx context.Context, arg InsertOrganizationParams) (Organization, error)
-	InsertRole(ctx context.Context, arg InsertRoleParams) error
 	InsertTTNMOrganization(ctx context.Context, arg InsertTTNMOrganizationParams) error
 	InsertWasteGroup(ctx context.Context, arg InsertWasteGroupParams) (WasteGroup, error)
+	RemovePermissionsFromRole(ctx context.Context, arg RemovePermissionsFromRoleParams) error
 	RevokePermission(ctx context.Context, arg RevokePermissionParams) error
+	RoleExists(ctx context.Context, name string) (int64, error)
 	UpdateChampionCollector(ctx context.Context, arg UpdateChampionCollectorParams) error
 	UpdateCompany(ctx context.Context, arg UpdateCompanyParams) error
 	UpdateCompanyStatus(ctx context.Context, arg UpdateCompanyStatusParams) error
 	UpdateOrganization(ctx context.Context, arg UpdateOrganizationParams) error
-	// roles.sql
 	UpdateRole(ctx context.Context, arg UpdateRoleParams) error
 	// ttnm_organization.sql
 	UpdateTtnmOrganizationProfile(ctx context.Context, arg UpdateTtnmOrganizationProfileParams) error

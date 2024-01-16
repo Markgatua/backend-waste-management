@@ -70,14 +70,13 @@ type PaymentMethod struct {
 }
 
 type Permission struct {
-	ID           int32          `json:"id"`
-	Name         string         `json:"name"`
-	GuardName    string         `json:"guard_name"`
-	CreatedAt    sql.NullTime   `json:"created_at"`
-	UpdatedAt    sql.NullTime   `json:"updated_at"`
-	Module       string         `json:"module"`
-	Submodule    sql.NullString `json:"submodule"`
-	PermissionID int32          `json:"permission_id"`
+	ID        int32          `json:"id"`
+	Name      string         `json:"name"`
+	Action    string         `json:"action"`
+	CreatedAt sql.NullTime   `json:"created_at"`
+	UpdatedAt sql.NullTime   `json:"updated_at"`
+	Module    string         `json:"module"`
+	Submodule sql.NullString `json:"submodule"`
 }
 
 type PhoneVerificationToken struct {
@@ -90,18 +89,17 @@ type PhoneVerificationToken struct {
 
 type Role struct {
 	ID          int32          `json:"id"`
-	RoleID      int32          `json:"role_id"`
 	Name        string         `json:"name"`
 	GuardName   string         `json:"guard_name"`
 	CreatedAt   sql.NullTime   `json:"created_at"`
 	UpdatedAt   sql.NullTime   `json:"updated_at"`
 	Description sql.NullString `json:"description"`
-	DeletedAt   sql.NullTime   `json:"deleted_at"`
+	IsActive    bool           `json:"is_active"`
 }
 
 type RoleHasPermission struct {
-	PermissionID sql.NullInt32 `json:"permission_id"`
-	RoleID       sql.NullInt32 `json:"role_id"`
+	PermissionID int32 `json:"permission_id"`
+	RoleID       int32 `json:"role_id"`
 }
 
 type TtnmOrganization struct {

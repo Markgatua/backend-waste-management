@@ -9,3 +9,6 @@ update users set first_name=$1,last_name=$2 where id=$3;
 
 -- name: GetUsersWithRole :many
 select users.*, roles.name from users INNER JOIN roles ON users.role_id=roles.id;
+
+-- name: CreateAdmin :exec
+insert into users (first_name,last_name,email,provider,role_id,email,password) VALUES($1,$2,$3,$4,$5,$6,$7);

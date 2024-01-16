@@ -1,12 +1,11 @@
 CREATE TABLE roles (
-  id SERIAL PRIMARY KEY,
-  role_id INTEGER NOT NULL UNIQUE,
-  name varchar(255) NOT NULL,
-  guard_name varchar(255) NOT NULL,
-  created_at timestamp NULL DEFAULT NULL,
-  updated_at timestamp NULL DEFAULT NULL,
-  description text DEFAULT NULL,
-  deleted_at timestamp NULL DEFAULT NULL
+    id SERIAL PRIMARY KEY,
+    name varchar(255) NOT NULL UNIQUE,
+    guard_name varchar(255) NOT NULL,
+    created_at timestamp NULL DEFAULT NULL,
+    updated_at timestamp NULL DEFAULT NULL,
+    description text DEFAULT NULL,
+    is_active BOOLEAN NOT NULL DEFAULT true
 );
 
 CREATE TABLE uploads(
@@ -19,15 +18,22 @@ CREATE TABLE uploads(
 );
 
 CREATE TABLE permissions (
-  id SERIAL PRIMARY KEY,
-  name varchar(255) NOT NULL,
-  guard_name varchar(255) NOT NULL UNIQUE,
-  created_at timestamp NULL DEFAULT NULL,
-  updated_at timestamp NULL DEFAULT NULL,
-  module varchar(255) NOT NULL,
-  submodule VARCHAR(255) NULL,
-  permission_id INTEGER NOT NULL UNIQUE
+    id SERIAL PRIMARY KEY,
+    name varchar(255) NOT NULL,
+    action varchar(255) NOT NULL UNIQUE,
+    created_at timestamp NULL DEFAULT NULL,
+    updated_at timestamp NULL DEFAULT NULL,
+    module varchar(255) NOT NULL,
+    submodule VARCHAR(255) NULL
 );
+
+CREATE TABLE role_has_permissions (
+      permission_id INTEGER NOT NULL,
+      role_id INTEGER NOT NULL,
+      FOREIGN Key (permission_id) REFERENCES permissions(id) on delete CASCADE,
+      FOREIGN Key (role_id) REFERENCES roles(id) on delete CASCADE,
+      UNIQUE (permission_id, role_id)
+ );
 
 CREATE TABLE countries (
   id SERIAL PRIMARY KEY,
@@ -50,12 +56,6 @@ CREATE TABLE countries (
   flag varchar(6) DEFAULT NULL
 );
 
-CREATE TABLE role_has_permissions (
-  permission_id INTEGER,
-  role_id INTEGER,
-  FOREIGN Key (permission_id) REFERENCES permissions(permission_id),
-  FOREIGN Key (role_id) REFERENCES roles(role_id) on delete CASCADE
-);
 
 CREATE TABLE organizations(
   id SERIAL PRIMARY KEY,

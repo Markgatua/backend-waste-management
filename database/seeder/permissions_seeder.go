@@ -56,9 +56,8 @@ func (permissionsSeeder PermissionsSeeder) Run(q *gen.Queries) {
 			for _, permissionElement := range v.Permissions {
 
 				q.CreatePermission(context.Background(), gen.CreatePermissionParams{
-					PermissionID: int32(permissionElement.PermissionId),
 					Name:      permissionElement.Name,
-					GuardName: permissionElement.Action,
+					Action:    permissionElement.Action,
 					Module:    v.Module,
 					Submodule: sql.NullString{String:fmt.Sprint(permissionElement.SubModule),Valid: true},
 				})

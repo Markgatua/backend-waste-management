@@ -4,10 +4,16 @@
         "key": "permissions",
         "permissions": [
             {
-                "permission_id": 100,
-                "name": "Assign Permission",
+                "permission_id": 103,
+                "name": "Assign Permissions",
                 "sub_module": "Permissions",
-                "action": "assign_permission"
+                "action": "assign_permissions_to_role"
+            },
+            {
+                "permission_id": 103,
+                "name": "Revoke Permissions",
+                "sub_module": "Permissions",
+                "action": "remove_permissions_from_role"
             }
         ]
     },
@@ -29,15 +35,33 @@
             },
             {
                 "permission_id": 103,
+                "name": "Add Roles",
+                "sub_module": "Roles",
+                "action": "add_roles"
+            },
+            {
+                "permission_id": 103,
                 "name": "View Roles",
                 "sub_module": "Roles",
                 "action": "view_roles"
             },
             {
                 "permission_id": 104,
-                "name": "Update Roles",
+                "name": "Edit Roles",
                 "sub_module": "Roles",
-                "action": "update_roles"
+                "action": "edit_roles"
+            },
+            {
+                "permission_id": 104,
+                "name": "Delete Roles",
+                "sub_module": "Roles",
+                "action": "delete_roles"
+            },
+            {
+                "permission_id": 103,
+                "name": "View Permissions",
+                "sub_module": "Permissions",
+                "action": "view_permissions"
             },
             {
                 "permission_id": 105,
@@ -56,6 +80,78 @@
                 "name": "Create Waste Type",
                 "sub_module": "Waste Types",
                 "action": "create_waste_type"
+            }
+        ]
+    },
+    {
+        "module": "Organizations",
+        "key": "organizations",
+        "permissions": [
+            {
+                "permission_id": 103,
+                "name": "Add Organization",
+                "sub_module": "Organizations",
+                "action": "add_organization"
+            },
+            {
+                "permission_id": 103,
+                "name": "Edit Organization",
+                "sub_module": "Organizations",
+                "action": "edit_organization"
+            },
+            {
+                "permission_id": 103,
+                "name": "View Organizations",
+                "sub_module": "Organizations",
+                "action": "view_organizations"
+            },
+            {
+                "permission_id": 103,
+                "name": "Delete Organization",
+                "sub_module": "Organizations",
+                "action": "delete_organization"
+            },
+            {
+                "permission_id": 103,
+                "name": "Delete Company",
+                "sub_module": "Companies",
+                "action": "delete_company"
+            },
+            {
+                "permission_id": 103,
+                "name": "View Companies",
+                "sub_module": "Companies",
+                "action": "view_companies"
+            },
+            {
+                "permission_id": 103,
+                "name": "Add Company",
+                "sub_module": "Companies",
+                "action": "add_company"
+            },
+            {
+                "permission_id": 103,
+                "name": "Edit Company",
+                "sub_module": "Companies",
+                "action": "edit_company"
+            }
+        ]
+    },
+    {
+        "module": "Champion Collector",
+        "key": "championcollector",
+        "permissions": [
+            {
+                "permission_id": 103,
+                "name": "Assign Collector to Champions",
+                "sub_module": "Champion Collector",
+                "action": "assign_collector_to_champion"
+            },
+            {
+                "permission_id": 103,
+                "name": "View Champion Collector",
+                "sub_module": "Champion Collector",
+                "action": "view_champion_collector"
             }
         ]
     }

@@ -2,7 +2,6 @@ package seeder
 
 import (
 	"context"
-	"database/sql"
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
@@ -28,15 +27,15 @@ func (roleHasPermissionsSeeder RoleHasPermissionsSeeder) Run(q *gen.Queries) {
 				permissionId := int32(v["permission_id"].(float64))
 
 				count, err := q.GetDuplicateRoleHasPermission(context.Background(), gen.GetDuplicateRoleHasPermissionParams{
-					RoleID:      sql.NullInt32{Int32: roleId, Valid: true},
-					PermissionID:      sql.NullInt32{Int32: permissionId, Valid: true},
+					RoleID:      roleId,
+					PermissionID:      permissionId,
 				})
 				if err == nil {
 					// var Role gen.Role
 					if count == 0 {
 						q.AssignPermission(context.Background(), gen.AssignPermissionParams{
-							RoleID:      sql.NullInt32{Int32: roleId, Valid: true},
-							PermissionID:      sql.NullInt32{Int32: permissionId, Valid: true},
+							RoleID:      roleId,
+							PermissionID:      permissionId,
 						})
 					}else{
 

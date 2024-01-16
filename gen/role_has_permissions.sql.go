@@ -7,7 +7,6 @@ package gen
 
 import (
 	"context"
-	"database/sql"
 )
 
 const assignPermission = `-- name: AssignPermission :exec
@@ -15,8 +14,8 @@ insert into role_has_permissions (role_id,permission_id) VALUES($1,$2)
 `
 
 type AssignPermissionParams struct {
-	RoleID       sql.NullInt32 `json:"role_id"`
-	PermissionID sql.NullInt32 `json:"permission_id"`
+	RoleID       int32 `json:"role_id"`
+	PermissionID int32 `json:"permission_id"`
 }
 
 func (q *Queries) AssignPermission(ctx context.Context, arg AssignPermissionParams) error {
@@ -29,8 +28,8 @@ select count(*) from role_has_permissions where role_id=$1 and permission_id=$2
 `
 
 type GetDuplicateRoleHasPermissionParams struct {
-	RoleID       sql.NullInt32 `json:"role_id"`
-	PermissionID sql.NullInt32 `json:"permission_id"`
+	RoleID       int32 `json:"role_id"`
+	PermissionID int32 `json:"permission_id"`
 }
 
 func (q *Queries) GetDuplicateRoleHasPermission(ctx context.Context, arg GetDuplicateRoleHasPermissionParams) (int64, error) {
@@ -46,7 +45,7 @@ SELECT permission_id, role_id FROM role_has_permissions WHERE role_id = $1
 `
 
 // role_has_permissions.sql
-func (q *Queries) GetRolePermissions(ctx context.Context, roleID sql.NullInt32) ([]RoleHasPermission, error) {
+func (q *Queries) GetRolePermissions(ctx context.Context, roleID int32) ([]RoleHasPermission, error) {
 	rows, err := q.db.QueryContext(ctx, getRolePermissions, roleID)
 	if err != nil {
 		return nil, err
@@ -74,8 +73,8 @@ DELETE from role_has_permissions where role_id=$1 AND permission_id=$2
 `
 
 type RevokePermissionParams struct {
-	RoleID       sql.NullInt32 `json:"role_id"`
-	PermissionID sql.NullInt32 `json:"permission_id"`
+	RoleID       int32 `json:"role_id"`
+	PermissionID int32 `json:"permission_id"`
 }
 
 func (q *Queries) RevokePermission(ctx context.Context, arg RevokePermissionParams) error {

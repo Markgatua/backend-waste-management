@@ -11,6 +11,33 @@ import (
 	"time"
 )
 
+const createAdmin = `-- name: CreateAdmin :exec
+insert into users (first_name,last_name,email,provider,role_id,email,password) VALUES($1,$2,$3,$4,$5,$6,$7)
+`
+
+type CreateAdminParams struct {
+	FirstName sql.NullString `json:"first_name"`
+	LastName  sql.NullString `json:"last_name"`
+	Email     sql.NullString `json:"email"`
+	Provider  sql.NullString `json:"provider"`
+	RoleID    sql.NullInt32  `json:"role_id"`
+	Email_2   sql.NullString `json:"email_2"`
+	Password  sql.NullString `json:"password"`
+}
+
+func (q *Queries) CreateAdmin(ctx context.Context, arg CreateAdminParams) error {
+	_, err := q.db.ExecContext(ctx, createAdmin,
+		arg.FirstName,
+		arg.LastName,
+		arg.Email,
+		arg.Provider,
+		arg.RoleID,
+		arg.Email_2,
+		arg.Password,
+	)
+	return err
+}
+
 const getAllUsers = `-- name: GetAllUsers :many
 select id, first_name, last_name, provider, role_id, user_company_id, email, password, avatar_url, user_type, is_active, calling_code, phone, phone_confirmed_at, confirmed_at, confirmation_token, confirmation_sent_at, recovery_token, recovery_sent_at, last_login, created_at, updated_at from users
 `
