@@ -9,14 +9,57 @@ import (
 	"context"
 )
 
-const insertSubcounties = `-- name: InsertSubcounties :exec
-
-INSERT INTO sub_counties (name) VALUES($1)
+const checkSubCountiesDuplicate = `-- name: CheckSubCountiesDuplicate :one
+SELECT COUNT(*) FROM sub_counties WHERE name=$1
 `
 
+func (q *Queries) CheckSubCountiesDuplicate(ctx context.Context, name string) (int64, error) {
+	row := q.db.QueryRowContext(ctx, checkSubCountiesDuplicate, name)
+	var count int64
+	err := row.Scan(&count)
+	return count, err
+}
+
+const getSubCountiesForACounty = `-- name: GetSubCountiesForACounty :many
+SELECT id, name, county_id FROM sub_counties WHERE county_id=$1
+`
+
+func (q *Queries) GetSubCountiesForACounty(ctx context.Context, countyID int32) ([]SubCounty, error) {
+	rows, err := q.db.QueryContext(ctx, getSubCountiesForACounty, countyID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	items := []SubCounty{}
+	for rows.Next() {
+		var i SubCounty
+		if err := rows.Scan(&i.ID, &i.Name, &i.CountyID); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const insertSubcounties = `-- name: InsertSubcounties :exec
+
+INSERT INTO sub_counties (name,county_id) VALUES($1,$2)
+`
+
+type InsertSubcountiesParams struct {
+	Name     string `json:"name"`
+	CountyID int32  `json:"county_id"`
+}
+
 // sub_counties.sql
-func (q *Queries) InsertSubcounties(ctx context.Context, name string) error {
-	_, err := q.db.ExecContext(ctx, insertSubcounties, name)
+func (q *Queries) InsertSubcounties(ctx context.Context, arg InsertSubcountiesParams) error {
+	_, err := q.db.ExecContext(ctx, insertSubcounties, arg.Name, arg.CountyID)
 	return err
 }
 
