@@ -4,12 +4,15 @@ import (
 	"fmt"
 	_ "fmt"
 	"os"
+	_"time"
+	_ "time"
 	"ttnmwastemanagementsystem/configs"
 	"ttnmwastemanagementsystem/controllers"
 	"ttnmwastemanagementsystem/database/seeder"
 	"ttnmwastemanagementsystem/gen"
 	"ttnmwastemanagementsystem/middlewares"
 
+	cors "github.com/rs/cors/wrapper/gin"
 	"github.com/gin-gonic/gin"
 	"github.com/muesli/cache2go"
 )
@@ -59,6 +62,9 @@ func runProgram() {
 
 	router.LoadHTMLGlob("templates/**/*")
 
+	router.Use(cors.Default())
+
+
 	auth := router.Group("/auth")
 	{
 		authController := controllers.AuthController{}
@@ -84,7 +90,6 @@ func runProgram() {
 
 	}
 
-
 	apiGroup := router.Group("/api:BVaDN9hl")
 
 	apiGroup.Use(middlewares.JwtAuthMiddleware())
@@ -94,9 +99,9 @@ func runProgram() {
 	// apiGroup.POST("update/user",usersController.UpdateUSer)
 	// apiGroup.GET("/users/roles",usersController.GetUsersWithRole)
 	apiGroup.GET("/user/:id", usersController.GetUser)
-	
+
 	//---------------------------countries-------------------------------------------------------
-	apiGroup.GET("countries",geoController.GetAllCountries)
+	apiGroup.GET("countries", geoController.GetAllCountries)
 	//-------------------------------------------------------------------------------------------
 
 	//---------------------------organization----------------------------------------------------
@@ -131,7 +136,7 @@ func runProgram() {
 	// apiGroup.POST("permissions/assign", roleHasPermissionsController.AssignPermission)
 	// apiGroup.POST("permissions/revoke", roleHasPermissionsController.RevokePermission)
 	//roles and permissions -----------------------------------------------------------
-	apiGroup.GET("roles", middlewares.PermissionBlockerMiddleware("view_roles"),  controllers.RoleAndPermissionsController{}.GetRoles)
+	apiGroup.GET("roles", middlewares.PermissionBlockerMiddleware("view_roles"), controllers.RoleAndPermissionsController{}.GetRoles)
 	apiGroup.GET("role/:id", middlewares.PermissionBlockerMiddleware("view_roles"), controllers.RoleAndPermissionsController{}.GetRole)
 	apiGroup.DELETE("role/:id", middlewares.PermissionBlockerMiddleware("delete_roles"), controllers.RoleAndPermissionsController{}.DeleteRole)
 	apiGroup.PUT("role/update", middlewares.PermissionBlockerMiddleware("edit_roles"), controllers.RoleAndPermissionsController{}.UpdateRole)
@@ -163,7 +168,7 @@ func runProgram() {
 	// apiGroup.GET("settings/wastegroups/wastegroup/:id", wasteGroupController.GetOneWasteGroup)
 	//--------------------------------------------------------------------------------------------
 
-	
+
 	router.Run()
 	//fmt.Println("Hello dabid")
 }
