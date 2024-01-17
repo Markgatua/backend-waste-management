@@ -25,32 +25,29 @@ func (countiesSeeder CountiesSeeder) Run(q *gen.Queries) {
 	}
 	defer file.Close()
 
-	// Create a CSV reader
 	reader := csv.NewReader(file)
 
-	// Read all records from the CSV file
 	records, err := reader.ReadAll()
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	
-	// if len(count) > 0{
-	// 	return;
-	// }
-	// Prepare and execute SQL statements to insert records into the PostgreSQL table
+	count,err := q.DuplicateCounties(context.Background(),"Nyeri");
+	if err == nil {
+		if count == 0 {
 
 	for _, record := range records {
-		name := record[0] // Assuming the name column is at index 0 in the CSV file
+		name := record[0] 
 
-		count, err := gen.REPO.ViewCounties(context.Background())
-		fmt.Println(count)
 		q.InsertCounties(context.Background(), name)
-		// ("INSERT INTO counties (name) VALUES ($1)", name)
 		if err != nil {
 			log.Fatal(err)
 		}
 	}
+	}else{
+		return
+	}
 
 	fmt.Println("Data inserted successfully.")
+}
 }

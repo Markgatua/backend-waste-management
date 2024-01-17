@@ -9,6 +9,17 @@ import (
 	"context"
 )
 
+const duplicateCounties = `-- name: DuplicateCounties :one
+SELECT COUNT(*) FROM counties WHERE name=$1
+`
+
+func (q *Queries) DuplicateCounties(ctx context.Context, name string) (int64, error) {
+	row := q.db.QueryRowContext(ctx, duplicateCounties, name)
+	var count int64
+	err := row.Scan(&count)
+	return count, err
+}
+
 const insertCounties = `-- name: InsertCounties :exec
 
 INSERT INTO counties (name) VALUES($1)
