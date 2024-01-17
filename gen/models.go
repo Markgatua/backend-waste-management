@@ -19,14 +19,17 @@ type ChampionAggregatorAssignment struct {
 }
 
 type Company struct {
-	ID             int32          `json:"id"`
-	Name           string         `json:"name"`
-	CompanyType    int32          `json:"company_type"`
-	OrganizationID int32          `json:"organization_id"`
-	Region         sql.NullString `json:"region"`
-	Location       sql.NullString `json:"location"`
-	IsActive       bool           `json:"is_active"`
-	CreatedAt      time.Time      `json:"created_at"`
+	ID               int32          `json:"id"`
+	Name             string         `json:"name"`
+	CompanyType      int32          `json:"company_type"`
+	OrganizationID   int32          `json:"organization_id"`
+	CountyID         int32          `json:"county_id"`
+	SubCountyID      int32          `json:"sub_county_id"`
+	PhysicalPosition string         `json:"physical_position"`
+	Region           sql.NullString `json:"region"`
+	Location         sql.NullString `json:"location"`
+	IsActive         bool           `json:"is_active"`
+	CreatedAt        time.Time      `json:"created_at"`
 }
 
 type Country struct {

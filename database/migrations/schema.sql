@@ -98,11 +98,16 @@ CREATE TABLE companies (
   name VARCHAR(255) NOT NULL,
   company_type INTEGER NOT NULL,  -- 1 FOR GREEN CORPORATES/CHAMPIONS || 2 FOR AGGREGATOR COMPANIES
   organization_id INTEGER NOT NULL,
+  county_id INTEGER NOT NULL,
+  sub_county_id INTEGER NOT NULL,
+  physical_position VARCHAR(255) NOT NULL,
   region VARCHAR(255) NULL,
   location VARCHAR(255),
   is_active BOOLEAN NOT NULL DEFAULT TRUE,
   created_at TIMESTAMP NOT NULL DEFAULT NOW(),
-  FOREIGN Key (organization_id) REFERENCES organizations(id)
+  FOREIGN Key (organization_id) REFERENCES organizations(id),
+  FOREIGN Key (county_id) REFERENCES counties(id),
+  FOREIGN Key (sub_county_id) REFERENCES sub_counties(id)
 );
 ALTER TABLE companies ADD CONSTRAINT check_company_type CHECK (company_type IN (1,2)); -- make sure company type is either 1 or 2
 
