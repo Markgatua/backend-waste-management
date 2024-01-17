@@ -1,11 +1,11 @@
 CREATE TABLE roles (
-  id SERIAL PRIMARY KEY,
-  name varchar(255) NOT NULL,
-  guard_name varchar(255) NOT NULL,
-  created_at timestamp NULL DEFAULT NULL,
-  updated_at timestamp NULL DEFAULT NULL,
-  description text DEFAULT NULL,
-  deleted_at timestamp NULL DEFAULT NULL
+    id SERIAL PRIMARY KEY,
+    name varchar(255) NOT NULL UNIQUE,
+    guard_name varchar(255) NOT NULL,
+    created_at timestamp NULL DEFAULT NULL,
+    updated_at timestamp NULL DEFAULT NULL,
+    description text DEFAULT NULL,
+    is_active BOOLEAN NOT NULL DEFAULT true
 );
 
 CREATE TABLE uploads(
@@ -18,14 +18,22 @@ CREATE TABLE uploads(
 );
 
 CREATE TABLE permissions (
-  id SERIAL PRIMARY KEY,
-  name varchar(255) NOT NULL,
-  guard_name varchar(255) NOT NULL UNIQUE,
-  created_at timestamp NULL DEFAULT NULL,
-  updated_at timestamp NULL DEFAULT NULL,
-  module varchar(255) NOT NULL,
-  submodule VARCHAR(255) NULL
+    id SERIAL PRIMARY KEY,
+    name varchar(255) NOT NULL,
+    action varchar(255) NOT NULL UNIQUE,
+    created_at timestamp NULL DEFAULT NULL,
+    updated_at timestamp NULL DEFAULT NULL,
+    module varchar(255) NOT NULL,
+    submodule VARCHAR(255) NULL
 );
+
+CREATE TABLE role_has_permissions (
+      permission_id INTEGER NOT NULL,
+      role_id INTEGER NOT NULL,
+      FOREIGN Key (permission_id) REFERENCES permissions(id) on delete CASCADE,
+      FOREIGN Key (role_id) REFERENCES roles(id) on delete CASCADE,
+      UNIQUE (permission_id, role_id)
+ );
 
 CREATE TABLE countries (
   id SERIAL PRIMARY KEY,
@@ -48,11 +56,16 @@ CREATE TABLE countries (
   flag varchar(6) DEFAULT NULL
 );
 
-CREATE TABLE role_has_permissions (
-  permission_id INTEGER,
-  role_id INTEGER,
-  FOREIGN Key (permission_id) REFERENCES permissions(id),
-  FOREIGN Key (role_id) REFERENCES roles(id) on delete CASCADE
+CREATE TABLE counties(
+  id SERIAL PRIMARY KEY,
+  name VARCHAR(255) NOT NULL
+);
+
+CREATE TABLE sub_counties(
+  id SERIAL PRIMARY KEY,
+  name VARCHAR(255) NOT NULL,
+  county_id INTEGER NOT NULL,
+  FOREIGN Key (county_id) REFERENCES counties(id) on delete set null
 );
 
 CREATE TABLE organizations(
@@ -60,6 +73,24 @@ CREATE TABLE organizations(
   name VARCHAR(255) NOT NULL,
   country_id INTEGER NOT NULL,
   FOREIGN Key (country_id) REFERENCES countries(id) on delete set null
+);
+
+CREATE TABLE ttnm_organization(
+  id SERIAL PRIMARY KEY,
+  organization_id VARCHAR(255) NOT NULL,
+  name VARCHAR(255) NOT NULL,
+  tag_line TEXT NOT NULL,
+  about_us TEXT NOT NULL,
+  logo_path TEXT NOT NULL,
+  app_appstore_link TEXT NOT NULL,
+  app_google_playstore_link TEXT NOT NULL,
+  website_url TEXT NOT NULL,
+  city TEXT NOT NULL,
+  state TEXT NOT NULL,
+  zip TEXT NOT NULL,
+  country TEXT NOT NULL,
+  created_at TIMESTAMP NOT NULL DEFAULT NOW(),
+  updated_at TIMESTAMP NOT NULL DEFAULT NOW()
 );
 
 CREATE TABLE companies (
@@ -88,7 +119,7 @@ CREATE TABLE users(
     email VARCHAR(255) DEFAULT NULL UNIQUE,
     password TEXT DEFAULT NULL,
     avatar_url TEXT NULL,
-    user_type SMALLINT, -- 1 for TTNM ADMINS || 2 AGG GLOBAL ADMINS || 3 AGG ADMINS || 4 AGG USERS || 5 AGG COLLECTORS || 6 EXTERNAL COLLECTORS || 7 GREEN CHAMPIONS
+    user_type SMALLINT, -- 1 for TTNM ADMINS || 2 AGG GLOBAL ADMINS || 3 AGG ADMINS || 4 AGG USERS || 5 AGG COLLECTORS || 6 EXTERNAL COLLECTORS || 7 GREEN CHAMPIONS 
     is_active BOOLEAN DEFAULT TRUE,
     calling_code VARCHAR(6) NULL,
     phone VARCHAR(15) NULL DEFAULT NULL,
@@ -120,11 +151,22 @@ CREATE TABLE email_verification_token (
   created_at TIMESTAMP NOT NULL DEFAULT NOW()
 );
 
+-- Create "champion_assigned_aggregator" table
+CREATE TABLE champion_aggregator_assignments (
+  id SERIAL PRIMARY KEY,
+  champion_id INTEGER,
+  FOREIGN Key (champion_id) REFERENCES companies(id),
+  collector_id INTEGER,
+  FOREIGN Key (collector_id) REFERENCES companies(id),
+  created_at TIMESTAMP NOT NULL DEFAULT NOW()
+);
+
 CREATE TABLE waste_groups (
   id SERIAL PRIMARY KEY,
   name VARCHAR(255) NOT NULL,
   category VARCHAR(255) NOT NULL,
-  created_at TIMESTAMP NOT NULL DEFAULT NOW()
+  created_at TIMESTAMP NOT NULL DEFAULT NOW(),
+  deleted_at timestamp NULL DEFAULT NULL
 );
 
 CREATE TABLE waste_collections (

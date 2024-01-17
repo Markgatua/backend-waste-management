@@ -1,4 +1,4 @@
-package utils
+package appsettings
 
 import (
 	"encoding/json"

@@ -1,17 +1,157 @@
 [
     {
-        "module": "TTNM_ADMIN",
-        "key": "ttnm_admin",
+        "module": "Permissions",
+        "key": "permissions",
         "permissions": [
             {
-                "name": "Add organization",
-                "sub_module": "Organization",
-                "action": "add_staff"
+                "permission_id": 103,
+                "name": "Assign Permissions",
+                "sub_module": "Permissions",
+                "action": "assign_permissions_to_role"
             },
             {
-                "name": "Add companies",
+                "permission_id": 103,
+                "name": "Revoke Permissions",
+                "sub_module": "Permissions",
+                "action": "remove_permissions_from_role"
+            }
+        ]
+    },
+    {
+        "module": "Settings",
+        "key": "settings",
+        "permissions": [
+            {
+                "permission_id": 101,
+                "name": "View TTNM Profile",
+                "sub_module": "Organization Profile",
+                "action": "view_ttnm_profile"
+            },
+            {
+                "permission_id": 102,
+                "name": "Update TTNM Profile",
+                "sub_module": "Organization Profile",
+                "action": "update_ttnm_profile"
+            },
+            {
+                "permission_id": 103,
+                "name": "Add Roles",
+                "sub_module": "Roles",
+                "action": "add_roles"
+            },
+            {
+                "permission_id": 103,
+                "name": "View Roles",
+                "sub_module": "Roles",
+                "action": "view_roles"
+            },
+            {
+                "permission_id": 104,
+                "name": "Edit Roles",
+                "sub_module": "Roles",
+                "action": "edit_roles"
+            },
+            {
+                "permission_id": 104,
+                "name": "Delete Roles",
+                "sub_module": "Roles",
+                "action": "delete_roles"
+            },
+            {
+                "permission_id": 103,
+                "name": "View Permissions",
+                "sub_module": "Permissions",
+                "action": "view_permissions"
+            },
+            {
+                "permission_id": 105,
+                "name": "View Waste Types",
+                "sub_module": "Waste Types",
+                "action": "view_waste_type"
+            },
+            {
+                "permission_id": 106,
+                "name": "Update Waste Type",
+                "sub_module": "Waste Types",
+                "action": "update_waste_type"
+            },
+            {
+                "permission_id": 107,
+                "name": "Create Waste Type",
+                "sub_module": "Waste Types",
+                "action": "create_waste_type"
+            }
+        ]
+    },
+    {
+        "module": "Organizations",
+        "key": "organizations",
+        "permissions": [
+            {
+                "permission_id": 103,
+                "name": "Add Organization",
+                "sub_module": "Organizations",
+                "action": "add_organization"
+            },
+            {
+                "permission_id": 103,
+                "name": "Edit Organization",
+                "sub_module": "Organizations",
+                "action": "edit_organization"
+            },
+            {
+                "permission_id": 103,
+                "name": "View Organizations",
+                "sub_module": "Organizations",
+                "action": "view_organizations"
+            },
+            {
+                "permission_id": 103,
+                "name": "Delete Organization",
+                "sub_module": "Organizations",
+                "action": "delete_organization"
+            },
+            {
+                "permission_id": 103,
+                "name": "Delete Company",
                 "sub_module": "Companies",
-                "action": "add_companies"
+                "action": "delete_company"
+            },
+            {
+                "permission_id": 103,
+                "name": "View Companies",
+                "sub_module": "Companies",
+                "action": "view_companies"
+            },
+            {
+                "permission_id": 103,
+                "name": "Add Company",
+                "sub_module": "Companies",
+                "action": "add_company"
+            },
+            {
+                "permission_id": 103,
+                "name": "Edit Company",
+                "sub_module": "Companies",
+                "action": "edit_company"
+            }
+        ]
+    },
+    {
+        "module": "Champion Collector",
+        "key": "championcollector",
+        "permissions": [
+            {
+                "permission_id": 103,
+                "name": "Assign Collector to Champions",
+                "sub_module": "Champion Collector",
+                "action": "assign_collector_to_champion"
+            },
+            {
+                "permission_id": 103,
+                "name": "View Champion Collector",
+                "sub_module": "Champion Collector",
+                "action": "view_champion_collector"
             }
         ]
     }

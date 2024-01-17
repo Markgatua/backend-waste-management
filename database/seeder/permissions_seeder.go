@@ -35,6 +35,7 @@ type PermissionElement struct {
 	Name      string `json:"name"`
 	SubModule string `json:"sub_module"`
 	Action    string `json:"action"`
+	PermissionId int32 `json:"permission_id"`
 }
 
 func (permissionsSeeder PermissionsSeeder) Run(q *gen.Queries) {
@@ -56,7 +57,7 @@ func (permissionsSeeder PermissionsSeeder) Run(q *gen.Queries) {
 
 				q.CreatePermission(context.Background(), gen.CreatePermissionParams{
 					Name:      permissionElement.Name,
-					GuardName: permissionElement.Action,
+					Action:    permissionElement.Action,
 					Module:    v.Module,
 					Submodule: sql.NullString{String:fmt.Sprint(permissionElement.SubModule),Valid: true},
 				})

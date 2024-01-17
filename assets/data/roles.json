@@ -1,0 +1,68 @@
+{
+    "1":{
+        "role_id":100,
+        "name": "TTNM Admin",
+        "description": "",
+        "guard_name": "api"
+    },
+    "2":{
+        "role_id":101,
+        "name": "Aggregator Global Admin",
+        "description": "",
+        "guard_name": "api"
+    },
+    "3":{
+        "role_id": 102,
+        "name": "Aggregator Admin",
+        "description": "",
+        "guard_name": "api"
+    },
+    "4":{
+        "role_id": 103,
+        "name": "Aggregator System User",
+        "description": "",
+        "guard_name": "api"
+    },
+    "5":{
+        "role_id": 104,
+        "name": "Aggregator Collector",
+        "description": "",
+        "guard_name": "api"
+    },
+    "6":{
+        "role_id": 105,
+        "name": "External Collector",
+        "description": "",
+        "guard_name": "api"
+    },
+    "7":{
+        "role_id": 106,
+        "name": "Green Champion",
+        "description": "",
+        "guard_name": "api"
+    },
+    "8":{
+        "role_id": 107,
+        "name": "Corporate Global Admin",
+        "description": "",
+        "guard_name": "api"
+    },
+    "9":{
+        "role_id": 108,
+        "name": "Corporate Admin",
+        "description": "",
+        "guard_name": "api"
+    },
+    "10":{
+        "role_id": 109,
+        "name": "Corporate System User",
+        "description": "",
+        "guard_name": "api"
+    },
+    "11":{
+        "role_id": 110,
+        "namonee": "Green Regulator",
+        "description": "",
+        "guard_name": "api"
+    }
+}

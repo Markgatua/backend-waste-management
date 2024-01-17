@@ -10,4 +10,7 @@ select * from waste_groups where id=$1;
 INSERT INTO waste_groups (name,category) VALUES ($1,$2) RETURNING *;
 
 -- name: UpdateWasteGroup :exec
-update waste_groups set name=$2, category=$3 where id=$1;
+update waste_groups set name=$2, category=$3, deleted_at=$4 where id=$1;
+
+-- name: GetUsersWasteGroups :many
+select * from waste_groups where deleted_at is NULL;

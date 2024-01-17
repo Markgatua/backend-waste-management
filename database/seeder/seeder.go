@@ -3,17 +3,17 @@ package seeder
 import (
 	"database/sql"
 	"fmt"
+	"ttnmwastemanagementsystem/appsettings"
 	"ttnmwastemanagementsystem/gen"
 	"ttnmwastemanagementsystem/logger"
-	"ttnmwastemanagementsystem/utils"
 
 	_ "github.com/lib/pq"
 )
 
 func Run() {
-	appSettings, err := utils.GetAppSettings()
+	appSettings, err := appsettings.GetAppSettings()
 	if err != nil {
-		logger.Log("SEEDER", "Error getting app settings", logger.LOG_LEVEL_ERROR)
+		logger.Log("SEEDER", fmt.Sprint("Error getting app settings::",err.Error()), logger.LOG_LEVEL_ERROR)
 		return
 	}
 	conn, err := sql.Open("postgres", appSettings.DBMasterConnectionString)
@@ -24,6 +24,10 @@ func Run() {
 		queries := gen.New(conn)
 		CountriesSeeder{}.Run(queries)
 		PermissionsSeeder{}.Run(queries)
+		TtnmOrganizationSeeder{}.Run(queries)
+		RoleSeeder{}.Run(queries)
+		RoleHasPermissionsSeeder{}.Run(queries)
+		CountiesSeeder{}.Run(queries)
 	}
 
 }
