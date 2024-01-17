@@ -14,6 +14,7 @@ type Querier interface {
 	AssignChampionToCollector(ctx context.Context, arg AssignChampionToCollectorParams) (ChampionAggregatorAssignment, error)
 	AssignPermission(ctx context.Context, arg AssignPermissionParams) error
 	AssignPermissionToRole(ctx context.Context, arg AssignPermissionToRoleParams) error
+	CheckSubCountiesDuplicate(ctx context.Context, name string) (int64, error)
 	CreateAdmin(ctx context.Context, arg CreateAdminParams) error
 	CreateCountry(ctx context.Context, arg CreateCountryParams) error
 	CreatePermission(ctx context.Context, arg CreatePermissionParams) (Permission, error)
@@ -25,6 +26,7 @@ type Querier interface {
 	DeletePermissionByActions(ctx context.Context, actions []string) error
 	DeletePermissionByIds(ctx context.Context, permissionIds []int32) error
 	DeleteRole(ctx context.Context, id int32) error
+	DuplicateCounties(ctx context.Context, name string) (int64, error)
 	// champion_aggregator_assignments.sql
 	GetAllChampionCollectorsAssignments(ctx context.Context) ([]GetAllChampionCollectorsAssignmentsRow, error)
 	GetAllChampionsForACollector(ctx context.Context, collectorID sql.NullInt32) ([]GetAllChampionsForACollectorRow, error)
@@ -52,6 +54,7 @@ type Querier interface {
 	// role_has_permissions.sql
 	GetRolePermissions(ctx context.Context, roleID int32) ([]RoleHasPermission, error)
 	GetRoles(ctx context.Context) ([]Role, error)
+	GetSubCountiesForACounty(ctx context.Context, countyID int32) ([]SubCounty, error)
 	GetTTNMOrganizations(ctx context.Context, organizationID string) ([]TtnmOrganization, error)
 	GetTheCollectorForAChampion(ctx context.Context, championID sql.NullInt32) (GetTheCollectorForAChampionRow, error)
 	GetUser(ctx context.Context, id int32) (User, error)
@@ -61,6 +64,8 @@ type Querier interface {
 	// counties.sql
 	InsertCounties(ctx context.Context, name string) error
 	InsertOrganization(ctx context.Context, arg InsertOrganizationParams) (Organization, error)
+	// sub_counties.sql
+	InsertSubcounties(ctx context.Context, arg InsertSubcountiesParams) error
 	InsertTTNMOrganization(ctx context.Context, arg InsertTTNMOrganizationParams) error
 	InsertWasteGroup(ctx context.Context, arg InsertWasteGroupParams) (WasteGroup, error)
 	RemovePermissionsFromRole(ctx context.Context, arg RemovePermissionsFromRoleParams) error
@@ -76,6 +81,7 @@ type Querier interface {
 	UpdateUser(ctx context.Context, arg UpdateUserParams) error
 	UpdateWasteGroup(ctx context.Context, arg UpdateWasteGroupParams) error
 	ViewCounties(ctx context.Context) ([]County, error)
+	ViewSubCounties(ctx context.Context) ([]SubCounty, error)
 }
 
 var _ Querier = (*Queries)(nil)

@@ -28,6 +28,7 @@ func Run() {
 		RoleSeeder{}.Run(queries)
 		RoleHasPermissionsSeeder{}.Run(queries)
 		CountiesSeeder{}.Run(queries)
+		SubCountiesSeeder{}.Run(queries)
 	}
 
 }
