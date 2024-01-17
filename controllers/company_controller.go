@@ -13,6 +13,9 @@ import (
 type CompaniesController struct{}
 
 type CreateCompanyParams struct {
+	CountyID	   int32  `json:"county_id"  binding:"required"`
+	SubCountyID	   int32  `json:"sub_county_id"  binding:"required"`
+	PhysicalPosition string `json:"physical_position" binding:"required"`
 	Name           string `json:"name"  binding:"required"`
 	Companytype    int32  `json:"company_type"  binding:"required"`
 	Location       string `json:"location"  binding:"required"`
@@ -22,6 +25,9 @@ type CreateCompanyParams struct {
 }
 
 type UpdateCompanyDataParams struct {
+	CountyID	   int32  `json:"county_id"  binding:"required"`
+	SubCountyID	   int32  `json:"sub_county_id"  binding:"required"`
+	PhysicalPosition string `json:"physical_position" binding:"required"`
 	Name           string `json:"name"  binding:"required"`
 	Companytype    int32  `json:"company_type"  binding:"required"`
 	Location       string `json:"location"  binding:"required"`
@@ -60,6 +66,9 @@ func (companiesController CompaniesController) InsertCompany(context *gin.Contex
 	}
 
 	company, insertError := gen.REPO.InsertCompany(context, gen.InsertCompanyParams{
+		CountyID: params.CountyID,
+		SubCountyID: params.SubCountyID,
+		PhysicalPosition: params.PhysicalPosition,
 		Name:        params.Name,
 		Location:    null.StringFrom(params.Location).NullString,
 		IsActive:    params.IsActive,
@@ -206,6 +215,9 @@ func (companiesController CompaniesController) UpdateCompany(context *gin.Contex
 
 	// Update company status
 	updateError := gen.REPO.UpdateCompany(context, gen.UpdateCompanyParams{
+		CountyID: params.CountyID,
+		SubCountyID: params.SubCountyID,
+		PhysicalPosition: params.PhysicalPosition,
 		IsActive:       params.IsActive,
 		Name:           params.Name,
 		Location:       null.StringFrom(params.Location).NullString,
