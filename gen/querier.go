@@ -58,6 +58,8 @@ type Querier interface {
 	GetUsersWasteGroups(ctx context.Context) ([]WasteGroup, error)
 	GetUsersWithRole(ctx context.Context) ([]GetUsersWithRoleRow, error)
 	InsertCompany(ctx context.Context, arg InsertCompanyParams) (Company, error)
+	// counties.sql
+	InsertCounties(ctx context.Context, name string) error
 	InsertOrganization(ctx context.Context, arg InsertOrganizationParams) (Organization, error)
 	InsertTTNMOrganization(ctx context.Context, arg InsertTTNMOrganizationParams) error
 	InsertWasteGroup(ctx context.Context, arg InsertWasteGroupParams) (WasteGroup, error)
@@ -73,6 +75,7 @@ type Querier interface {
 	UpdateTtnmOrganizationProfile(ctx context.Context, arg UpdateTtnmOrganizationProfileParams) error
 	UpdateUser(ctx context.Context, arg UpdateUserParams) error
 	UpdateWasteGroup(ctx context.Context, arg UpdateWasteGroupParams) error
+	ViewCounties(ctx context.Context) ([]County, error)
 }
 
 var _ Querier = (*Queries)(nil)

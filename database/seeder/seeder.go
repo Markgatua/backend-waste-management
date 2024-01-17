@@ -27,6 +27,7 @@ func Run() {
 		TtnmOrganizationSeeder{}.Run(queries)
 		RoleSeeder{}.Run(queries)
 		RoleHasPermissionsSeeder{}.Run(queries)
+		CountiesSeeder{}.Run(queries)
 	}
 
 }

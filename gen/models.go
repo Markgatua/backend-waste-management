@@ -50,6 +50,11 @@ type Country struct {
 	Flag             sql.NullString `json:"flag"`
 }
 
+type County struct {
+	ID   int32  `json:"id"`
+	Name string `json:"name"`
+}
+
 type EmailVerificationToken struct {
 	ID        int32     `json:"id"`
 	Token     string    `json:"token"`
@@ -100,6 +105,12 @@ type Role struct {
 type RoleHasPermission struct {
 	PermissionID int32 `json:"permission_id"`
 	RoleID       int32 `json:"role_id"`
+}
+
+type SubCounty struct {
+	ID       int32  `json:"id"`
+	Name     string `json:"name"`
+	CountyID int32  `json:"county_id"`
 }
 
 type TtnmOrganization struct {

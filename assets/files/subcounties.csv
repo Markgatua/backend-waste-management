@@ -1,0 +1,345 @@
+1,Changamwe
+1,Jomvu
+1,Kisauni
+1,Likoni
+1,Mvita
+1,Nyali
+2,Kinango
+2,Lungalunga
+2,Matuga
+2,Msambweni
+2,Samburu Kwale
+3,Chonyi
+3,Ganze
+3,Kaloleni
+3,Kauma
+3,Kilifi North
+3,Kilifi South
+3,Magarini
+3,Malindi
+3,Rabai
+4,Tana North
+4,Tana Delta
+4,Tana River
+5,Lamu East
+5,Lamu West
+6,Mwatate
+6,Taita
+6,Taveta
+6,Voi
+7,Balambala
+7,Dadaab
+7,Fafi
+7,Garissa
+7,Hulugho
+7,Ijara
+7,Lagdera
+8,Buna
+8,Eldas
+8,Habaswein.
+8,Tarbaj
+8,Wajir East.
+8,Wajir North
+8,Wajir South
+8,Wajir West
+9,Mandera West.
+9,Banisa
+9,Kutulo
+9,Lafey
+9,Mandera Central
+9,Mandera East
+9,Mandera North
+10,Loiyangalani
+10,Marsabit Central.
+10,Marsabit North.
+10,Marsabit South.
+10,Moyale
+10,North Horr
+10,Sololo
+11,Garbatulla.
+11,Isiolo
+11,Merti
+12,Buuri East
+12,Buuri West.
+12,Igembe Central
+12,Igembe North
+12,Igembe South
+12,Imenti North.
+12,Imenti South.
+12,Meru Central
+12,Tigania Central
+12,Tigania East.
+12,Tigania West
+12,Meru National Park.
+12,Mt Kenya Forest
+13,Igambang'ombe
+13,Maara
+13,Meru South
+13,Tharaka North
+13,Tharaka South
+13,Mt Kenya Forest
+14,Embu East
+14,Embu North
+14,Embu West
+14,Mbeere South
+14,Mbeere North
+14,Mt Kenya Forest
+15,Ikutha
+15,Katulani
+15,Kisasi
+15,Kitui Central
+15,Kitui West
+15,Kyuso
+15,Lower Yatta
+15,Matinyani
+15,Migwani
+15,Mumoni
+15,Mutitu
+15,Mutitu North
+15,Mutomo
+15,Mwingi Central
+15,Mwingi East
+15,Nzambani
+15,Thagicu
+15,Tseikuru
+16,Athi River
+16,Kalama
+16,Kangundo
+16,Kathiani
+16,Machakos
+16,Masinga
+16,Matungulu
+16,Mwala
+16,Yatta
+17,Kathonzweni
+17,Kibwezi
+17,Kilungu
+17,Makindu
+17,Makueni
+17,Mbooni East
+17,Mbooni West
+17,Mukaa
+17,Nzaui
+18,Kinangop
+18,Nyandarua South
+18,Mirangine
+18,Kipipiri
+18,Nyandarua Central
+18,Nyandarua West
+18,Nyandarua North
+18,Aberdare National Park
+19,Tetu
+19,Kieni East
+19,Kieni West
+19,Mathira East
+19,Mathira West
+19,Nyeri South
+19,Mukurwe ini
+19,Nyeri Central
+19,Mt Kenya Forest
+19,Aberdare Forest
+20,Kirinyaga Central
+20,Kirinyaga East
+20,Kirinyaga West
+20,Mwea East
+20,Mwea West
+20,Mt Kenya Forest
+21,Murang'a East
+21,Kangema
+21,Mathioya
+21,Kahuro
+21,Murang'a South
+21,Gatanga
+21,Kigumo
+21,Kandara
+21,Aberdare Forest
+22,Gatundu North
+22,Gatundu South
+22,Githunguri
+22,Juja
+22,Kabete
+22,Kiambaa
+22,Kiambu
+22,Kikuyu
+22,Lari
+22,Limuru
+22,Ruiru
+22,Thika East
+22,Thika West
+23,Kibish
+23,Loima
+23,Turkana Central
+23,Turkana East
+23,Turkana North
+23,Turkana South
+23,Turkana West
+24,Kipkomo
+24,Pokot Central
+24,Pokot North
+24,Pokot South
+24,West Pokot
+25,Samburu Central
+25,Samburu East
+25,Samburu North
+26,Trans Nzoia West
+26,Trans Nzoia East
+26,Kwanza
+26,Endebess
+26,Kiminini
+27,Ainabkoi
+27,Kapseret
+27,Kesses
+27,Moiben
+27,Soy
+27,Turbo
+28,Keiyo North
+28,Keiyo South
+28,Marakwet East
+28,Marakwet West
+29,Chesumei
+29,Nandi Central
+29,Nandi East
+29,Nandi North
+29,Nandi South
+29,Tinderet
+30,Baringo Central
+30,Baringo North
+30,East Pokot
+30,Koibatek
+30,Marigat
+30,Mogotio
+30,Tiaty East
+31,Laikipia Central
+31,Laikipia East
+31,Laikipia North
+31,Laikipia West
+31,Nyahururu
+32,Gilgil
+32,Kuresoi North
+32,Kuresoi South
+32,Molo
+32,Naivasha
+32,Nakuru East
+32,Nakuru North
+32,Nakuru West
+32,Njoro
+32,Rongai
+32,Subukia
+32,Narok East
+32,Narok North
+32,Narok South
+32,Narok West
+32,Trans Mara East
+32,Trans Mara West
+32,Mau Forest
+34,Isinya
+34,Kajiado Central
+34,Kajiado North
+34,Kajiado West
+34,Loitokitok
+34,Mashuuru
+35,Belgut
+35,Bureti
+35,Kericho East
+35,Kipkelion
+35,Londiani
+35,Soin Sigowet
+36,Bomet East
+36,Chepalungu
+36,Konoin
+36,Sotik
+36,Bomet Central
+37,Butere
+37,Kakamega Central
+37,Kakamega East
+37,Kakamega North
+37,Kakamega South
+37,Khwisero
+37,Likuyani
+37,Lugari
+37,Matete
+37,Matungu
+37,Mumias East
+37,Mumias West
+37,Navakholo
+38,Emuhaya
+38,Vihiga
+38,Sabatia
+38,Luanda
+38,Hamisi
+38,Kakamega Forest
+39,Bumula
+39,Bungoma Central
+39,Bungoma East
+39,Bungoma North
+39,Bungoma South
+39,Cheptais
+39,Kimilili Bungoma
+39,Mt Elgon
+39,Bungoma West
+39,Tongaren
+39,Webuye West
+39,Mt Elgon Forest
+40,Bunyala
+40,Busia
+40,Butula
+40,Nambale
+40,Samia
+40,Teso North
+40,Teso South
+41,Siaya
+41,Gem
+41,Ugenya
+41,Ugunja
+41,Bondo
+41,Rarieda
+42,Kisumu East
+42,Kisumu Central
+42,Kisumu West
+42,Seme
+42,Muhoroni
+42,Nyando
+42,Nyakach
+43,Homa Bay
+43,Ndhiwa
+43,Rachuonyo North
+43,Rachuonyo East
+43,Rachuonyo South
+43,Rangwe
+43,Suba North
+43,Suba South
+44,Awendo
+44,Kuria East
+44,Kuria West
+44,Nyatike
+44,Rongo
+44,Suna East
+44,Suna West
+44,Uriri
+45,Etago
+45,Gucha
+45,Gucha South
+45,Kenyenya
+45,Kisii Central
+45,Kisii South
+45,Kitutu Central
+45,Marani
+45,Masaba South
+45,Nyamache
+45,Sameta
+46,Borabu
+46,Manga
+46,Masaba North
+46,Nyamira North
+46,Nyamira South
+47,Dagoretti
+47,Embakasi
+47,Kamukunji
+47,Kasarani
+47,Kibra
+47,Lang'ata
+47,Makadara
+47,Mathare
+47,Njiru
+47,Starehe
+47,Westlands

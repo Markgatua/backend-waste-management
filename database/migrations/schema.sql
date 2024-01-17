@@ -56,6 +56,17 @@ CREATE TABLE countries (
   flag varchar(6) DEFAULT NULL
 );
 
+CREATE TABLE counties(
+  id SERIAL PRIMARY KEY,
+  name VARCHAR(255) NOT NULL
+);
+
+CREATE TABLE sub_counties(
+  id SERIAL PRIMARY KEY,
+  name VARCHAR(255) NOT NULL,
+  county_id INTEGER NOT NULL,
+  FOREIGN Key (county_id) REFERENCES counties(id) on delete set null
+);
 
 CREATE TABLE organizations(
   id SERIAL PRIMARY KEY,

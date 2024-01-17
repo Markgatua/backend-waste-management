@@ -72,7 +72,7 @@ func (roleSeeder RoleSeeder) Run(q *gen.Queries) {
 	})
 	q.CreateRole(context.Background(), gen.CreateRoleParams{
 		ID:          10,
-		Name:        "Corporate System Admin",
+		Name:        "Corporate System User",
 		GuardName:   "Web",
 		Description: null.StringFrom("").NullString,
 	})
