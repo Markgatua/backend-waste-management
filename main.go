@@ -88,6 +88,10 @@ func runProgram() {
 		auth.POST("/challenge/forgot_pin/verify_otp_phone", authController.ForgotPinVerifyOTPPhone)
 		auth.POST("/challenge/forgot_pin/enter_new_pin", authController.ForgotPinEnterNewPin)
 
+		auth.POST("/reset_password/email/mobile", authController.ResetPasswordApi)
+		auth.POST("/reset_password/email/mobile/reset", authController.SubmitNewPasswordApi)
+		auth.POST("/reset_password/phone/mobile/reset", authController.PasswordResetAndVerifyOTPPhone)
+
 	}
 
 	// apiGroup := router.Group("/api:BVaDN9hl")

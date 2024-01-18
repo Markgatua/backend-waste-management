@@ -113,6 +113,62 @@ func (mail Mail) SendPasswordResetMail(email string, name string) bool {
 	return true
 }
 
+func (mail Mail) SendPasswordResetApiMail(email string, name string) bool {
+	functions := Functions{}
+	token := functions.TokenGenerator()
+
+	var timeOut = configs.EnvConfigs.AccountRecoveryTokenExpirationTime
+
+	//insert this to the database
+	_, err := gen.REPO.DB.NamedExec(`UPDATE users set recovery_token=:token,recovery_sent_at=:sent_at where email=:email`,
+		map[string]interface{}{
+			"email":   email,
+			"token":   token,
+			"sent_at": time.Now(),
+		})
+
+	if err != nil {
+		logger.Log(MAIL_TAG, fmt.Sprint("Failed to insert reset token,", err), logger.LOG_LEVEL_ERROR)
+		return false
+	}
+
+	mailConfig, err := GetMailConfig()
+	if err != nil {
+		return false
+	}
+	logger.Log(MAIL_TAG, fmt.Sprint("Mail config", mailConfig.MailPassword), logger.LOG_LEVEL_INFO)
+
+	passwordResetLink := token
+
+	templateString := functions.FileToString("./templates/auth/password_reset_api.html")
+	if templateString == "" {
+		logger.Log(MAIL_TAG, "Failed to load password reset template", logger.LOG_LEVEL_ERROR)
+		return false
+	}
+
+	templateString = strings.ReplaceAll(templateString, "{{.password_reset_link}}", passwordResetLink)
+	templateString = strings.ReplaceAll(templateString, "{{.password_reset_timeout}}", strconv.Itoa(int(timeOut))+" Hrs")
+
+	templateString = functions.ReplaceTemplateWithOrganizationInformation(templateString)
+	msg := gomail.NewMessage()
+	msg.SetHeader("From", mailConfig.MailFromAddress)
+	msg.SetHeader("To", email)
+	msg.SetHeader("Subject", "Password reset link")
+	msg.SetBody("text/html", templateString)
+
+	n := gomail.NewDialer(mailConfig.MailHost, int(mailConfig.MailPort), mailConfig.MailUsername, mailConfig.MailPassword)
+
+	// Send the email
+	if err := n.DialAndSend(msg); err != nil {
+		logger.Log(MAIL_TAG, fmt.Sprint("Error sending email ::", err), logger.LOG_LEVEL_ERROR)
+		if configs.CanDebug() {
+			fmt.Println("Error sending email :: ", err)
+		}
+		return false
+	}
+	return true
+}
+
 // retuns true if we have managed to send the mail, else false
 func (mail Mail) SendToken(email string, name string) bool {
 	functions := Functions{}
