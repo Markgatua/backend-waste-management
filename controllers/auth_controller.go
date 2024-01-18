@@ -678,7 +678,7 @@ func (auth AuthController) RegisterPhoneSendOTPCode(context *gin.Context) {
 	}
 
 	sms := helpers.SMS{}
-	err = sms.SendSMS([]string{phone}, fmt.Sprint("Welcome to cashlite, enter the OTP code : ", otpCode))
+	err = sms.SendSMS([]string{phone}, fmt.Sprint("Welcome to TakaTaka Ni Mali, enter the OTP code : ", otpCode))
 	if err != nil {
 		context.JSON(http.StatusUnprocessableEntity, gin.H{
 			"error":   true,
