@@ -718,9 +718,13 @@ func (auth AuthController) LoginEmail(context *gin.Context) {
 	}
 
 	token, err := helpers.Functions{}.GenerateToken(user.ID.Int64)
+	permissionsForRole,_ := GetPermissionsForRole(int32(user.RoleId.Int64))
+	actionList :=  GetActionsFromPermissions(permissionsForRole)
+
 	context.JSON(http.StatusOK, gin.H{
 		"error": false,
 		"user":  user,
+		"permissions":actionList,
 		"token": token,
 	})
 }
