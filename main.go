@@ -90,79 +90,79 @@ func runProgram() {
 
 	}
 
-	apiGroup := router.Group("/api:BVaDN9hl")
+	// apiGroup := router.Group("/api:BVaDN9hl")
 
-	apiGroup.Use(middlewares.JwtAuthMiddleware())
-	apiGroup.Use(middlewares.PermissionMiddleware())
+	router.Use(middlewares.JwtAuthMiddleware())
+	router.Use(middlewares.PermissionMiddleware())
 
-	apiGroup.GET("/users", usersController.GetAllUsers)
-	// apiGroup.POST("update/user",usersController.UpdateUSer)
-	// apiGroup.GET("/users/roles",usersController.GetUsersWithRole)
-	apiGroup.GET("/user/:id", usersController.GetUser)
+	router.GET("/users", usersController.GetAllUsers)
+	// router.POST("update/user",usersController.UpdateUSer)
+	// router.GET("/users/roles",usersController.GetUsersWithRole)
+	router.GET("/user/:id", usersController.GetUser)
 
 	//---------------------------countries-------------------------------------------------------
-	apiGroup.GET("countries", geoController.GetAllCountries)
+	router.GET("countries", geoController.GetAllCountries)
 	//-------------------------------------------------------------------------------------------
 
 	//---------------------------organization----------------------------------------------------
-	apiGroup.POST("organization/add", middlewares.PermissionBlockerMiddleware("add_organization"), organzationController.InsertOrganization)
-	apiGroup.PUT("organization/update", middlewares.PermissionBlockerMiddleware("edit_organization"), organzationController.UpdateOrganization)
-	apiGroup.GET("organizations", middlewares.PermissionBlockerMiddleware("view_organizations"), organzationController.GetAllOrganizations)
-	apiGroup.DELETE("organization/delete/:id", middlewares.PermissionBlockerMiddleware("delete_organization"), organzationController.DeleteOrganization)
-	apiGroup.GET("organization/:id", middlewares.PermissionBlockerMiddleware("view_organizations"), organzationController.GetOrganization)
+	router.POST("organization/add", middlewares.PermissionBlockerMiddleware("add_organization"), organzationController.InsertOrganization)
+	router.PUT("organization/update", middlewares.PermissionBlockerMiddleware("edit_organization"), organzationController.UpdateOrganization)
+	router.GET("organizations", middlewares.PermissionBlockerMiddleware("view_organizations"), organzationController.GetAllOrganizations)
+	router.DELETE("organization/delete/:id", middlewares.PermissionBlockerMiddleware("delete_organization"), organzationController.DeleteOrganization)
+	router.GET("organization/:id", middlewares.PermissionBlockerMiddleware("view_organizations"), organzationController.GetOrganization)
 	//-------------------------------------------------------------------------------------------
 
 	//---------------------------companies ------------------------------------------------------
-	apiGroup.POST("companies/add", middlewares.PermissionBlockerMiddleware("add_company"), companiesController.InsertCompany)
-	apiGroup.GET("companies", middlewares.PermissionBlockerMiddleware("view_companies"), companiesController.GetAllCompanies)
-	apiGroup.GET("company/:id", middlewares.PermissionBlockerMiddleware("view_companies"), companiesController.GetCompany)
-	apiGroup.POST("companies/status", middlewares.PermissionBlockerMiddleware("edit_company"), companiesController.UpdateCompanyStatus)
-	apiGroup.DELETE("company/delete/:id", middlewares.PermissionBlockerMiddleware("delete_company"), companiesController.DeleteCompany)
-	apiGroup.POST("companies/update", middlewares.PermissionBlockerMiddleware("edit_company"), companiesController.UpdateCompany)
+	router.POST("companies/add", middlewares.PermissionBlockerMiddleware("add_company"), companiesController.InsertCompany)
+	router.GET("companies", middlewares.PermissionBlockerMiddleware("view_companies"), companiesController.GetAllCompanies)
+	router.GET("company/:id", middlewares.PermissionBlockerMiddleware("view_companies"), companiesController.GetCompany)
+	router.POST("companies/status", middlewares.PermissionBlockerMiddleware("edit_company"), companiesController.UpdateCompanyStatus)
+	router.DELETE("company/delete/:id", middlewares.PermissionBlockerMiddleware("delete_company"), companiesController.DeleteCompany)
+	router.POST("companies/update", middlewares.PermissionBlockerMiddleware("edit_company"), companiesController.UpdateCompany)
 	//-------------------------------------------------------------------------------------------
 
 	//---------------------------Roles ------------------------------------------------------
-	// apiGroup.GET("roles", rolesController.GetRoles)
-	// apiGroup.GET("role/:id", rolesController.GetRole)
-	// apiGroup.POST("role/update", rolesController.UpdateRole)
+	// router.GET("roles", rolesController.GetRoles)
+	// router.GET("role/:id", rolesController.GetRole)
+	// router.POST("role/update", rolesController.UpdateRole)
 	//-------------------------------------------------------------------------------------------
 
 	//--------------------------- TTNM Organization ------------------------------------------------------
-	apiGroup.GET("ttnm/profile/:id", middlewares.PermissionBlockerMiddleware("view_ttnm_profile"), ttnmOrganizationController.GetTTNMOrganizations)
-	apiGroup.POST("ttnm/profile/update", middlewares.PermissionBlockerMiddleware("update_ttnm_profile"), ttnmOrganizationController.UpdateTtnmOrganizationProfile)
+	router.GET("ttnm/profile/:id", middlewares.PermissionBlockerMiddleware("view_ttnm_profile"), ttnmOrganizationController.GetTTNMOrganizations)
+	router.POST("ttnm/profile/update", middlewares.PermissionBlockerMiddleware("update_ttnm_profile"), ttnmOrganizationController.UpdateTtnmOrganizationProfile)
 	//-------------------------------------------------------------------------------------------
 
 	//--------------------------- Role Has Permissions ------------------------------------------------------
-	// apiGroup.POST("permissions/assign", roleHasPermissionsController.AssignPermission)
-	// apiGroup.POST("permissions/revoke", roleHasPermissionsController.RevokePermission)
+	// router.POST("permissions/assign", roleHasPermissionsController.AssignPermission)
+	// router.POST("permissions/revoke", roleHasPermissionsController.RevokePermission)
 	//roles and permissions -----------------------------------------------------------
-	apiGroup.GET("roles", middlewares.PermissionBlockerMiddleware("view_roles"), controllers.RoleAndPermissionsController{}.GetRoles)
-	apiGroup.GET("role/:id", middlewares.PermissionBlockerMiddleware("view_roles"), controllers.RoleAndPermissionsController{}.GetRole)
-	apiGroup.DELETE("role/:id", middlewares.PermissionBlockerMiddleware("delete_roles"), controllers.RoleAndPermissionsController{}.DeleteRole)
-	apiGroup.PUT("role/update", middlewares.PermissionBlockerMiddleware("edit_roles"), controllers.RoleAndPermissionsController{}.UpdateRole)
-	apiGroup.POST("role/add", middlewares.PermissionBlockerMiddleware("add_roles"), controllers.RoleAndPermissionsController{}.AddRole)
+	router.GET("roles", middlewares.PermissionBlockerMiddleware("view_roles"), controllers.RoleAndPermissionsController{}.GetRoles)
+	router.GET("role/:id", middlewares.PermissionBlockerMiddleware("view_roles"), controllers.RoleAndPermissionsController{}.GetRole)
+	router.DELETE("role/:id", middlewares.PermissionBlockerMiddleware("delete_roles"), controllers.RoleAndPermissionsController{}.DeleteRole)
+	router.PUT("role/update", middlewares.PermissionBlockerMiddleware("edit_roles"), controllers.RoleAndPermissionsController{}.UpdateRole)
+	router.POST("role/add", middlewares.PermissionBlockerMiddleware("add_roles"), controllers.RoleAndPermissionsController{}.AddRole)
 
-	apiGroup.GET("permissions", middlewares.PermissionBlockerMiddleware("view_permissions"), controllers.RoleAndPermissionsController{}.GetAllPermissions)
-	apiGroup.GET("permissions/:role_id", middlewares.PermissionBlockerMiddleware("view_permissions"), controllers.RoleAndPermissionsController{}.GetRolePermissions)
+	router.GET("permissions", middlewares.PermissionBlockerMiddleware("view_permissions"), controllers.RoleAndPermissionsController{}.GetAllPermissions)
+	router.GET("permissions/:role_id", middlewares.PermissionBlockerMiddleware("view_permissions"), controllers.RoleAndPermissionsController{}.GetRolePermissions)
 
-	apiGroup.PUT("assign_permissions_to_role", middlewares.PermissionBlockerMiddleware("assign_permissions_to_role"), controllers.RoleAndPermissionsController{}.AssignPermissionsToRole)
-	apiGroup.PUT("remove_permissions_from_role", middlewares.PermissionBlockerMiddleware("remove_permissions_from_role"), controllers.RoleAndPermissionsController{}.RemovePermissionsFromRole)
+	router.PUT("assign_permissions_to_role", middlewares.PermissionBlockerMiddleware("assign_permissions_to_role"), controllers.RoleAndPermissionsController{}.AssignPermissionsToRole)
+	router.PUT("remove_permissions_from_role", middlewares.PermissionBlockerMiddleware("remove_permissions_from_role"), controllers.RoleAndPermissionsController{}.RemovePermissionsFromRole)
 	//---------------------------------------------------------------------------------
 	//-------------------------------------------------------------------------------------------
 
 	//--------------------------- wastegroups-----------------------------------------------------
-	apiGroup.POST("settings/wastegroups/create", middlewares.PermissionBlockerMiddleware("create_waste_type"), wasteGroupController.InsertWasteGroup)
-	apiGroup.PUT("settings/wastegroups/update", middlewares.PermissionBlockerMiddleware("update_waste_type"), wasteGroupController.UpdateWasteGroup)
-	apiGroup.GET("settings/wastegroups/all", middlewares.PermissionBlockerMiddleware("view_waste_type"), wasteGroupController.GetAllWasteGroups)
-	apiGroup.GET("settings/wastegroups/user", middlewares.PermissionBlockerMiddleware("view_waste_type"), wasteGroupController.GetUsersWasteGroups)
-	apiGroup.GET("settings/wastegroups/wastegroup/:id", middlewares.PermissionBlockerMiddleware("view_waste_type"), wasteGroupController.GetOneWasteGroup)
+	router.POST("settings/wastegroups/create", middlewares.PermissionBlockerMiddleware("create_waste_type"), wasteGroupController.InsertWasteGroup)
+	router.PUT("settings/wastegroups/update", middlewares.PermissionBlockerMiddleware("update_waste_type"), wasteGroupController.UpdateWasteGroup)
+	router.GET("settings/wastegroups/all", middlewares.PermissionBlockerMiddleware("view_waste_type"), wasteGroupController.GetAllWasteGroups)
+	router.GET("settings/wastegroups/user", middlewares.PermissionBlockerMiddleware("view_waste_type"), wasteGroupController.GetUsersWasteGroups)
+	router.GET("settings/wastegroups/wastegroup/:id", middlewares.PermissionBlockerMiddleware("view_waste_type"), wasteGroupController.GetOneWasteGroup)
 	//--------------------------------------------------------------------------------------------
 
 	//--------------------------- Assign collectors to champions-----------------------------------------------------
-	apiGroup.POST("assign_collectors_to_champions/assign", middlewares.PermissionBlockerMiddleware("assign_collector_to_champion"), championCollectorController.AssignChampionToCollector)
-	apiGroup.GET("assign_collectors_to_champions/get_champion_collector/:id", middlewares.PermissionBlockerMiddleware("view_champion_collector"), championCollectorController.GetTheCollectorForAChampion)
-	apiGroup.GET("assign_collectors_to_champions/get_champions_for_a_collector/:id", middlewares.PermissionBlockerMiddleware("view_champion_collector"), championCollectorController.GetAllChampionsForACollector)
-	apiGroup.POST("assign_collectors_to_champions/update", middlewares.PermissionBlockerMiddleware("assign_collector_to_champion"), championCollectorController.UpdateChampionCollector) //not in use
+	router.POST("assign_collectors_to_champions/assign", middlewares.PermissionBlockerMiddleware("assign_collector_to_champion"), championCollectorController.AssignChampionToCollector)
+	router.GET("assign_collectors_to_champions/get_champion_collector/:id", middlewares.PermissionBlockerMiddleware("view_champion_collector"), championCollectorController.GetTheCollectorForAChampion)
+	router.GET("assign_collectors_to_champions/get_champions_for_a_collector/:id", middlewares.PermissionBlockerMiddleware("view_champion_collector"), championCollectorController.GetAllChampionsForACollector)
+	router.POST("assign_collectors_to_champions/update", middlewares.PermissionBlockerMiddleware("assign_collector_to_champion"), championCollectorController.UpdateChampionCollector) //not in use
 	// apiGroup.POST("settings/wastegroups/update", wasteGroupController.UpdateWasteGroup)
 	// apiGroup.GET("settings/wastegroups/all", wasteGroupController.GetAllWasteGroups)
 	// apiGroup.GET("settings/wastegroups/wastegroup/:id", wasteGroupController.GetOneWasteGroup)
