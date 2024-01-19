@@ -106,10 +106,10 @@ func runProgram() {
 	router.Use(middlewares.JwtAuthMiddleware())
 	router.Use(middlewares.PermissionMiddleware())
 
-	router.GET("/users", usersController.GetAllUsers)
+	router.GET("/users",middlewares.PermissionBlockerMiddleware("view_user"), usersController.GetAllUsers)
 	// router.POST("update/user",usersController.UpdateUSer)
 	// router.GET("/users/roles",usersController.GetUsersWithRole)
-	router.GET("/user/:id", usersController.GetUser)
+	router.GET("/user/:id",middlewares.PermissionBlockerMiddleware("view_user"), usersController.GetUser)
 
 	//---------------------------countries-------------------------------------------------------
 	router.GET("countries", geoController.GetAllCountries)

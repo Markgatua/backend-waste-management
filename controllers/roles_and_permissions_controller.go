@@ -49,15 +49,6 @@ func (c RoleAndPermissionsController) RemovePermissionsFromRole(context *gin.Con
 		})
 		return
 	}
-	err = RemoveRolePermissions(int32(params.RoleID))
-	if err != nil {
-		context.JSON(http.StatusUnprocessableEntity, gin.H{
-			"error":   true,
-			"message": err.Error(),
-		})
-		return
-	}
-	
 	err = RemovePermissionsFromRole(int32(params.RoleID), params.Permissions)
 	if err != nil {
 		context.JSON(http.StatusUnprocessableEntity, gin.H{
@@ -88,6 +79,14 @@ func (c RoleAndPermissionsController) GetAllPermissions(context *gin.Context) {
 func (c RoleAndPermissionsController) AssignPermissionsToRole(context *gin.Context) {
 	assignPermissionsToRoleParam := AssignPermissionsToRoleParams{}
 	err := context.ShouldBindJSON(&assignPermissionsToRoleParam)
+	if err != nil {
+		context.JSON(http.StatusUnprocessableEntity, gin.H{
+			"error":   true,
+			"message": err.Error(),
+		})
+		return
+	}
+	err = RemoveRolePermissions(int32(assignPermissionsToRoleParam.RoleID))
 	if err != nil {
 		context.JSON(http.StatusUnprocessableEntity, gin.H{
 			"error":   true,

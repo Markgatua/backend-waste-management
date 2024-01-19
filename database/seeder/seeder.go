@@ -13,7 +13,7 @@ import (
 func Run() {
 	appSettings, err := appsettings.GetAppSettings()
 	if err != nil {
-		logger.Log("SEEDER", fmt.Sprint("Error getting app settings::",err.Error()), logger.LOG_LEVEL_ERROR)
+		logger.Log("SEEDER", fmt.Sprint("Error getting app settings::", err.Error()), logger.LOG_LEVEL_ERROR)
 		return
 	}
 	conn, err := sql.Open("postgres", appSettings.DBMasterConnectionString)
@@ -22,10 +22,11 @@ func Run() {
 		logger.Log("SEEDER", fmt.Sprint("Unable to connect to database: %v", err), logger.LOG_LEVEL_ERROR)
 	} else {
 		queries := gen.New(conn)
+		RoleSeeder{}.Run(queries)
 		CountriesSeeder{}.Run(queries)
+		UserSeeder{}.Run(queries)
 		PermissionsSeeder{}.Run(queries)
 		TtnmOrganizationSeeder{}.Run(queries)
-		RoleSeeder{}.Run(queries)
 		RoleHasPermissionsSeeder{}.Run(queries)
 		CountiesSeeder{}.Run(queries)
 		SubCountiesSeeder{}.Run(queries)

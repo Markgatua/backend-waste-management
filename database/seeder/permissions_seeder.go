@@ -35,39 +35,52 @@ type PermissionElement struct {
 	Name      string `json:"name"`
 	SubModule string `json:"sub_module"`
 	Action    string `json:"action"`
-	PermissionId int32 `json:"permission_id"`
 }
 
 func (permissionsSeeder PermissionsSeeder) Run(q *gen.Queries) {
 	logger.Log("[SEEDER/PERMISSIONS SEEDER]", "======= Seeding permissions======", logger.LOG_LEVEL_INFO)
-
 	jsonFile, err := os.Open("assets/data/permissions.json")
 	if err == nil {
 		byteValue, _ := ioutil.ReadAll(jsonFile)
-
 		permissions, err := UnmarshalPermissions(byteValue)
-
 		if err != nil {
 			logger.Log("[SEEDER/PERMISSIONS SEEDER]", fmt.Sprint("Error reading permissions file"), logger.LOG_LEVEL_ERROR)
 			return
 		}
+		permissionActions := []string{}
 		for _, v := range permissions {
-
 			for _, permissionElement := range v.Permissions {
-
 				q.CreatePermission(context.Background(), gen.CreatePermissionParams{
 					Name:      permissionElement.Name,
 					Action:    permissionElement.Action,
 					Module:    v.Module,
-					Submodule: sql.NullString{String:fmt.Sprint(permissionElement.SubModule),Valid: true},
+					Submodule: sql.NullString{String: permissionElement.SubModule, Valid: true},
 				})
+				permissionActions = append(permissionActions, permissionElement.Action)
 			}
-
 		}
 
+		fmt.Println(permissionActions)
+		//delete permissions which are not captured in the file
+		permissionIDs := []int32{}
+		q.DeletePermissionByActions(context.Background(), permissionActions)
+		permissions_, err := q.GetAllPermissions(context.Background())
+		if err == nil {
+			for _, v := range permissions_ {
+				permissionIDs = append(permissionIDs, v.ID)
+			}
+		}
+
+		//superAdmin,_ := q.GetUserByEmail(context.Background(),sql.NullString{String: "superadmin@admin.com",Valid: true})
+		//insert super admin permissions
+		for _, v := range permissionIDs {
+			q.AssignPermissionToRole(context.Background(), gen.AssignPermissionToRoleParams{
+				RoleID:       1,
+				PermissionID: v,
+			})
+		}
 	} else {
 		fmt.Println("Error reading from json file -- ", err.Error())
 	}
-
 	defer jsonFile.Close()
 }

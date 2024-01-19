@@ -12,17 +12,17 @@ import (
 )
 
 const createAdmin = `-- name: CreateAdmin :exec
-insert into users (first_name,last_name,email,provider,role_id,email,password) VALUES($1,$2,$3,$4,$5,$6,$7)
+insert into users (first_name,last_name,email,provider,role_id,password,confirmed_at) VALUES($1,$2,$3,$4,$5,$6,$7)
 `
 
 type CreateAdminParams struct {
-	FirstName sql.NullString `json:"first_name"`
-	LastName  sql.NullString `json:"last_name"`
-	Email     sql.NullString `json:"email"`
-	Provider  sql.NullString `json:"provider"`
-	RoleID    sql.NullInt32  `json:"role_id"`
-	Email_2   sql.NullString `json:"email_2"`
-	Password  sql.NullString `json:"password"`
+	FirstName   sql.NullString `json:"first_name"`
+	LastName    sql.NullString `json:"last_name"`
+	Email       sql.NullString `json:"email"`
+	Provider    sql.NullString `json:"provider"`
+	RoleID      sql.NullInt32  `json:"role_id"`
+	Password    sql.NullString `json:"password"`
+	ConfirmedAt sql.NullTime   `json:"confirmed_at"`
 }
 
 func (q *Queries) CreateAdmin(ctx context.Context, arg CreateAdminParams) error {
@@ -32,8 +32,8 @@ func (q *Queries) CreateAdmin(ctx context.Context, arg CreateAdminParams) error 
 		arg.Email,
 		arg.Provider,
 		arg.RoleID,
-		arg.Email_2,
 		arg.Password,
+		arg.ConfirmedAt,
 	)
 	return err
 }
@@ -94,6 +94,40 @@ select id, first_name, last_name, provider, role_id, user_company_id, email, pas
 
 func (q *Queries) GetUser(ctx context.Context, id int32) (User, error) {
 	row := q.db.QueryRowContext(ctx, getUser, id)
+	var i User
+	err := row.Scan(
+		&i.ID,
+		&i.FirstName,
+		&i.LastName,
+		&i.Provider,
+		&i.RoleID,
+		&i.UserCompanyID,
+		&i.Email,
+		&i.Password,
+		&i.AvatarUrl,
+		&i.UserType,
+		&i.IsActive,
+		&i.CallingCode,
+		&i.Phone,
+		&i.PhoneConfirmedAt,
+		&i.ConfirmedAt,
+		&i.ConfirmationToken,
+		&i.ConfirmationSentAt,
+		&i.RecoveryToken,
+		&i.RecoverySentAt,
+		&i.LastLogin,
+		&i.CreatedAt,
+		&i.UpdatedAt,
+	)
+	return i, err
+}
+
+const getUserByEmail = `-- name: GetUserByEmail :one
+select id, first_name, last_name, provider, role_id, user_company_id, email, password, avatar_url, user_type, is_active, calling_code, phone, phone_confirmed_at, confirmed_at, confirmation_token, confirmation_sent_at, recovery_token, recovery_sent_at, last_login, created_at, updated_at from users where email = $1
+`
+
+func (q *Queries) GetUserByEmail(ctx context.Context, email sql.NullString) (User, error) {
+	row := q.db.QueryRowContext(ctx, getUserByEmail, email)
 	var i User
 	err := row.Scan(
 		&i.ID,

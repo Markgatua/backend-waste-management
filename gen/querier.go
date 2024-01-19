@@ -59,6 +59,7 @@ type Querier interface {
 	GetTTNMOrganizations(ctx context.Context, organizationID string) ([]TtnmOrganization, error)
 	GetTheCollectorForAChampion(ctx context.Context, championID sql.NullInt32) (GetTheCollectorForAChampionRow, error)
 	GetUser(ctx context.Context, id int32) (User, error)
+	GetUserByEmail(ctx context.Context, email sql.NullString) (User, error)
 	GetUsersWasteGroups(ctx context.Context) ([]WasteGroup, error)
 	GetUsersWithRole(ctx context.Context) ([]GetUsersWithRoleRow, error)
 	InsertCompany(ctx context.Context, arg InsertCompanyParams) (Company, error)
