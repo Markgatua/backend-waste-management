@@ -6,7 +6,6 @@ import (
 	"ttnmwastemanagementsystem/appsettings"
 	"ttnmwastemanagementsystem/gen"
 	"ttnmwastemanagementsystem/logger"
-
 	_ "github.com/lib/pq"
 )
 

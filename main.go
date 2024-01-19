@@ -84,7 +84,7 @@ func runProgram() {
 		auth.GET("/challenge/enter_new_password/web", authController.EnterNewPassword)
 		auth.POST("/reset_password/email/web", authController.ResetPassword)
 
-		auth.POST("/register/email", authController.RegisterUserEmail)
+		auth.POST("/register/email/:organization", authController.RegisterUserEmail)
 		auth.GET("/challenge/verify_email/web", authController.VerifyEmail)
 		auth.POST("/challenge/send_email_verfication/web", authController.SendVerificationMail)
 		auth.POST("/login/email", authController.LoginEmail)

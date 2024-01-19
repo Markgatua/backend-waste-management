@@ -36,11 +36,8 @@ func (usersController UsersController) GetAllTTNMUsers(context *gin.Context) {
 
 func (usersController UsersController) GetTTNMUser(context *gin.Context) {
 	id := context.Param("id")
-
 	id_, _ := strconv.ParseUint(id, 10, 32)
-	println("------------------------------", id_)
 	user, err := gen.REPO.GetTTNMUser(context, int32(id_))
-
 	if err != nil {
 		context.JSON(http.StatusUnprocessableEntity, gin.H{
 			"error":   true,
@@ -48,7 +45,6 @@ func (usersController UsersController) GetTTNMUser(context *gin.Context) {
 		})
 		return
 	}
-
 	context.JSON(http.StatusOK, gin.H{
 		"error": false,
 		"user":  user,
