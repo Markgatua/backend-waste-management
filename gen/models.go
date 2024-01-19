@@ -150,6 +150,7 @@ type User struct {
 	Provider           sql.NullString `json:"provider"`
 	RoleID             sql.NullInt32  `json:"role_id"`
 	UserCompanyID      sql.NullInt32  `json:"user_company_id"`
+	IsTtnmUser         bool           `json:"is_ttnm_user"`
 	Email              sql.NullString `json:"email"`
 	Password           sql.NullString `json:"password"`
 	AvatarUrl          sql.NullString `json:"avatar_url"`

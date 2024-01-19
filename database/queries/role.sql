@@ -13,7 +13,7 @@ INSERT INTO roles (id,name,guard_name,description,is_active) VALUES (
 SELECT count(*) FROM roles where name = sqlc.arg('name');
 
 -- name: GetRoles :many
-select * from roles;
+select * from roles where id !=12;
 
 -- name: GetRole :one
 select * from roles where id=sqlc.arg('id');

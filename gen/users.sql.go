@@ -11,11 +11,15 @@ import (
 	"time"
 )
 
-const createAdmin = `-- name: CreateAdmin :exec
-insert into users (first_name,last_name,email,provider,role_id,password,confirmed_at) VALUES($1,$2,$3,$4,$5,$6,$7)
+const createTTNMAdmin = `-- name: CreateTTNMAdmin :exec
+insert into
+    users (
+        first_name, last_name, email, provider, role_id, password, confirmed_at,is_ttnm_user
+    )
+VALUES ($1, $2, $3, $4, $5, $6, $7,$8)
 `
 
-type CreateAdminParams struct {
+type CreateTTNMAdminParams struct {
 	FirstName   sql.NullString `json:"first_name"`
 	LastName    sql.NullString `json:"last_name"`
 	Email       sql.NullString `json:"email"`
@@ -23,10 +27,11 @@ type CreateAdminParams struct {
 	RoleID      sql.NullInt32  `json:"role_id"`
 	Password    sql.NullString `json:"password"`
 	ConfirmedAt sql.NullTime   `json:"confirmed_at"`
+	IsTtnmUser  bool           `json:"is_ttnm_user"`
 }
 
-func (q *Queries) CreateAdmin(ctx context.Context, arg CreateAdminParams) error {
-	_, err := q.db.ExecContext(ctx, createAdmin,
+func (q *Queries) CreateTTNMAdmin(ctx context.Context, arg CreateTTNMAdminParams) error {
+	_, err := q.db.ExecContext(ctx, createTTNMAdmin,
 		arg.FirstName,
 		arg.LastName,
 		arg.Email,
@@ -34,46 +39,50 @@ func (q *Queries) CreateAdmin(ctx context.Context, arg CreateAdminParams) error 
 		arg.RoleID,
 		arg.Password,
 		arg.ConfirmedAt,
+		arg.IsTtnmUser,
 	)
 	return err
 }
 
-const getAllUsers = `-- name: GetAllUsers :many
-select id, first_name, last_name, provider, role_id, user_company_id, email, password, avatar_url, user_type, is_active, calling_code, phone, phone_confirmed_at, confirmed_at, confirmation_token, confirmation_sent_at, recovery_token, recovery_sent_at, last_login, created_at, updated_at from users
+const getAllTTNMUsers = `-- name: GetAllTTNMUsers :many
+select users.id, users.first_name, users.last_name, users.email, users.avatar_url, users.calling_code, users.phone, users.is_active, roles.name as role_name
+from users
+    inner join roles on users.role_id = roles.id
+where
+    users.email not ilike 'superadmin@admin.com' and users.is_ttnm_user=true
 `
 
-func (q *Queries) GetAllUsers(ctx context.Context) ([]User, error) {
-	rows, err := q.db.QueryContext(ctx, getAllUsers)
+type GetAllTTNMUsersRow struct {
+	ID          int32          `json:"id"`
+	FirstName   sql.NullString `json:"first_name"`
+	LastName    sql.NullString `json:"last_name"`
+	Email       sql.NullString `json:"email"`
+	AvatarUrl   sql.NullString `json:"avatar_url"`
+	CallingCode sql.NullString `json:"calling_code"`
+	Phone       sql.NullString `json:"phone"`
+	IsActive    sql.NullBool   `json:"is_active"`
+	RoleName    string         `json:"role_name"`
+}
+
+func (q *Queries) GetAllTTNMUsers(ctx context.Context) ([]GetAllTTNMUsersRow, error) {
+	rows, err := q.db.QueryContext(ctx, getAllTTNMUsers)
 	if err != nil {
 		return nil, err
 	}
 	defer rows.Close()
-	items := []User{}
+	items := []GetAllTTNMUsersRow{}
 	for rows.Next() {
-		var i User
+		var i GetAllTTNMUsersRow
 		if err := rows.Scan(
 			&i.ID,
 			&i.FirstName,
 			&i.LastName,
-			&i.Provider,
-			&i.RoleID,
-			&i.UserCompanyID,
 			&i.Email,
-			&i.Password,
 			&i.AvatarUrl,
-			&i.UserType,
-			&i.IsActive,
 			&i.CallingCode,
 			&i.Phone,
-			&i.PhoneConfirmedAt,
-			&i.ConfirmedAt,
-			&i.ConfirmationToken,
-			&i.ConfirmationSentAt,
-			&i.RecoveryToken,
-			&i.RecoverySentAt,
-			&i.LastLogin,
-			&i.CreatedAt,
-			&i.UpdatedAt,
+			&i.IsActive,
+			&i.RoleName,
 		); err != nil {
 			return nil, err
 		}
@@ -88,12 +97,12 @@ func (q *Queries) GetAllUsers(ctx context.Context) ([]User, error) {
 	return items, nil
 }
 
-const getUser = `-- name: GetUser :one
-select id, first_name, last_name, provider, role_id, user_company_id, email, password, avatar_url, user_type, is_active, calling_code, phone, phone_confirmed_at, confirmed_at, confirmation_token, confirmation_sent_at, recovery_token, recovery_sent_at, last_login, created_at, updated_at from users where id=$1
+const getTTNMUser = `-- name: GetTTNMUser :one
+select id, first_name, last_name, provider, role_id, user_company_id, is_ttnm_user, email, password, avatar_url, user_type, is_active, calling_code, phone, phone_confirmed_at, confirmed_at, confirmation_token, confirmation_sent_at, recovery_token, recovery_sent_at, last_login, created_at, updated_at from users where id = $1
 `
 
-func (q *Queries) GetUser(ctx context.Context, id int32) (User, error) {
-	row := q.db.QueryRowContext(ctx, getUser, id)
+func (q *Queries) GetTTNMUser(ctx context.Context, id int32) (User, error) {
+	row := q.db.QueryRowContext(ctx, getTTNMUser, id)
 	var i User
 	err := row.Scan(
 		&i.ID,
@@ -102,6 +111,7 @@ func (q *Queries) GetUser(ctx context.Context, id int32) (User, error) {
 		&i.Provider,
 		&i.RoleID,
 		&i.UserCompanyID,
+		&i.IsTtnmUser,
 		&i.Email,
 		&i.Password,
 		&i.AvatarUrl,
@@ -122,12 +132,12 @@ func (q *Queries) GetUser(ctx context.Context, id int32) (User, error) {
 	return i, err
 }
 
-const getUserByEmail = `-- name: GetUserByEmail :one
-select id, first_name, last_name, provider, role_id, user_company_id, email, password, avatar_url, user_type, is_active, calling_code, phone, phone_confirmed_at, confirmed_at, confirmation_token, confirmation_sent_at, recovery_token, recovery_sent_at, last_login, created_at, updated_at from users where email = $1
+const getTTNMUserByEmail = `-- name: GetTTNMUserByEmail :one
+select id, first_name, last_name, provider, role_id, user_company_id, is_ttnm_user, email, password, avatar_url, user_type, is_active, calling_code, phone, phone_confirmed_at, confirmed_at, confirmation_token, confirmation_sent_at, recovery_token, recovery_sent_at, last_login, created_at, updated_at from users where email = $1
 `
 
-func (q *Queries) GetUserByEmail(ctx context.Context, email sql.NullString) (User, error) {
-	row := q.db.QueryRowContext(ctx, getUserByEmail, email)
+func (q *Queries) GetTTNMUserByEmail(ctx context.Context, email sql.NullString) (User, error) {
+	row := q.db.QueryRowContext(ctx, getTTNMUserByEmail, email)
 	var i User
 	err := row.Scan(
 		&i.ID,
@@ -136,6 +146,7 @@ func (q *Queries) GetUserByEmail(ctx context.Context, email sql.NullString) (Use
 		&i.Provider,
 		&i.RoleID,
 		&i.UserCompanyID,
+		&i.IsTtnmUser,
 		&i.Email,
 		&i.Password,
 		&i.AvatarUrl,
@@ -157,7 +168,9 @@ func (q *Queries) GetUserByEmail(ctx context.Context, email sql.NullString) (Use
 }
 
 const getUsersWithRole = `-- name: GetUsersWithRole :many
-select users.id, users.first_name, users.last_name, users.provider, users.role_id, users.user_company_id, users.email, users.password, users.avatar_url, users.user_type, users.is_active, users.calling_code, users.phone, users.phone_confirmed_at, users.confirmed_at, users.confirmation_token, users.confirmation_sent_at, users.recovery_token, users.recovery_sent_at, users.last_login, users.created_at, users.updated_at, roles.name from users INNER JOIN roles ON users.role_id=roles.id
+select users.id, users.first_name, users.last_name, users.provider, users.role_id, users.user_company_id, users.is_ttnm_user, users.email, users.password, users.avatar_url, users.user_type, users.is_active, users.calling_code, users.phone, users.phone_confirmed_at, users.confirmed_at, users.confirmation_token, users.confirmation_sent_at, users.recovery_token, users.recovery_sent_at, users.last_login, users.created_at, users.updated_at, roles.name
+from users
+    INNER JOIN roles ON users.role_id = roles.id
 `
 
 type GetUsersWithRoleRow struct {
@@ -167,6 +180,7 @@ type GetUsersWithRoleRow struct {
 	Provider           sql.NullString `json:"provider"`
 	RoleID             sql.NullInt32  `json:"role_id"`
 	UserCompanyID      sql.NullInt32  `json:"user_company_id"`
+	IsTtnmUser         bool           `json:"is_ttnm_user"`
 	Email              sql.NullString `json:"email"`
 	Password           sql.NullString `json:"password"`
 	AvatarUrl          sql.NullString `json:"avatar_url"`
@@ -202,6 +216,7 @@ func (q *Queries) GetUsersWithRole(ctx context.Context) ([]GetUsersWithRoleRow, 
 			&i.Provider,
 			&i.RoleID,
 			&i.UserCompanyID,
+			&i.IsTtnmUser,
 			&i.Email,
 			&i.Password,
 			&i.AvatarUrl,
@@ -233,17 +248,17 @@ func (q *Queries) GetUsersWithRole(ctx context.Context) ([]GetUsersWithRoleRow, 
 	return items, nil
 }
 
-const updateUser = `-- name: UpdateUser :exec
-update users set first_name=$1,last_name=$2 where id=$3
+const updateTTNMUser = `-- name: UpdateTTNMUser :exec
+update users set first_name = $1, last_name = $2 where id = $3
 `
 
-type UpdateUserParams struct {
+type UpdateTTNMUserParams struct {
 	FirstName sql.NullString `json:"first_name"`
 	LastName  sql.NullString `json:"last_name"`
 	ID        int32          `json:"id"`
 }
 
-func (q *Queries) UpdateUser(ctx context.Context, arg UpdateUserParams) error {
-	_, err := q.db.ExecContext(ctx, updateUser, arg.FirstName, arg.LastName, arg.ID)
+func (q *Queries) UpdateTTNMUser(ctx context.Context, arg UpdateTTNMUserParams) error {
+	_, err := q.db.ExecContext(ctx, updateTTNMUser, arg.FirstName, arg.LastName, arg.ID)
 	return err
 }

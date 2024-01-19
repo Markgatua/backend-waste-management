@@ -109,6 +109,7 @@ CREATE TABLE companies (
   FOREIGN Key (county_id) REFERENCES counties(id),
   FOREIGN Key (sub_county_id) REFERENCES sub_counties(id)
 );
+
 ALTER TABLE companies ADD CONSTRAINT check_company_type CHECK (company_type IN (1,2)); -- make sure company type is either 1 or 2
 
 -- Create "users" table
@@ -121,6 +122,7 @@ CREATE TABLE users(
     FOREIGN Key (role_id) REFERENCES roles(id),
     user_company_id INTEGER NULL,
     FOREIGN Key (user_company_id) REFERENCES companies(id),
+    is_ttnm_user BOOLEAN DEFAULT false not null,
     email VARCHAR(255) DEFAULT NULL UNIQUE,
     password TEXT DEFAULT NULL,
     avatar_url TEXT NULL,

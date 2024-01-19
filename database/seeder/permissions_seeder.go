@@ -78,6 +78,10 @@ func (permissionsSeeder PermissionsSeeder) Run(q *gen.Queries) {
 				RoleID:       1,
 				PermissionID: v,
 			})
+			q.AssignPermissionToRole(context.Background(), gen.AssignPermissionToRoleParams{
+				RoleID:       12,
+				PermissionID: v,
+			})
 		}
 	} else {
 		fmt.Println("Error reading from json file -- ", err.Error())

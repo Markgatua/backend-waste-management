@@ -690,6 +690,7 @@ func (auth AuthController) LoginEmail(context *gin.Context) {
 	}
 	user, err := GetEmailUser(loginUserEmailParam.Email)
 	if user == nil {
+		fmt.Print(err.Error())
 		context.JSON(http.StatusUnprocessableEntity, gin.H{
 			"error":   true,
 			"message": "User with the given email address does not exist",
