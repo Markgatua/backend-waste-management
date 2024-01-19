@@ -62,7 +62,18 @@ func runProgram() {
 
 	router.LoadHTMLGlob("templates/**/*")
 
-	router.Use(cors.Default())
+	//router.Use(cors.Default())
+	c := cors.New(cors.Options{
+		AllowedOrigins: []string{"http*"},
+		AllowedHeaders: []string{"*"},
+		AllowedMethods: []string{"PUT","POST","DELETE","OPTIONS","GET","PATCH"},
+		AllowCredentials: true,
+		// Enable Debugging for testing, consider disabling in production
+		Debug: true,
+	})
+	//router.Use(cors.Default())
+	router.Use(c)
+	
 
 
 	auth := router.Group("/auth")
@@ -144,6 +155,7 @@ func runProgram() {
 
 	router.GET("permissions", middlewares.PermissionBlockerMiddleware("view_permissions"), controllers.RoleAndPermissionsController{}.GetAllPermissions)
 	router.GET("permissions/:role_id", middlewares.PermissionBlockerMiddleware("view_permissions"), controllers.RoleAndPermissionsController{}.GetRolePermissions)
+	router.GET("permissions/active_role_permissions/:role_id",middlewares.PermissionBlockerMiddleware("view_permissions"),controllers.RoleAndPermissionsController{}.GetActiveRolePermissions)
 
 	router.PUT("assign_permissions_to_role", middlewares.PermissionBlockerMiddleware("assign_permissions_to_role"), controllers.RoleAndPermissionsController{}.AssignPermissionsToRole)
 	router.PUT("remove_permissions_from_role", middlewares.PermissionBlockerMiddleware("remove_permissions_from_role"), controllers.RoleAndPermissionsController{}.RemovePermissionsFromRole)

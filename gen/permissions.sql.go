@@ -73,6 +73,41 @@ func (q *Queries) DeletePermissionByIds(ctx context.Context, permissionIds []int
 	return err
 }
 
+const getAllPermissionGroupedByModule = `-- name: GetAllPermissionGroupedByModule :many
+SELECT id, name, action, created_at, updated_at, module, submodule FROM permissions GROUP BY id,module
+`
+
+func (q *Queries) GetAllPermissionGroupedByModule(ctx context.Context) ([]Permission, error) {
+	rows, err := q.db.QueryContext(ctx, getAllPermissionGroupedByModule)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	items := []Permission{}
+	for rows.Next() {
+		var i Permission
+		if err := rows.Scan(
+			&i.ID,
+			&i.Name,
+			&i.Action,
+			&i.CreatedAt,
+			&i.UpdatedAt,
+			&i.Module,
+			&i.Submodule,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
 const getAllPermissions = `-- name: GetAllPermissions :many
 SELECT id, name, action, created_at, updated_at, module, submodule FROM permissions
 `

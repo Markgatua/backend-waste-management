@@ -3,6 +3,9 @@
 -- name: GetRolePermissions :many
 SELECT * FROM role_has_permissions WHERE role_id = $1;
 
+-- name: RemoveRolePermissions :exec
+DELETE FROM role_has_permissions WHERE role_id = $1;
+
 -- name: AssignPermission :exec
 insert into role_has_permissions (role_id,permission_id) VALUES($1,$2);
 

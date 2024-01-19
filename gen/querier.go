@@ -35,6 +35,7 @@ type Querier interface {
 	GetAllCountries(ctx context.Context) ([]Country, error)
 	// regions.sql
 	GetAllOrganizations(ctx context.Context) ([]GetAllOrganizationsRow, error)
+	GetAllPermissionGroupedByModule(ctx context.Context) ([]Permission, error)
 	GetAllPermissions(ctx context.Context) ([]Permission, error)
 	GetAllUsers(ctx context.Context) ([]User, error)
 	// waste_groups.sql
@@ -69,6 +70,7 @@ type Querier interface {
 	InsertTTNMOrganization(ctx context.Context, arg InsertTTNMOrganizationParams) error
 	InsertWasteGroup(ctx context.Context, arg InsertWasteGroupParams) (WasteGroup, error)
 	RemovePermissionsFromRole(ctx context.Context, arg RemovePermissionsFromRoleParams) error
+	RemoveRolePermissions(ctx context.Context, roleID int32) error
 	RevokePermission(ctx context.Context, arg RevokePermissionParams) error
 	RoleExists(ctx context.Context, name string) (int64, error)
 	UpdateChampionCollector(ctx context.Context, arg UpdateChampionCollectorParams) error
