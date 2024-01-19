@@ -30,17 +30,7 @@ update roles set is_active = false where id = sqlc.arg('role_id');
 update roles set is_active = true where id = sqlc.arg('role_id');
 
 -- name: UpdateRole :exec
-update roles
-set
-    name = sqlc.arg('name'),
-    is_active =sqlc.arg('is_active'),
-    description = sqlc.arg('description') where id = sqlc.arg('role_id');
+update roles set name = sqlc.arg('name'), is_active =sqlc.arg('is_active'),description = sqlc.arg('description') where id = sqlc.arg('role_id');
 
 -- name: AssignPermissionToRole :exec
-insert into
-    role_has_permissions(role_id, permission_id)
-VALUES
-(
-        sqlc.arg('role_id'),
-        sqlc.arg('permission_id')
-    );
+insert into role_has_permissions(role_id, permission_id) VALUES (sqlc.arg('role_id'),sqlc.arg('permission_id'));
