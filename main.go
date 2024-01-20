@@ -106,7 +106,12 @@ func runProgram() {
 	router.Use(middlewares.JwtAuthMiddleware())
 	router.Use(middlewares.PermissionMiddleware())
 
-	router.GET("/users/ttnm",middlewares.PermissionBlockerMiddleware("view_user"), usersController.GetAllTTNMUsers)
+	router.GET("/users",middlewares.PermissionBlockerMiddleware("view_user"), usersController.GetAllUsers)
+	//main organizations is 
+	router.GET("/users/main_organization",middlewares.PermissionBlockerMiddleware("view_user"),usersController.GetAllTTNMUsers)
+
+	router.PUT("/users/set_active_inactive_status",middlewares.PermissionBlockerMiddleware("edit_user"), usersController.SetActiveInActiveStatus)
+
 	// router.POST("update/user",usersController.UpdateUSer)
 	// router.GET("/users/roles",usersController.GetUsersWithRole)
 	router.GET("/user/:id/ttnm",middlewares.PermissionBlockerMiddleware("view_user"), usersController.GetTTNMUser)

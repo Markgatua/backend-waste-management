@@ -16,9 +16,9 @@ type Querier interface {
 	AssignPermissionToRole(ctx context.Context, arg AssignPermissionToRoleParams) error
 	CheckSubCountiesDuplicate(ctx context.Context, name string) (int64, error)
 	CreateCountry(ctx context.Context, arg CreateCountryParams) error
+	CreateMainOrganizationAdmin(ctx context.Context, arg CreateMainOrganizationAdminParams) error
 	CreatePermission(ctx context.Context, arg CreatePermissionParams) (Permission, error)
 	CreateRole(ctx context.Context, arg CreateRoleParams) (Role, error)
-	CreateTTNMAdmin(ctx context.Context, arg CreateTTNMAdminParams) error
 	DeactivateRole(ctx context.Context, roleID int32) error
 	DeleteChampionCollector(ctx context.Context, id int32) error
 	DeleteCompany(ctx context.Context, id int32) error
@@ -33,11 +33,12 @@ type Querier interface {
 	// companies.sql
 	GetAllCompanies(ctx context.Context) ([]GetAllCompaniesRow, error)
 	GetAllCountries(ctx context.Context) ([]Country, error)
+	GetAllMainOrganizationUsers(ctx context.Context) ([]GetAllMainOrganizationUsersRow, error)
 	// regions.sql
 	GetAllOrganizations(ctx context.Context) ([]GetAllOrganizationsRow, error)
 	GetAllPermissionGroupedByModule(ctx context.Context) ([]Permission, error)
 	GetAllPermissions(ctx context.Context) ([]Permission, error)
-	GetAllTTNMUsers(ctx context.Context) ([]GetAllTTNMUsersRow, error)
+	GetAllUsers(ctx context.Context) ([]GetAllUsersRow, error)
 	// waste_groups.sql
 	GetAllWasteGroups(ctx context.Context) ([]WasteGroup, error)
 	GetAssignedCollectorsToGreenChampion(ctx context.Context, championID sql.NullInt32) ([]ChampionAggregatorAssignment, error)
@@ -47,6 +48,9 @@ type Querier interface {
 	GetDuplicateCompaniesWithoutID(ctx context.Context, arg GetDuplicateCompaniesWithoutIDParams) ([]Company, error)
 	GetDuplicateOrganization(ctx context.Context, arg GetDuplicateOrganizationParams) ([]Organization, error)
 	GetDuplicateRoleHasPermission(ctx context.Context, arg GetDuplicateRoleHasPermissionParams) (int64, error)
+	GetMainOrganization(ctx context.Context, organizationID string) ([]MainOrganization, error)
+	GetMainOrganizationUser(ctx context.Context, id int32) (User, error)
+	GetMainOrganizationUserByEmail(ctx context.Context, email sql.NullString) (User, error)
 	GetOneWasteGroup(ctx context.Context, id int32) (WasteGroup, error)
 	GetOrganization(ctx context.Context, id int32) (GetOrganizationRow, error)
 	GetOrganizationCountWithNameAndCountry(ctx context.Context, arg GetOrganizationCountWithNameAndCountryParams) ([]Organization, error)
@@ -56,19 +60,16 @@ type Querier interface {
 	GetRolePermissions(ctx context.Context, roleID int32) ([]RoleHasPermission, error)
 	GetRoles(ctx context.Context) ([]Role, error)
 	GetSubCountiesForACounty(ctx context.Context, countyID int32) ([]SubCounty, error)
-	GetTTNMOrganizations(ctx context.Context, organizationID string) ([]TtnmOrganization, error)
-	GetTTNMUser(ctx context.Context, id int32) (User, error)
-	GetTTNMUserByEmail(ctx context.Context, email sql.NullString) (User, error)
 	GetTheCollectorForAChampion(ctx context.Context, championID sql.NullInt32) (GetTheCollectorForAChampionRow, error)
 	GetUsersWasteGroups(ctx context.Context) ([]WasteGroup, error)
 	GetUsersWithRole(ctx context.Context) ([]GetUsersWithRoleRow, error)
 	InsertCompany(ctx context.Context, arg InsertCompanyParams) (Company, error)
 	// counties.sql
 	InsertCounties(ctx context.Context, name string) error
+	InsertMainOrganization(ctx context.Context, arg InsertMainOrganizationParams) error
 	InsertOrganization(ctx context.Context, arg InsertOrganizationParams) (Organization, error)
 	// sub_counties.sql
 	InsertSubcounties(ctx context.Context, arg InsertSubcountiesParams) error
-	InsertTTNMOrganization(ctx context.Context, arg InsertTTNMOrganizationParams) error
 	InsertWasteGroup(ctx context.Context, arg InsertWasteGroupParams) (WasteGroup, error)
 	RemovePermissionsFromRole(ctx context.Context, arg RemovePermissionsFromRoleParams) error
 	RemoveRolePermissions(ctx context.Context, roleID int32) error
@@ -77,11 +78,12 @@ type Querier interface {
 	UpdateChampionCollector(ctx context.Context, arg UpdateChampionCollectorParams) error
 	UpdateCompany(ctx context.Context, arg UpdateCompanyParams) error
 	UpdateCompanyStatus(ctx context.Context, arg UpdateCompanyStatusParams) error
+	// ttnm_organization.sql
+	UpdateMainOrganizationProfile(ctx context.Context, arg UpdateMainOrganizationProfileParams) error
+	UpdateMainOrganizationUser(ctx context.Context, arg UpdateMainOrganizationUserParams) error
 	UpdateOrganization(ctx context.Context, arg UpdateOrganizationParams) error
 	UpdateRole(ctx context.Context, arg UpdateRoleParams) error
-	UpdateTTNMUser(ctx context.Context, arg UpdateTTNMUserParams) error
-	// ttnm_organization.sql
-	UpdateTtnmOrganizationProfile(ctx context.Context, arg UpdateTtnmOrganizationProfileParams) error
+	UpdateUserIsActive(ctx context.Context, arg UpdateUserIsActiveParams) error
 	UpdateWasteGroup(ctx context.Context, arg UpdateWasteGroupParams) error
 	ViewCounties(ctx context.Context) ([]County, error)
 	ViewSubCounties(ctx context.Context) ([]SubCounty, error)

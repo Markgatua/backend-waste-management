@@ -25,23 +25,23 @@ type UpdateTtnmOrganizationProfileParams struct {
 	AppGooglePlaystoreLink string `json:"app_google_playstore_link"`
 }
 
-func(ttnmOrganizationController TtnmOrganizationController) GetTTNMOrganizations(context *gin.Context){
-	id :=  context.Param("id")
+func (ttnmOrganizationController TtnmOrganizationController) GetTTNMOrganizations(context *gin.Context) {
+	id := context.Param("id")
 
-	id_,_ :=strconv.ParseUint(id,10,32);
-	println("------------------------------",id_)
-	ttnm, err := gen.REPO.GetTTNMOrganizations(context, id)
+	id_, _ := strconv.ParseUint(id, 10, 32)
+	println("------------------------------", id_)
+	ttnm, err := gen.REPO.GetMainOrganization(context, id)
 
-	if err!=nil{
-		context.JSON(http.StatusUnprocessableEntity,gin.H{
-			"error":true,
-			"message":err.Error(),
+	if err != nil {
+		context.JSON(http.StatusUnprocessableEntity, gin.H{
+			"error":   true,
+			"message": err.Error(),
 		})
 		return
 	}
 
-	context.JSON(http.StatusOK,gin.H{
-		"error":  false,
+	context.JSON(http.StatusOK, gin.H{
+		"error":   false,
 		"Profile": ttnm,
 	})
 }
@@ -57,18 +57,17 @@ func (ttnmOrganizationController TtnmOrganizationController) UpdateTtnmOrganizat
 		return
 	}
 
-	updateError := gen.REPO.UpdateTtnmOrganizationProfile(context, gen.UpdateTtnmOrganizationProfileParams{
+	updateError := gen.REPO.UpdateMainOrganizationProfile(context, gen.UpdateMainOrganizationProfileParams{
 		OrganizationID: params.OrganizationID,
-		Name: params.Name,
-		TagLine: params.TagLine,
-		AboutUs: params.AboutUs,
-		LogoPath: params.LogoPath,
-		WebsiteUrl: params.WebsiteUrl,
-		Country: params.Country,
-		City: params.City,
-		Zip: params.Zip,
-		State: params.State,
-		
+		Name:           params.Name,
+		TagLine:        params.TagLine,
+		AboutUs:        params.AboutUs,
+		LogoPath:       params.LogoPath,
+		WebsiteUrl:     params.WebsiteUrl,
+		Country:        params.Country,
+		City:           params.City,
+		Zip:            params.Zip,
+		State:          params.State,
 	})
 	if updateError != nil {
 		context.JSON(http.StatusUnprocessableEntity, gin.H{

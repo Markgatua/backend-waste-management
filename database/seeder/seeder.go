@@ -3,10 +3,10 @@ package seeder
 import (
 	"database/sql"
 	"fmt"
+	_ "github.com/lib/pq"
 	"ttnmwastemanagementsystem/appsettings"
 	"ttnmwastemanagementsystem/gen"
 	"ttnmwastemanagementsystem/logger"
-	_ "github.com/lib/pq"
 )
 
 func Run() {
@@ -25,7 +25,7 @@ func Run() {
 		CountriesSeeder{}.Run(queries)
 		UserSeeder{}.Run(queries)
 		PermissionsSeeder{}.Run(queries)
-		TtnmOrganizationSeeder{}.Run(queries)
+		MainOrganizationSeeder{}.Run(queries)
 		RoleHasPermissionsSeeder{}.Run(queries)
 		CountiesSeeder{}.Run(queries)
 		SubCountiesSeeder{}.Run(queries)

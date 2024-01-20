@@ -94,6 +94,8 @@ type PhoneVerificationToken struct {
 
 type AuthController struct{}
 
+
+
 func IsVerificationTokenValid(token string) (bool, error) {
 	tokenExpirationTime := configs.EnvConfigs.AcoountVerificationTokenExpirationTime
 	//	if !tokenExpirationTime.Valid {/

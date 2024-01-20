@@ -75,7 +75,7 @@ CREATE TABLE organizations(
   FOREIGN Key (country_id) REFERENCES countries(id) on delete set null
 );
 
-CREATE TABLE ttnm_organization(
+CREATE TABLE main_organization(
   id SERIAL PRIMARY KEY,
   organization_id VARCHAR(255) NOT NULL,
   name VARCHAR(255) NOT NULL,
@@ -122,7 +122,7 @@ CREATE TABLE users(
     FOREIGN Key (role_id) REFERENCES roles(id),
     user_company_id INTEGER NULL,
     FOREIGN Key (user_company_id) REFERENCES companies(id),
-    is_ttnm_user BOOLEAN DEFAULT false not null,
+    is_main_organization_user BOOLEAN DEFAULT false not null,
     email VARCHAR(255) DEFAULT NULL UNIQUE,
     password TEXT DEFAULT NULL,
     avatar_url TEXT NULL,
