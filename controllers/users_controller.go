@@ -109,6 +109,23 @@ func (usersController UsersController) GetMainOrganizationUser(context *gin.Cont
 	})
 }
 
+func (usersController UsersController) GetUser(context *gin.Context) {
+	id := context.Param("id")
+	id_, _ := strconv.ParseUint(id, 10, 32)
+	user, err := gen.REPO.GetMainOrganizationUser(context, int32(id_))
+	if err != nil {
+		context.JSON(http.StatusUnprocessableEntity, gin.H{
+			"error":   true,
+			"message": err.Error(),
+		})
+		return
+	}
+	context.JSON(http.StatusOK, gin.H{
+		"error": false,
+		"user":  user,
+	})
+}
+
 func (usersController UsersController) UpdateMainOrganizationUser(context *gin.Context) {
 	var params UpdateUserParams
 	err := context.ShouldBindJSON(&params)

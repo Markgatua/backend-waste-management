@@ -4,7 +4,6 @@ import (
 	"fmt"
 	_ "fmt"
 	"os"
-	_"time"
 	_ "time"
 	"ttnmwastemanagementsystem/configs"
 	"ttnmwastemanagementsystem/controllers"
@@ -12,9 +11,9 @@ import (
 	"ttnmwastemanagementsystem/gen"
 	"ttnmwastemanagementsystem/middlewares"
 
-	cors "github.com/rs/cors/wrapper/gin"
 	"github.com/gin-gonic/gin"
 	"github.com/muesli/cache2go"
+	cors "github.com/rs/cors/wrapper/gin"
 )
 
 func main() {
@@ -64,17 +63,15 @@ func runProgram() {
 
 	//router.Use(cors.Default())
 	c := cors.New(cors.Options{
-		AllowedOrigins: []string{"http*"},
-		AllowedHeaders: []string{"*"},
-		AllowedMethods: []string{"PUT","POST","DELETE","OPTIONS","GET","PATCH"},
+		AllowedOrigins:   []string{"http*"},
+		AllowedHeaders:   []string{"*"},
+		AllowedMethods:   []string{"PUT", "POST", "DELETE", "OPTIONS", "GET", "PATCH"},
 		AllowCredentials: true,
 		// Enable Debugging for testing, consider disabling in production
 		Debug: true,
 	})
 	//router.Use(cors.Default())
 	router.Use(c)
-	
-
 
 	auth := router.Group("/auth")
 	{
@@ -106,15 +103,16 @@ func runProgram() {
 	router.Use(middlewares.JwtAuthMiddleware())
 	router.Use(middlewares.PermissionMiddleware())
 
-	router.GET("/users",middlewares.PermissionBlockerMiddleware("view_user"), usersController.GetAllUsers)
-	//main organizations is 
-	router.GET("/users/main_organization",middlewares.PermissionBlockerMiddleware("view_user"),usersController.GetAllTTNMUsers)
+	router.GET("/users", middlewares.PermissionBlockerMiddleware("view_user"), usersController.GetAllUsers)
+	//main organizations is
+	router.GET("/users/main_organization", middlewares.PermissionBlockerMiddleware("view_user"), usersController.GetAllMainOrganizationUsers)
 
-	router.PUT("/users/set_active_inactive_status",middlewares.PermissionBlockerMiddleware("edit_user"), usersController.SetActiveInActiveStatus)
+	router.PUT("/users/set_active_inactive_status", middlewares.PermissionBlockerMiddleware("edit_user"), usersController.SetActiveInActiveStatus)
 
 	// router.POST("update/user",usersController.UpdateUSer)
 	// router.GET("/users/roles",usersController.GetUsersWithRole)
-	router.GET("/user/:id/ttnm",middlewares.PermissionBlockerMiddleware("view_user"), usersController.GetTTNMUser)
+	router.GET("/user/:id/main_organization", middlewares.PermissionBlockerMiddleware("view_user"), usersController.GetMainOrganizationUser)
+	router.GET("/user/:id", middlewares.PermissionBlockerMiddleware("view_user"), usersController.GetUser)
 
 	//---------------------------countries-------------------------------------------------------
 	router.GET("countries", geoController.GetAllCountries)
@@ -160,7 +158,7 @@ func runProgram() {
 
 	router.GET("permissions", middlewares.PermissionBlockerMiddleware("view_permissions"), controllers.RoleAndPermissionsController{}.GetAllPermissions)
 	router.GET("permissions/:role_id", middlewares.PermissionBlockerMiddleware("view_permissions"), controllers.RoleAndPermissionsController{}.GetRolePermissions)
-	router.GET("permissions/active_role_permissions/:role_id",middlewares.PermissionBlockerMiddleware("view_permissions"),controllers.RoleAndPermissionsController{}.GetActiveRolePermissions)
+	router.GET("permissions/active_role_permissions/:role_id", middlewares.PermissionBlockerMiddleware("view_permissions"), controllers.RoleAndPermissionsController{}.GetActiveRolePermissions)
 
 	router.PUT("assign_permissions_to_role", middlewares.PermissionBlockerMiddleware("assign_permissions_to_role"), controllers.RoleAndPermissionsController{}.AssignPermissionsToRole)
 	router.PUT("remove_permissions_from_role", middlewares.PermissionBlockerMiddleware("remove_permissions_from_role"), controllers.RoleAndPermissionsController{}.RemovePermissionsFromRole)
@@ -184,7 +182,6 @@ func runProgram() {
 	// apiGroup.GET("settings/wastegroups/all", wasteGroupController.GetAllWasteGroups)
 	// apiGroup.GET("settings/wastegroups/wastegroup/:id", wasteGroupController.GetOneWasteGroup)
 	//--------------------------------------------------------------------------------------------
-
 
 	router.Run()
 	//fmt.Println("Hello dabid")
