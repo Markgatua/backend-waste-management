@@ -11,7 +11,7 @@ type User struct {
 	RoleId             null.Int    `db:"role_id" json:"role_id"`
 	UserCompanyId      null.Int    `db:"user_company_id"  json:"user_company_id"`
 	Password           null.String `db:"password" json:"-"`
-	ISttnm_user        bool        `db:"is_ttnm_user" json:"-"`
+	IsMainOrganization_user        bool        `db:"is_main_organization_user" json:"-"`
 	IsActive           null.Bool   `db:"is_active" json:"is_active"`
 	CallingCode        null.String `db:"calling_code" json:"calling_code"`
 	AvatarUrl          null.String `db:"avatar_url" json:"avatar_url"`
