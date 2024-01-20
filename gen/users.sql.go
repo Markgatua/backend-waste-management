@@ -41,7 +41,7 @@ func (q *Queries) CreateMainOrganizationAdmin(ctx context.Context, arg CreateMai
 }
 
 const getAllMainOrganizationUsers = `-- name: GetAllMainOrganizationUsers :many
-select users.id, users.first_name, users.last_name, users.email, users.avatar_url, users.calling_code, users.phone, users.is_active, roles.name as role_name
+select users.id, users.first_name, users.last_name, users.email, users.avatar_url, users.calling_code, users.phone, users.is_active, roles.name as role_name,roles.id as role_id
 from users
     inner join roles on users.role_id = roles.id
 where
@@ -58,6 +58,7 @@ type GetAllMainOrganizationUsersRow struct {
 	Phone       sql.NullString `json:"phone"`
 	IsActive    sql.NullBool   `json:"is_active"`
 	RoleName    string         `json:"role_name"`
+	RoleID      int32          `json:"role_id"`
 }
 
 func (q *Queries) GetAllMainOrganizationUsers(ctx context.Context) ([]GetAllMainOrganizationUsersRow, error) {
@@ -79,6 +80,7 @@ func (q *Queries) GetAllMainOrganizationUsers(ctx context.Context) ([]GetAllMain
 			&i.Phone,
 			&i.IsActive,
 			&i.RoleName,
+			&i.RoleID,
 		); err != nil {
 			return nil, err
 		}
@@ -94,7 +96,7 @@ func (q *Queries) GetAllMainOrganizationUsers(ctx context.Context) ([]GetAllMain
 }
 
 const getAllUsers = `-- name: GetAllUsers :many
-select users.id, users.first_name, users.last_name, users.email, users.avatar_url, users.calling_code, users.phone, users.is_active, roles.name as role_name
+select users.id, users.first_name, users.last_name, users.email, users.avatar_url, users.calling_code, users.phone, users.is_active, roles.name as role_name,roles.id as role_id
 from users
     inner join roles on users.role_id = roles.id
 where
@@ -111,6 +113,7 @@ type GetAllUsersRow struct {
 	Phone       sql.NullString `json:"phone"`
 	IsActive    sql.NullBool   `json:"is_active"`
 	RoleName    string         `json:"role_name"`
+	RoleID      int32          `json:"role_id"`
 }
 
 func (q *Queries) GetAllUsers(ctx context.Context) ([]GetAllUsersRow, error) {
@@ -132,6 +135,7 @@ func (q *Queries) GetAllUsers(ctx context.Context) ([]GetAllUsersRow, error) {
 			&i.Phone,
 			&i.IsActive,
 			&i.RoleName,
+			&i.RoleID,
 		); err != nil {
 			return nil, err
 		}

@@ -1,5 +1,5 @@
 -- name: GetAllMainOrganizationUsers :many
-select users.id, users.first_name, users.last_name, users.email, users.avatar_url, users.calling_code, users.phone, users.is_active, roles.name as role_name
+select users.id, users.first_name, users.last_name, users.email, users.avatar_url, users.calling_code, users.phone, users.is_active, roles.name as role_name,roles.id as role_id
 from users
     inner join roles on users.role_id = roles.id
 where
@@ -7,7 +7,7 @@ where
 
 
 -- name: GetAllUsers :many
-select users.id, users.first_name, users.last_name, users.email, users.avatar_url, users.calling_code, users.phone, users.is_active, roles.name as role_name
+select users.id, users.first_name, users.last_name, users.email, users.avatar_url, users.calling_code, users.phone, users.is_active, roles.name as role_name,roles.id as role_id
 from users
     inner join roles on users.role_id = roles.id
 where
