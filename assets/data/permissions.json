@@ -45,6 +45,12 @@
                 "name": "Delete user",
                 "sub_module": "user",
                 "action": "delete_user"
+            },
+            {
+                "permission_id": 103,
+                "name": "Update user password",
+                "sub_module": "user",
+                "action": "update_user_password"
             }
 
         ]

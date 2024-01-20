@@ -72,10 +72,9 @@ func runProgram() {
 	})
 	//router.Use(cors.Default())
 	router.Use(c)
-
+	authController := controllers.AuthController{}
 	auth := router.Group("/auth")
 	{
-		authController := controllers.AuthController{}
 		auth.GET("/challenge/password_reset_success/email/web", authController.PassWordResetSuccess)
 		auth.POST("/challenge/submit_new_password/email/web", authController.SubmitNewPassword)
 		auth.GET("/challenge/enter_new_password/web", authController.EnterNewPassword)
@@ -106,13 +105,16 @@ func runProgram() {
 	router.GET("/users", middlewares.PermissionBlockerMiddleware("view_user"), usersController.GetAllUsers)
 	//main organizations is
 	router.GET("/users/main_organization", middlewares.PermissionBlockerMiddleware("view_user"), usersController.GetAllMainOrganizationUsers)
-
 	router.PUT("/users/set_active_inactive_status", middlewares.PermissionBlockerMiddleware("edit_user"), usersController.SetActiveInActiveStatus)
+	router.PUT("/users/edit/email/:organization", middlewares.PermissionBlockerMiddleware("edit_user"), authController.EditUserEmail)
+	router.PUT("/user/update_password", middlewares.PermissionBlockerMiddleware("update_user_password"), authController.UpdateUserPassword)
+
 
 	// router.POST("update/user",usersController.UpdateUSer)
 	// router.GET("/users/roles",usersController.GetUsersWithRole)
 	router.GET("/user/:id/main_organization", middlewares.PermissionBlockerMiddleware("view_user"), usersController.GetMainOrganizationUser)
 	router.GET("/user/:id", middlewares.PermissionBlockerMiddleware("view_user"), usersController.GetUser)
+
 
 	//---------------------------countries-------------------------------------------------------
 	router.GET("countries", geoController.GetAllCountries)

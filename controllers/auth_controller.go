@@ -73,6 +73,19 @@ type RegisterUserEmailParam struct {
 	RoleId        int32  `json:"role_id" binding:"required"`
 	UserCompanyId int32  `json:"user_company_id"`
 }
+
+type UpdatePasswordParam struct {
+	Password string `json:"password" binding:"required"`
+	UserID   int32  `json:"user_id" binding:"required"`
+}
+
+type EditUserEmailParam struct {
+	Email     string `json:"email" binding:"required"`
+	FirstName string `json:"first_name" binding:"required"`
+	LastName  string `json:"last_name" binding:"required"`
+	RoleId    int32  `json:"role_id" binding:"required"`
+	UserID    int32  `json:"user_id" binding:"required"`
+}
 type LoginUserEmailParam struct {
 	Email    string `json:"email" binding:"required"`
 	Password string `json:"password" binding:"required"`
@@ -93,8 +106,6 @@ type PhoneVerificationToken struct {
 }
 
 type AuthController struct{}
-
-
 
 func IsVerificationTokenValid(token string) (bool, error) {
 	tokenExpirationTime := configs.EnvConfigs.AcoountVerificationTokenExpirationTime
@@ -731,6 +742,81 @@ func (auth AuthController) LoginEmail(context *gin.Context) {
 		"token":       token,
 	})
 }
+func (auth AuthController) EditUserEmail(context *gin.Context) {
+	organization, _ := context.Params.Get("organization")
+	var editUserParam EditUserEmailParam
+	err := context.ShouldBindJSON(&editUserParam)
+	if err != nil {
+		context.JSON(http.StatusUnprocessableEntity, gin.H{
+			"error":   true,
+			"message": err.Error(),
+		})
+		return
+	}
+	user, err := GetEmailUser(editUserParam.Email)
+	if user != nil {
+		if user.ID.Int64 != int64(editUserParam.UserID) {
+			context.JSON(http.StatusUnprocessableEntity, gin.H{
+				"error":   true,
+				"message": "Another user has the same email",
+			})
+			return
+		}
+	}
+	fmt.Println(organization)
+	_, err = gen.REPO.DB.NamedExec(`update users set first_name=:first_name,last_name=:last_name,email=:email,role_id=:role_id where id=:user_id`,
+		map[string]interface{}{
+			"email":      editUserParam.Email,
+			"first_name": editUserParam.FirstName,
+			"last_name":  editUserParam.LastName,
+			"role_id":    editUserParam.RoleId,
+			"user_id":    editUserParam.UserID,
+			"updated_at": time.Now(),
+		})
+	context.JSON(http.StatusUnprocessableEntity, gin.H{
+		"error":   false,
+		"message": "User updated successfully",
+	})
+	return
+}
+func (auth AuthController) UpdateUserPassword(context *gin.Context) {
+	var param UpdatePasswordParam
+	err := context.ShouldBindJSON(&param)
+	if err != nil {
+		context.JSON(http.StatusUnprocessableEntity, gin.H{
+			"error":   true,
+			"message": err.Error(),
+		})
+		return
+	}
+	if len(param.Password) < 6 {
+		context.JSON(http.StatusUnprocessableEntity, gin.H{
+			"error":   true,
+			"message": "Password length should be greater than or equal to 6",
+		})
+		return
+	}
+
+	_, err = gen.REPO.DB.NamedExec(`update users set password:=password where id:=user_id)`,
+		map[string]interface{}{
+			"password": helpers.Functions{}.HashPassword(param.Password),
+			"user_id":  param.UserID,
+		})
+
+	if err != nil {
+		context.JSON(http.StatusUnprocessableEntity, gin.H{
+			"error":   true,
+			"message": "Error updating password",
+		})
+		return
+	} else {
+		context.JSON(http.StatusUnprocessableEntity, gin.H{
+			"error":   false,
+			"message": "Password updated successfully",
+		})
+		return
+	}
+}
 
 func (auth AuthController) RegisterUserEmail(context *gin.Context) {
 	organization, _ := context.Params.Get("organization")
@@ -777,34 +863,34 @@ func (auth AuthController) RegisterUserEmail(context *gin.Context) {
 
 	} else {
 
-		if organization == "ttnm" {
+		if organization == "main_organization" {
 			_, err = gen.REPO.DB.NamedExec(`INSERT INTO users (email,first_name,last_name,user_type,provider,role_id,created_at,updated_at,password,is_ttnm_user,confirmed_at) VALUES (:email,:first_name,:last_name,:user_type,:provider,:role_id,:created_at,:updated_at,:password,:is_ttnm_user,:confirmed_at)`,
 				map[string]interface{}{
-					"email":        registerUserEmailParam.Email,
-					"first_name":   registerUserEmailParam.FirstName,
-					"last_name":    registerUserEmailParam.LastName,
-					"user_type":    registerUserEmailParam.UserType,
-					"role_id":      registerUserEmailParam.RoleId,
-					"provider":     "email",
-					"is_ttnm_user": organization == "ttnm",
-					"confirmed_at": time.Now(),
-					"password":     helpers.Functions{}.HashPassword(registerUserEmailParam.Password),
-					"created_at":   time.Now(),
-					"updated_at":   time.Now(),
+					"email":                registerUserEmailParam.Email,
+					"first_name":           registerUserEmailParam.FirstName,
+					"last_name":            registerUserEmailParam.LastName,
+					"user_type":            registerUserEmailParam.UserType,
+					"role_id":              registerUserEmailParam.RoleId,
+					"provider":             "email",
+					"is_main_organization": organization == "main_organization",
+					"confirmed_at":         time.Now(),
+					"password":             helpers.Functions{}.HashPassword(registerUserEmailParam.Password),
+					"created_at":           time.Now(),
+					"updated_at":           time.Now(),
 				})
 		} else {
 			_, err = gen.REPO.DB.NamedExec(`INSERT INTO users (email,first_name,last_name,user_type,provider,role_id,created_at,updated_at,password,is_ttnm_user) VALUES (:email,:first_name,:last_name,:user_type,:provider,:role_id,:created_at,:updated_at,:password,:is_ttnm_user)`,
 				map[string]interface{}{
-					"email":        registerUserEmailParam.Email,
-					"first_name":   registerUserEmailParam.FirstName,
-					"last_name":    registerUserEmailParam.LastName,
-					"user_type":    registerUserEmailParam.UserType,
-					"role_id":      registerUserEmailParam.RoleId,
-					"provider":     "email",
-					"is_ttnm_user": organization == "ttnm",
-					"password":     helpers.Functions{}.HashPassword(registerUserEmailParam.Password),
-					"created_at":   time.Now(),
-					"updated_at":   time.Now(),
+					"email":                registerUserEmailParam.Email,
+					"first_name":           registerUserEmailParam.FirstName,
+					"last_name":            registerUserEmailParam.LastName,
+					"user_type":            registerUserEmailParam.UserType,
+					"role_id":              registerUserEmailParam.RoleId,
+					"provider":             "email",
+					"is_main_organization": organization == "main_organization",
+					"password":             helpers.Functions{}.HashPassword(registerUserEmailParam.Password),
+					"created_at":           time.Now(),
+					"updated_at":           time.Now(),
 				})
 		}
 
@@ -818,7 +904,7 @@ func (auth AuthController) RegisterUserEmail(context *gin.Context) {
 		return
 	}
 
-	if organization != "ttnm" {
+	if organization != "main_organization" {
 		mail := helpers.Mail{}
 		sent := mail.SendMailVerification(registerUserEmailParam.Email, fmt.Sprint(registerUserEmailParam.FirstName, " ", registerUserEmailParam.LastName))
 		if sent {
