@@ -797,13 +797,14 @@ func (auth AuthController) UpdateUserPassword(context *gin.Context) {
 		return
 	}
 
-	_, err = gen.REPO.DB.NamedExec(`update users set password:=password where id:=user_id)`,
+	_, err = gen.REPO.DB.NamedExec(`update users set password=:password where id=:user_id`,
 		map[string]interface{}{
 			"password": helpers.Functions{}.HashPassword(param.Password),
 			"user_id":  param.UserID,
 		})
 
 	if err != nil {
+		fmt.Print(err.Error())
 		context.JSON(http.StatusUnprocessableEntity, gin.H{
 			"error":   true,
 			"message": "Error updating password",
