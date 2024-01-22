@@ -1,6 +1,7 @@
 package controllers
 
 import (
+	"database/sql"
 	"net/http"
 	"strconv"
 	"ttnmwastemanagementsystem/gen"
@@ -92,6 +93,26 @@ func(usersController UsersController) UpdateUSer(context *gin.Context){
 
 func(usersController  UsersController) GetUsersWithRole(context *gin.Context){
 	users, err := gen.REPO.GetUsersWithRole(context)
+	if err!=nil{
+		context.JSON(http.StatusUnprocessableEntity,gin.H{
+		   "error":true,
+		   "message":err.Error(),	
+		})
+		return
+	}
+	
+	context.JSON(http.StatusOK,gin.H{
+		"error":false,
+		"users":users,
+	})
+}
+
+func(usersController  UsersController) GetCompanyUsers(context *gin.Context){
+	id :=  context.Param("id")
+
+	id_,_ :=strconv.ParseUint(id,10,32);
+
+	users, err := gen.REPO.GetCompanyUsers(context, sql.NullInt32{Int32: int32(id_),Valid: true});
 	if err!=nil{
 		context.JSON(http.StatusUnprocessableEntity,gin.H{
 		   "error":true,

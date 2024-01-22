@@ -59,6 +59,7 @@ func runProgram() {
 	// rolesController := controllers.RolesController{}
 	// rolespermissions := controllers.RoleAndPermissionsController{}
 	ttnmOrganizationController := controllers.TtnmOrganizationController{}
+	requestCollectionController := controllers.RequestCollectionController{}
 
 	router.LoadHTMLGlob("templates/**/*")
 
@@ -103,6 +104,7 @@ func runProgram() {
 	// router.POST("update/user",usersController.UpdateUSer)
 	// router.GET("/users/roles",usersController.GetUsersWithRole)
 	router.GET("/user/:id", usersController.GetUser)
+	router.GET("/company/users/:id", usersController.GetCompanyUsers)
 
 	//---------------------------countries-------------------------------------------------------
 	router.GET("countries", geoController.GetAllCountries)
@@ -170,6 +172,13 @@ func runProgram() {
 	// apiGroup.POST("settings/wastegroups/update", wasteGroupController.UpdateWasteGroup)
 	// apiGroup.GET("settings/wastegroups/all", wasteGroupController.GetAllWasteGroups)
 	// apiGroup.GET("settings/wastegroups/wastegroup/:id", wasteGroupController.GetOneWasteGroup)
+	//--------------------------------------------------------------------------------------------
+
+	//--------------------------- Request Collections -----------------------------------------------------
+	router.POST("request_collection", middlewares.PermissionBlockerMiddleware("request_collection"), requestCollectionController.InsertNewCollectionRequestParams)
+	router.POST("confirm_collection_request", requestCollectionController.ConfirmCollectionRequest)
+	router.POST("cancel_collection_request", requestCollectionController.CancelCollectionRequest)
+	router.POST("update_collection_request", requestCollectionController.UpdateCollectionRequest)
 	//--------------------------------------------------------------------------------------------
 
 

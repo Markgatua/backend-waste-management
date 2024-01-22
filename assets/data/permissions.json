@@ -154,5 +154,23 @@
                 "action": "view_champion_collector"
             }
         ]
+    },
+    {
+        "module": "Request Collection",
+        "key": "requestcollection",
+        "permissions": [
+            {
+                "permission_id": 103,
+                "name": "Request Collection",
+                "sub_module": "Waste Collection",
+                "action": "request_collection"
+            },
+            {
+                "permission_id": 103,
+                "name": "View Collection Requests",
+                "sub_module": "Waste Collection",
+                "action": "view_collections"
+            }
+        ]
     }
 ]

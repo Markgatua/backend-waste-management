@@ -173,6 +173,39 @@ CREATE TABLE waste_groups (
   created_at TIMESTAMP NOT NULL DEFAULT NOW(),
   deleted_at timestamp NULL DEFAULT NULL
 );
+CREATE TABLE collection_requests (
+  id SERIAL PRIMARY KEY,
+  producer_id INTEGER NOT NULL,
+  FOREIGN Key (producer_id) REFERENCES companies(id),
+  collector_id INTEGER NOT NULL,
+  FOREIGN Key (collector_id) REFERENCES companies(id),
+  request_date TIMESTAMP NOT NULL,
+  pickup_date TIMESTAMP NULL,
+  confirmed BOOLEAN DEFAULT FALSE,
+  cancelled BOOLEAN DEFAULT FALSE,
+  status BOOLEAN DEFAULT FALSE,
+  created_at TIMESTAMP NOT NULL DEFAULT NOW()
+);
+
+CREATE TABLE waste_items (
+  id SERIAL PRIMARY KEY,
+  collection_request_id INTEGER,
+  FOREIGN Key (collection_request_id) REFERENCES collection_requests(id),
+  waste_group_id INTEGER,
+  FOREIGN Key (waste_group_id) REFERENCES waste_groups(id),
+  weight DECIMAL NOT NULL
+);
+
+CREATE TABLE notifications (
+  id SERIAL PRIMARY KEY,
+  user_id INTEGER NOT NULL,
+  FOREIGN Key (user_id) REFERENCES users(id),
+  subject VARCHAR(255) NOT NULL,
+  message VARCHAR(255) NOT NULL,
+  status BOOLEAN DEFAULT FALSE,
+  created_at TIMESTAMP NOT NULL DEFAULT NOW()
+);
+
 
 CREATE TABLE waste_collections (
   id SERIAL PRIMARY KEY,
