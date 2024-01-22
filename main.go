@@ -51,7 +51,7 @@ func runProgram() {
 
 	usersController := controllers.UsersController{}
 	companiesController := controllers.CompaniesController{}
-	wasteGroupController := controllers.WasteGroupsController{}
+	wasteTypesController := controllers.WasteTypesController{}
 	organzationController := controllers.OrgnizationController{}
 	geoController := controllers.GeoController{}
 	championCollectorController := controllers.ChampionCollectorController{}
@@ -175,11 +175,11 @@ func runProgram() {
 	//-------------------------------------------------------------------------------------------
 
 	//--------------------------- wastegroups-----------------------------------------------------
-	router.POST("settings/wastegroups/create", middlewares.PermissionBlockerMiddleware("create_waste_type"), wasteGroupController.InsertWasteGroup)
-	router.PUT("settings/wastegroups/update", middlewares.PermissionBlockerMiddleware("update_waste_type"), wasteGroupController.UpdateWasteGroup)
-	router.GET("settings/wastegroups/all", middlewares.PermissionBlockerMiddleware("view_waste_type"), wasteGroupController.GetAllWasteGroups)
-	router.GET("settings/wastegroups/user", middlewares.PermissionBlockerMiddleware("view_waste_type"), wasteGroupController.GetUsersWasteGroups)
-	router.GET("settings/wastegroups/wastegroup/:id", middlewares.PermissionBlockerMiddleware("view_waste_type"), wasteGroupController.GetOneWasteGroup)
+	router.POST("settings/wastetypes/create", middlewares.PermissionBlockerMiddleware("create_waste_type"), wasteTypesController.InsertWasteGroup)
+	router.PUT("settings/wastetypes/update", middlewares.PermissionBlockerMiddleware("update_waste_type"), wasteTypesController.UpdateWasteGroup)
+	router.GET("settings/wastetypes/all", middlewares.PermissionBlockerMiddleware("view_waste_type"), wasteTypesController.GetAllWasteTypes)
+	router.GET("settings/wastetypes/user", middlewares.PermissionBlockerMiddleware("view_waste_type"), wasteTypesController.GetUsersWasteGroups)
+	router.GET("settings/wastetypes/wastegroup/:id", middlewares.PermissionBlockerMiddleware("view_waste_type"), wasteTypesController.GetOneWasteGroup)
 	//--------------------------------------------------------------------------------------------
 
 	//--------------------------- Assign collectors to champions-----------------------------------------------------
