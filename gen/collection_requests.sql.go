@@ -25,6 +25,25 @@ func (q *Queries) CancelCollectionRequest(ctx context.Context, arg CancelCollect
 	return err
 }
 
+const collectionWeightTotals = `-- name: CollectionWeightTotals :one
+select sum(waste_items.weight) as total_weight,waste_types.name from waste_items 
+inner join waste_types on waste_types.id=waste_items.waste_type_id 
+inner join collection_requests on collection_requests.id=waste_items.collection_request_id
+where collection_requests.producer_id=$1 GROUP BY waste_types.name
+`
+
+type CollectionWeightTotalsRow struct {
+	TotalWeight []uint8   `json:"total_weight"`
+	Name        string `json:"name"`
+}
+
+func (q *Queries) CollectionWeightTotals(ctx context.Context, producerID int32) (CollectionWeightTotalsRow, error) {
+	row := q.db.QueryRowContext(ctx, collectionWeightTotals, producerID)
+	var i CollectionWeightTotalsRow
+	err := row.Scan(&i.TotalWeight, &i.Name)
+	return i, err
+}
+
 const confirmCollectionRequest = `-- name: ConfirmCollectionRequest :exec
 update collection_requests set confirmed = $1 where id = $2
 `

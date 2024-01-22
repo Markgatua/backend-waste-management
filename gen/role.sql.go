@@ -22,13 +22,7 @@ func (q *Queries) ActivateRole(ctx context.Context, roleID int32) error {
 }
 
 const assignPermissionToRole = `-- name: AssignPermissionToRole :exec
-insert into
-    role_has_permissions(role_id, permission_id)
-VALUES
-(
-        $1,
-        $2
-    )
+insert into role_has_permissions(role_id, permission_id) VALUES ($1,$2)
 `
 
 type AssignPermissionToRoleParams struct {
@@ -118,7 +112,7 @@ func (q *Queries) GetRole(ctx context.Context, id int32) (Role, error) {
 }
 
 const getRoles = `-- name: GetRoles :many
-select id, name, guard_name, created_at, updated_at, description, is_active from roles
+select id, name, guard_name, created_at, updated_at, description, is_active from roles where id !=12
 `
 
 func (q *Queries) GetRoles(ctx context.Context) ([]Role, error) {
@@ -178,11 +172,7 @@ func (q *Queries) RoleExists(ctx context.Context, name string) (int64, error) {
 }
 
 const updateRole = `-- name: UpdateRole :exec
-update roles
-set
-    name = $1,
-    is_active =$2,
-    description = $3 where id = $4
+update roles set name = $1, is_active =$2,description = $3 where id = $4
 `
 
 type UpdateRoleParams struct {

@@ -4,7 +4,6 @@ import (
 	"fmt"
 	_ "fmt"
 	"os"
-	_"time"
 	_ "time"
 	"ttnmwastemanagementsystem/configs"
 	"ttnmwastemanagementsystem/controllers"
@@ -12,9 +11,9 @@ import (
 	"ttnmwastemanagementsystem/gen"
 	"ttnmwastemanagementsystem/middlewares"
 
-	cors "github.com/rs/cors/wrapper/gin"
 	"github.com/gin-gonic/gin"
 	"github.com/muesli/cache2go"
+	cors "github.com/rs/cors/wrapper/gin"
 )
 
 func main() {
@@ -52,7 +51,7 @@ func runProgram() {
 
 	usersController := controllers.UsersController{}
 	companiesController := controllers.CompaniesController{}
-	wasteGroupController := controllers.WasteGroupsController{}
+	wasteTypesController := controllers.WasteTypesController{}
 	organzationController := controllers.OrgnizationController{}
 	geoController := controllers.GeoController{}
 	championCollectorController := controllers.ChampionCollectorController{}
@@ -60,21 +59,30 @@ func runProgram() {
 	// rolespermissions := controllers.RoleAndPermissionsController{}
 	ttnmOrganizationController := controllers.TtnmOrganizationController{}
 	requestCollectionController := controllers.RequestCollectionController{}
+	wasteItemsController := controllers.WasteItemsController{}
 
 	router.LoadHTMLGlob("templates/**/*")
 
-	router.Use(cors.Default())
-
-
+	//router.Use(cors.Default())
+	c := cors.New(cors.Options{
+		AllowedOrigins:   []string{"http*"},
+		AllowedHeaders:   []string{"*"},
+		AllowedMethods:   []string{"PUT", "POST", "DELETE", "OPTIONS", "GET", "PATCH"},
+		AllowCredentials: true,
+		// Enable Debugging for testing, consider disabling in production
+		Debug: true,
+	})
+	//router.Use(cors.Default())
+	router.Use(c)
+	authController := controllers.AuthController{}
 	auth := router.Group("/auth")
 	{
-		authController := controllers.AuthController{}
 		auth.GET("/challenge/password_reset_success/email/web", authController.PassWordResetSuccess)
 		auth.POST("/challenge/submit_new_password/email/web", authController.SubmitNewPassword)
 		auth.GET("/challenge/enter_new_password/web", authController.EnterNewPassword)
 		auth.POST("/reset_password/email/web", authController.ResetPassword)
 
-		auth.POST("/register/email", authController.RegisterUserEmail)
+		auth.POST("/register/email/:organization", authController.RegisterUserEmail)
 		auth.GET("/challenge/verify_email/web", authController.VerifyEmail)
 		auth.POST("/challenge/send_email_verfication/web", authController.SendVerificationMail)
 		auth.POST("/login/email", authController.LoginEmail)
@@ -96,14 +104,30 @@ func runProgram() {
 	}
 
 	// apiGroup := router.Group("/api:BVaDN9hl")
+	router.GET("/uploads/:file",controllers.FileController{}.GetFile)
 
 	router.Use(middlewares.JwtAuthMiddleware())
 	router.Use(middlewares.PermissionMiddleware())
 
-	router.GET("/users", usersController.GetAllUsers)
+	//---------------------------    Files ------------------------------------------------------
+	router.MaxMultipartMemory = 8 << 20  // 8 MiB
+	router.POST("/upload_files",middlewares.PermissionBlockerMiddleware("upload_files"),controllers.FileController{}.UploadFiles)
+	//-------------------------------------------------------------------------------------------
+
+
+	router.GET("/users", middlewares.PermissionBlockerMiddleware("view_user"), usersController.GetAllUsers)
+	//main organizations is
+	router.GET("/users/main_organization", middlewares.PermissionBlockerMiddleware("view_user"), usersController.GetAllMainOrganizationUsers)
+	router.PUT("/users/set_active_inactive_status", middlewares.PermissionBlockerMiddleware("edit_user"), usersController.SetActiveInActiveStatus)
+	router.PUT("/users/edit/email/:organization", middlewares.PermissionBlockerMiddleware("edit_user"), authController.EditUserEmail)
+	router.PUT("/user/update_password", middlewares.PermissionBlockerMiddleware("update_user_password"), authController.UpdateUserPassword)
+
+
 	// router.POST("update/user",usersController.UpdateUSer)
 	// router.GET("/users/roles",usersController.GetUsersWithRole)
-	router.GET("/user/:id", usersController.GetUser)
+	router.GET("/user/:id/main_organization", middlewares.PermissionBlockerMiddleware("view_user"), usersController.GetMainOrganizationUser)
+	router.GET("/user/:id", middlewares.PermissionBlockerMiddleware("view_user"), usersController.GetUser)
+
 	router.GET("/company/users/:id", usersController.GetCompanyUsers)
 
 	//---------------------------countries-------------------------------------------------------
@@ -150,6 +174,7 @@ func runProgram() {
 
 	router.GET("permissions", middlewares.PermissionBlockerMiddleware("view_permissions"), controllers.RoleAndPermissionsController{}.GetAllPermissions)
 	router.GET("permissions/:role_id", middlewares.PermissionBlockerMiddleware("view_permissions"), controllers.RoleAndPermissionsController{}.GetRolePermissions)
+	router.GET("permissions/active_role_permissions/:role_id", middlewares.PermissionBlockerMiddleware("view_permissions"), controllers.RoleAndPermissionsController{}.GetActiveRolePermissions)
 
 	router.PUT("assign_permissions_to_role", middlewares.PermissionBlockerMiddleware("assign_permissions_to_role"), controllers.RoleAndPermissionsController{}.AssignPermissionsToRole)
 	router.PUT("remove_permissions_from_role", middlewares.PermissionBlockerMiddleware("remove_permissions_from_role"), controllers.RoleAndPermissionsController{}.RemovePermissionsFromRole)
@@ -157,11 +182,11 @@ func runProgram() {
 	//-------------------------------------------------------------------------------------------
 
 	//--------------------------- wastegroups-----------------------------------------------------
-	router.POST("settings/wastegroups/create", middlewares.PermissionBlockerMiddleware("create_waste_type"), wasteGroupController.InsertWasteGroup)
-	router.PUT("settings/wastegroups/update", middlewares.PermissionBlockerMiddleware("update_waste_type"), wasteGroupController.UpdateWasteGroup)
-	router.GET("settings/wastegroups/all", middlewares.PermissionBlockerMiddleware("view_waste_type"), wasteGroupController.GetAllWasteGroups)
-	router.GET("settings/wastegroups/user", middlewares.PermissionBlockerMiddleware("view_waste_type"), wasteGroupController.GetUsersWasteGroups)
-	router.GET("settings/wastegroups/wastegroup/:id", middlewares.PermissionBlockerMiddleware("view_waste_type"), wasteGroupController.GetOneWasteGroup)
+	router.POST("settings/wastetypes/create", middlewares.PermissionBlockerMiddleware("create_waste_type"), wasteTypesController.InsertWasteGroup)
+	router.PUT("settings/wastetypes/update", middlewares.PermissionBlockerMiddleware("update_waste_type"), wasteTypesController.UpdateWasteType)
+	router.GET("settings/wastetypes/all", middlewares.PermissionBlockerMiddleware("view_waste_type"), wasteTypesController.GetAllWasteTypes)
+	router.GET("settings/wastetypes/user", middlewares.PermissionBlockerMiddleware("view_waste_type"), wasteTypesController.GetUsersWasteGroups)
+	router.GET("settings/wastetypes/wastegroup/:id", middlewares.PermissionBlockerMiddleware("view_waste_type"), wasteTypesController.GetOneWasteGroup)
 	//--------------------------------------------------------------------------------------------
 
 	//--------------------------- Assign collectors to champions-----------------------------------------------------
@@ -179,8 +204,12 @@ func runProgram() {
 	router.POST("confirm_collection_request", requestCollectionController.ConfirmCollectionRequest)
 	router.POST("cancel_collection_request", requestCollectionController.CancelCollectionRequest)
 	router.POST("update_collection_request", requestCollectionController.UpdateCollectionRequest)
+	router.GET("collections_weight_totals/:id", requestCollectionController.CollectionWeightTotals)
 	//--------------------------------------------------------------------------------------------
 
+	//--------------------------- Request Collections -----------------------------------------------------
+	router.POST("collection_request_data", wasteItemsController.InsertWasteItem)
+	//--------------------------------------------------------------------------------------------
 
 	router.Run()
 	//fmt.Println("Hello dabid")

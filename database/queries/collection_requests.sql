@@ -112,3 +112,10 @@ LEFT JOIN
 LEFT JOIN 
     companies AS secondcollector ON secondcollector.id = collection_requests.second_collector_id
 WHERE collection_requests.collector_id=$1;
+
+
+-- name: CollectionWeightTotals :one
+select sum(waste_items.weight) as total_weight,waste_types.name from waste_items 
+inner join waste_types on waste_types.id=waste_items.waste_type_id 
+inner join collection_requests on collection_requests.id=waste_items.collection_request_id
+where collection_requests.producer_id=$1 GROUP BY waste_types.name;

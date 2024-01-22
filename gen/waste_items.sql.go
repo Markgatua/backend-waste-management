@@ -7,28 +7,27 @@ package gen
 
 import (
 	"context"
-	"database/sql"
 )
 
 const insertWasteItem = `-- name: InsertWasteItem :one
 
-INSERT INTO waste_items (collection_request_id,waste_group_id,weight) VALUES ($1,$2,$3) RETURNING id, collection_request_id, waste_group_id, weight
+INSERT INTO waste_items (collection_request_id,waste_type_id,weight) VALUES ($1,$2,$3) RETURNING id, collection_request_id, waste_type_id, weight
 `
 
 type InsertWasteItemParams struct {
-	CollectionRequestID sql.NullInt32 `json:"collection_request_id"`
-	WasteGroupID        sql.NullInt32 `json:"waste_group_id"`
-	Weight              string        `json:"weight"`
+	CollectionRequestID int32  `json:"collection_request_id"`
+	WasteTypeID         int32  `json:"waste_type_id"`
+	Weight              string `json:"weight"`
 }
 
 // waste_items.sql
 func (q *Queries) InsertWasteItem(ctx context.Context, arg InsertWasteItemParams) (WasteItem, error) {
-	row := q.db.QueryRowContext(ctx, insertWasteItem, arg.CollectionRequestID, arg.WasteGroupID, arg.Weight)
+	row := q.db.QueryRowContext(ctx, insertWasteItem, arg.CollectionRequestID, arg.WasteTypeID, arg.Weight)
 	var i WasteItem
 	err := row.Scan(
 		&i.ID,
 		&i.CollectionRequestID,
-		&i.WasteGroupID,
+		&i.WasteTypeID,
 		&i.Weight,
 	)
 	return i, err
