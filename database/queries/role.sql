@@ -13,7 +13,7 @@ INSERT INTO roles (id,name,guard_name,description,is_active) VALUES (
 SELECT count(*) FROM roles where name = sqlc.arg('name');
 
 -- name: GetRoles :many
-select * from roles;
+select * from roles where id !=12;
 
 -- name: GetRole :one
 select * from roles where id=sqlc.arg('id');
@@ -30,17 +30,7 @@ update roles set is_active = false where id = sqlc.arg('role_id');
 update roles set is_active = true where id = sqlc.arg('role_id');
 
 -- name: UpdateRole :exec
-update roles
-set
-    name = sqlc.arg('name'),
-    is_active =sqlc.arg('is_active'),
-    description = sqlc.arg('description') where id = sqlc.arg('role_id');
+update roles set name = sqlc.arg('name'), is_active =sqlc.arg('is_active'),description = sqlc.arg('description') where id = sqlc.arg('role_id');
 
 -- name: AssignPermissionToRole :exec
-insert into
-    role_has_permissions(role_id, permission_id)
-VALUES
-(
-        sqlc.arg('role_id'),
-        sqlc.arg('permission_id')
-    );
+insert into role_has_permissions(role_id, permission_id) VALUES (sqlc.arg('role_id'),sqlc.arg('permission_id'));

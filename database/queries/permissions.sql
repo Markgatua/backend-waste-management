@@ -22,6 +22,10 @@ delete from permissions where not (action = ANY(sqlc.arg('actions')::varchar[]))
 -- name: GetAllPermissions :many
 SELECT * FROM permissions;
 
+-- name: GetAllPermissionGroupedByModule :many
+SELECT * FROM permissions GROUP BY id,module;
+
+
 -- name: GetPermissionsForRoleID :many
 select
     permissions.id as permission_id,

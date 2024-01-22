@@ -18,6 +18,42 @@
         ]
     },
     {
+        "module": "Users",
+        "key": "users",
+        "permissions": [
+            {
+                "permission_id": 103,
+                "name": "Add user",
+                "sub_module": "user",
+                "action": "add_user"
+            },
+            {
+                "permission_id": 103,
+                "name": "Edit user",
+                "sub_module": "user",
+                "action": "edit_user"
+            },
+            {
+                "permission_id": 103,
+                "name": "View user",
+                "sub_module": "user",
+                "action": "view_user"
+            },
+            {
+                "permission_id": 103,
+                "name": "Delete user",
+                "sub_module": "user",
+                "action": "delete_user"
+            },
+            {
+                "permission_id": 103,
+                "name": "Update user password",
+                "sub_module": "user",
+                "action": "update_user_password"
+            }
+        ]
+    },
+    {
         "module": "Settings",
         "key": "settings",
         "permissions": [
@@ -134,6 +170,18 @@
                 "name": "Edit Company",
                 "sub_module": "Companies",
                 "action": "edit_company"
+            }
+        ]
+    },
+    {
+        "module": "Files",
+        "key": "files",
+        "permissions": [
+            {
+                "permission_id": 103,
+                "name": "Upload files",
+                "sub_module": "Files",
+                "action": "upload_files"
             }
         ]
     },

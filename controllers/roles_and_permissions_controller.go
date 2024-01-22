@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"net/http"
+	_ "slices"
 	"ttnmwastemanagementsystem/gen"
 	"ttnmwastemanagementsystem/utils"
 
@@ -19,7 +20,7 @@ type RoleAndPermissionsController struct{}
 
 type AssignPermissionsToRoleParams struct {
 	RoleID      int64   `json:"role_id" binding:"required"`
-	Permissions []int32  `json:"permissions" binding:"required"`
+	Permissions []int32 `json:"permissions" binding:"required"`
 }
 
 type RemovePermissionsFromRoleParams struct {
@@ -27,15 +28,15 @@ type RemovePermissionsFromRoleParams struct {
 	Permissions []int32 `json:"permissions" binding:"required"`
 }
 type UpdateRoleParams struct {
-	RoleID      int64  `json:"role_id" binding:"required"`
-	Name        string `json:"name" binding:"required"`
+	RoleID      int64   `json:"role_id" binding:"required"`
+	Name        *string `json:"name" binding:"required"`
 	IsActive    *bool   `json:"is_active" binding:"required"`
-	Description string `json:"description" binding:"required"`
+	Description *string `json:"description" binding:"required"`
 }
 type AddRoleParams struct {
-	Name        string `json:"name" binding:"required"`
+	Name        *string `json:"name" binding:"required"`
 	IsActive    *bool   `json:"is_active" binding:"required"`
-	Description string `json:"description" binding:"required"`
+	Description *string `json:"description" binding:"required"`
 }
 
 func (c RoleAndPermissionsController) RemovePermissionsFromRole(context *gin.Context) {
@@ -62,7 +63,7 @@ func (c RoleAndPermissionsController) RemovePermissionsFromRole(context *gin.Con
 	})
 }
 func (c RoleAndPermissionsController) GetAllPermissions(context *gin.Context) {
-	permissions, err :=  gen.REPO.GetAllPermissions(context)
+	permissions, err := gen.REPO.GetAllPermissions(context)
 	if err != nil {
 		context.JSON(http.StatusUnprocessableEntity, gin.H{
 			"error":   true,
@@ -85,6 +86,14 @@ func (c RoleAndPermissionsController) AssignPermissionsToRole(context *gin.Conte
 		})
 		return
 	}
+	err = RemoveRolePermissions(int32(assignPermissionsToRoleParam.RoleID))
+	if err != nil {
+		context.JSON(http.StatusUnprocessableEntity, gin.H{
+			"error":   true,
+			"message": err.Error(),
+		})
+		return
+	}
 	err = SetRolePermissions(assignPermissionsToRoleParam.RoleID, assignPermissionsToRoleParam.Permissions)
 	if err != nil {
 		context.JSON(http.StatusUnprocessableEntity, gin.H{
@@ -100,7 +109,7 @@ func (c RoleAndPermissionsController) AssignPermissionsToRole(context *gin.Conte
 }
 
 func (c RoleAndPermissionsController) GetRoles(context *gin.Context) {
-	roles, err :=  gen.REPO.GetRoles(context)
+	roles, err := gen.REPO.GetRoles(context)
 	if err != nil {
 		context.JSON(http.StatusUnprocessableEntity, gin.H{
 			"error":   false,
@@ -119,7 +128,7 @@ func (c RoleAndPermissionsController) GetRole(context *gin.Context) {
 
 	var id32 int32
 	fmt.Sscan(id, &id32)
-	role, err :=  gen.REPO.GetRole(context, id32)
+	role, err := gen.REPO.GetRole(context, id32)
 
 	if err != nil {
 		context.JSON(http.StatusUnprocessableEntity, gin.H{
@@ -145,7 +154,7 @@ func (c RoleAndPermissionsController) DeleteRole(context *gin.Context) {
 		})
 		return
 	}
-	err :=  gen.REPO.DeleteRole(context, id32)
+	err := gen.REPO.DeleteRole(context, id32)
 
 	if err != nil {
 		context.JSON(http.StatusUnprocessableEntity, gin.H{
@@ -170,10 +179,10 @@ func (c RoleAndPermissionsController) UpdateRole(context *gin.Context) {
 		})
 		return
 	}
-	err =  gen.REPO.UpdateRole(context, gen.UpdateRoleParams{
+	err = gen.REPO.UpdateRole(context, gen.UpdateRoleParams{
 		RoleID:      int32(updateRoleParams.RoleID),
-		Description: null.StringFrom(updateRoleParams.Description).NullString,
-		Name:        updateRoleParams.Name,
+		Description: null.StringFrom(*updateRoleParams.Description).NullString,
+		Name:        *updateRoleParams.Name,
 		IsActive:    *updateRoleParams.IsActive,
 	})
 	if err != nil {
@@ -202,9 +211,9 @@ func (c RoleAndPermissionsController) AddRole(context *gin.Context) {
 		})
 		return
 	}
-	role, err :=  gen.REPO.CreateRole(context, gen.CreateRoleParams{
-		Description: null.StringFrom(params.Description).NullString,
-		Name:        params.Name,
+	role, err := gen.REPO.CreateRole(context, gen.CreateRoleParams{
+		Description: null.StringFrom(*params.Description).NullString,
+		Name:        *params.Name,
 		IsActive:    *params.IsActive,
 		ID:          nextID,
 	})
@@ -218,6 +227,54 @@ func (c RoleAndPermissionsController) AddRole(context *gin.Context) {
 	context.JSON(http.StatusOK, gin.H{
 		"error":   false,
 		"content": role,
+	})
+}
+
+func (c RoleAndPermissionsController) GetActiveRolePermissions(context *gin.Context) {
+	id, _ := context.Params.Get("role_id")
+	var id32 int32
+	fmt.Sscan(id, &id32)
+	rolePermissions, _ := GetPermissionsForRole(id32)
+	ids := GetIDSFromPermissions(rolePermissions)
+
+	type Restruct struct {
+		ID       int32
+		Name     string
+		Assigned bool
+	}
+
+	m := make(map[string][]Restruct)
+
+	permissions, err := gen.REPO.GetAllPermissionGroupedByModule(context)
+	if err != nil {
+		context.JSON(http.StatusUnprocessableEntity, gin.H{
+			"error":   true,
+			"message": err.Error(), // "Error getting permissions",
+		})
+		return
+	}
+
+	for _, v := range permissions {
+		restruct := Restruct{}
+
+		for _, x := range ids {
+			if x == v.ID {
+				restruct.Assigned = true
+			}
+		}
+		restruct.ID = v.ID
+		restruct.Name = v.Name
+		//_, ok := m[v.Module]
+		//if ok {
+
+		//} else {
+		m[v.Module] = append(m[v.Module], restruct)
+		//}
+
+	}
+	context.JSON(http.StatusOK, gin.H{
+		"error":   false,
+		"content": m,
 	})
 }
 
@@ -255,7 +312,7 @@ func RoleExists(roleID int64) (bool, error) {
 }
 
 func GetPermissionsForRole(roleId int32) ([]gen.GetPermissionsForRoleIDRow, error) {
-	val, err :=  gen.REPO.GetPermissionsForRoleID(context.Background(), roleId)
+	val, err := gen.REPO.GetPermissionsForRoleID(context.Background(), roleId)
 	return val, err
 }
 
@@ -266,6 +323,20 @@ func GetActionsFromPermissions(permissions []gen.GetPermissionsForRoleIDRow) []s
 	}
 	return actions
 }
+
+func GetIDSFromPermissions(permissions []gen.GetPermissionsForRoleIDRow) []int32 {
+	ids := []int32{}
+	for _, v := range permissions {
+		ids = append(ids, v.PermissionID)
+	}
+	return ids
+}
+
+func RemoveRolePermissions(roleID int32) error {
+	err := gen.REPO.RemoveRolePermissions(context.Background(), roleID)
+	return err
+}
+
 func SetRolePermissions(roleID int64, permissions []int32) error {
 	for _, v := range permissions {
 
@@ -279,7 +350,7 @@ func SetRolePermissions(roleID int64, permissions []int32) error {
 }
 
 func RemovePermissionsFromRole(roleID int32, permission []int32) error {
-	err :=  gen.REPO.RemovePermissionsFromRole(context.Background(), gen.RemovePermissionsFromRoleParams{
+	err := gen.REPO.RemovePermissionsFromRole(context.Background(), gen.RemovePermissionsFromRoleParams{
 		PermissionIds: permission,
 		RoleID:        roleID,
 	})

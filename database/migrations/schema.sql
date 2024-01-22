@@ -14,7 +14,8 @@ CREATE TABLE uploads(
     type VARCHAR(100),
     path TEXT,
     related_table VARCHAR(150),
-    meta JSON NULL
+    meta JSON NULL,
+    UNIQUE(item_id,related_table)
 );
 
 CREATE TABLE permissions (
@@ -75,7 +76,7 @@ CREATE TABLE organizations(
   FOREIGN Key (country_id) REFERENCES countries(id) on delete set null
 );
 
-CREATE TABLE ttnm_organization(
+CREATE TABLE main_organization(
   id SERIAL PRIMARY KEY,
   organization_id VARCHAR(255) NOT NULL,
   name VARCHAR(255) NOT NULL,
@@ -109,6 +110,7 @@ CREATE TABLE companies (
   FOREIGN Key (county_id) REFERENCES counties(id),
   FOREIGN Key (sub_county_id) REFERENCES sub_counties(id)
 );
+
 ALTER TABLE companies ADD CONSTRAINT check_company_type CHECK (company_type IN (1,2)); -- make sure company type is either 1 or 2
 
 -- Create "users" table
@@ -121,6 +123,7 @@ CREATE TABLE users(
     FOREIGN Key (role_id) REFERENCES roles(id),
     user_company_id INTEGER NULL,
     FOREIGN Key (user_company_id) REFERENCES companies(id),
+    is_main_organization_user BOOLEAN DEFAULT false not null,
     email VARCHAR(255) DEFAULT NULL UNIQUE,
     password TEXT DEFAULT NULL,
     avatar_url TEXT NULL,
@@ -166,13 +169,15 @@ CREATE TABLE champion_aggregator_assignments (
   created_at TIMESTAMP NOT NULL DEFAULT NOW()
 );
 
-CREATE TABLE waste_groups (
+CREATE TABLE waste_types (
   id SERIAL PRIMARY KEY,
   name VARCHAR(255) NOT NULL,
+  is_active BOOLEAN not null DEFAULT true,
   category VARCHAR(255) NOT NULL,
-  created_at TIMESTAMP NOT NULL DEFAULT NOW(),
-  deleted_at timestamp NULL DEFAULT NULL
+  created_at TIMESTAMP NOT NULL DEFAULT NOW()
 );
+CREATE UNIQUE INDEX waste_types_unique_name_idx on waste_types (LOWER(name));  
+
 
 CREATE TABLE waste_collections (
   id SERIAL PRIMARY KEY,
