@@ -168,13 +168,15 @@ CREATE TABLE champion_aggregator_assignments (
   created_at TIMESTAMP NOT NULL DEFAULT NOW()
 );
 
-CREATE TABLE waste_groups (
+CREATE TABLE waste_types (
   id SERIAL PRIMARY KEY,
   name VARCHAR(255) NOT NULL,
   category VARCHAR(255) NOT NULL,
   created_at TIMESTAMP NOT NULL DEFAULT NOW(),
   deleted_at timestamp NULL DEFAULT NULL
 );
+CREATE UNIQUE INDEX waste_types_unique_name_idx on waste_types (LOWER(name));  
+
 
 CREATE TABLE waste_collections (
   id SERIAL PRIMARY KEY,

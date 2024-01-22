@@ -39,8 +39,8 @@ type Querier interface {
 	GetAllPermissionGroupedByModule(ctx context.Context) ([]Permission, error)
 	GetAllPermissions(ctx context.Context) ([]Permission, error)
 	GetAllUsers(ctx context.Context) ([]GetAllUsersRow, error)
-	// waste_groups.sql
-	GetAllWasteGroups(ctx context.Context) ([]WasteGroup, error)
+	// waste_types.sql
+	GetAllWasteTypes(ctx context.Context) ([]WasteType, error)
 	GetAssignedCollectorsToGreenChampion(ctx context.Context, championID sql.NullInt32) ([]ChampionAggregatorAssignment, error)
 	GetCompany(ctx context.Context, id int32) (GetCompanyRow, error)
 	GetCountryBeCountryCode(ctx context.Context, countryCode string) ([]Country, error)
@@ -51,7 +51,7 @@ type Querier interface {
 	GetMainOrganization(ctx context.Context, organizationID string) ([]MainOrganization, error)
 	GetMainOrganizationUser(ctx context.Context, id int32) (User, error)
 	GetMainOrganizationUserByEmail(ctx context.Context, email sql.NullString) (User, error)
-	GetOneWasteGroup(ctx context.Context, id int32) (WasteGroup, error)
+	GetOneWasteType(ctx context.Context, id int32) (WasteType, error)
 	GetOrganization(ctx context.Context, id int32) (GetOrganizationRow, error)
 	GetOrganizationCountWithNameAndCountry(ctx context.Context, arg GetOrganizationCountWithNameAndCountryParams) ([]Organization, error)
 	GetPermissionsForRoleID(ctx context.Context, roleID int32) ([]GetPermissionsForRoleIDRow, error)
@@ -61,7 +61,7 @@ type Querier interface {
 	GetRoles(ctx context.Context) ([]Role, error)
 	GetSubCountiesForACounty(ctx context.Context, countyID int32) ([]SubCounty, error)
 	GetTheCollectorForAChampion(ctx context.Context, championID sql.NullInt32) (GetTheCollectorForAChampionRow, error)
-	GetUsersWasteGroups(ctx context.Context) ([]WasteGroup, error)
+	GetUsersWasteType(ctx context.Context) ([]WasteType, error)
 	GetUsersWithRole(ctx context.Context) ([]GetUsersWithRoleRow, error)
 	InsertCompany(ctx context.Context, arg InsertCompanyParams) (Company, error)
 	// counties.sql
@@ -70,7 +70,7 @@ type Querier interface {
 	InsertOrganization(ctx context.Context, arg InsertOrganizationParams) (Organization, error)
 	// sub_counties.sql
 	InsertSubcounties(ctx context.Context, arg InsertSubcountiesParams) error
-	InsertWasteGroup(ctx context.Context, arg InsertWasteGroupParams) (WasteGroup, error)
+	InsertWasteType(ctx context.Context, arg InsertWasteTypeParams) (WasteType, error)
 	RemovePermissionsFromRole(ctx context.Context, arg RemovePermissionsFromRoleParams) error
 	RemoveRolePermissions(ctx context.Context, roleID int32) error
 	RevokePermission(ctx context.Context, arg RevokePermissionParams) error
@@ -84,7 +84,7 @@ type Querier interface {
 	UpdateOrganization(ctx context.Context, arg UpdateOrganizationParams) error
 	UpdateRole(ctx context.Context, arg UpdateRoleParams) error
 	UpdateUserIsActive(ctx context.Context, arg UpdateUserIsActiveParams) error
-	UpdateWasteGroup(ctx context.Context, arg UpdateWasteGroupParams) error
+	UpdateWasteType(ctx context.Context, arg UpdateWasteTypeParams) error
 	ViewCounties(ctx context.Context) ([]County, error)
 	ViewSubCounties(ctx context.Context) ([]SubCounty, error)
 }

@@ -11,7 +11,7 @@ import (
 )
 
 
-type WasteGroupsController struct{}
+type WasteTypesController struct{}
 
 type InsertWasteGroupParams struct {
 	Name      string `json:"name"  binding:"required"`
@@ -26,7 +26,7 @@ type UpdateWasteGroupParams struct {
 }
 
 
-func (wasteGroupsController WasteGroupsController) InsertWasteGroup(context *gin.Context) {
+func (wasteGroupsController WasteTypesController) InsertWasteGroup(context *gin.Context) {
 	var params InsertWasteGroupParams
 	err := context.ShouldBindJSON(&params)
 	if err != nil {
@@ -37,7 +37,7 @@ func (wasteGroupsController WasteGroupsController) InsertWasteGroup(context *gin
 		return
 	}
 
-	WasteGroup, insertError := gen.REPO.InsertWasteGroup(context, gen.InsertWasteGroupParams{
+	WasteGroup, insertError := gen.REPO.InsertWasteType(context, gen.InsertWasteTypeParams{
 		Name:		 params.Name,
 		Category:    params.Category,
 	})
@@ -45,7 +45,7 @@ func (wasteGroupsController WasteGroupsController) InsertWasteGroup(context *gin
 	if insertError != nil {
 		context.JSON(http.StatusUnprocessableEntity, gin.H{
 			"error":   true,
-			"message": "Failed to add Waste Group",
+			"message": "Failed to add Waste Type",
 		})
 		return
 	}
@@ -53,14 +53,30 @@ func (wasteGroupsController WasteGroupsController) InsertWasteGroup(context *gin
 	// If you want to return the created company as part of the response
 	context.JSON(http.StatusOK, gin.H{
 		"error":   false,
-		"message": "Successfully Created Waste Group",
-		"Waste Group": WasteGroup, // Include the company details in the response
+		"message": "Successfully Created Waste Type",
+		"waste_group": WasteGroup, // Include the company details in the response
 	})
 
 }
 
-func(wasteGroupsController  WasteGroupsController) GetAllWasteGroups(context *gin.Context){
-	wasteGroups, err := gen.REPO.GetAllWasteGroups(context)
+func(wasteGroupsController  WasteTypesController) GetAllWasteTypes(context *gin.Context){
+	wasteGroups, err := gen.REPO.GetAllWasteTypes(context)
+	if err!=nil{
+		context.JSON(http.StatusUnprocessableEntity,gin.H{
+		   "error":true,
+		   "message":err.Error(),	
+		})
+		return
+	}
+	
+	context.JSON(http.StatusOK,gin.H{
+		"error":false,
+		"waste_types":wasteGroups,
+	})
+}
+
+func(wasteGroupsController  WasteTypesController) GetUsersWasteGroups(context *gin.Context){
+	wasteGroups, err := gen.REPO.GetUsersWasteType(context)
 	if err!=nil{
 		context.JSON(http.StatusUnprocessableEntity,gin.H{
 		   "error":true,
@@ -75,28 +91,12 @@ func(wasteGroupsController  WasteGroupsController) GetAllWasteGroups(context *gi
 	})
 }
 
-func(wasteGroupsController  WasteGroupsController) GetUsersWasteGroups(context *gin.Context){
-	wasteGroups, err := gen.REPO.GetUsersWasteGroups(context)
-	if err!=nil{
-		context.JSON(http.StatusUnprocessableEntity,gin.H{
-		   "error":true,
-		   "message":err.Error(),	
-		})
-		return
-	}
-	
-	context.JSON(http.StatusOK,gin.H{
-		"error":false,
-		"Waste Groups":wasteGroups,
-	})
-}
-
-func(wasteGroupController WasteGroupsController) GetOneWasteGroup(context *gin.Context){
+func(wasteGroupController WasteTypesController) GetOneWasteGroup(context *gin.Context){
 	id :=  context.Param("id")
 
 	id_,_ :=strconv.ParseUint(id,10,32);
 	println("------------------------------",id_)
-	wasteGroup, err := gen.REPO.GetOneWasteGroup(context, int32(id_))
+	wasteGroup, err := gen.REPO.GetOneWasteType(context, int32(id_))
 
 	if err!=nil{
 		context.JSON(http.StatusUnprocessableEntity,gin.H{
@@ -113,7 +113,7 @@ func(wasteGroupController WasteGroupsController) GetOneWasteGroup(context *gin.C
 }
 
 
-func (wasteGroupController WasteGroupsController) UpdateWasteGroup(context *gin.Context) {
+func (wasteGroupController WasteTypesController) UpdateWasteGroup(context *gin.Context) {
 	var params UpdateWasteGroupParams
 	err := context.ShouldBindJSON(&params)
 	if err != nil {
@@ -132,7 +132,7 @@ func (wasteGroupController WasteGroupsController) UpdateWasteGroup(context *gin.
 		
 	}
 	// Update Waste Group
-	updateError := gen.REPO.UpdateWasteGroup(context, gen.UpdateWasteGroupParams{
+	updateError := gen.REPO.UpdateWasteType(context, gen.UpdateWasteTypeParams{
 		Category: params.Category,
 		Name: params.Name,
 		ID:     int32(params.ID),

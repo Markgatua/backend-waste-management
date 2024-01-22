@@ -191,14 +191,6 @@ type WasteForSale struct {
 	Waste  pqtype.NullRawMessage `json:"waste"`
 }
 
-type WasteGroup struct {
-	ID        int32        `json:"id"`
-	Name      string       `json:"name"`
-	Category  string       `json:"category"`
-	CreatedAt time.Time    `json:"created_at"`
-	DeletedAt sql.NullTime `json:"deleted_at"`
-}
-
 type WasteTransaction struct {
 	ID                int32                 `json:"id"`
 	Date              time.Time             `json:"date"`
@@ -216,4 +208,12 @@ type WasteTransaction struct {
 	IsPaid            sql.NullBool          `json:"is_paid"`
 	CreatedAt         time.Time             `json:"created_at"`
 	UpdatedAt         time.Time             `json:"updated_at"`
+}
+
+type WasteType struct {
+	ID        int32        `json:"id"`
+	Name      string       `json:"name"`
+	Category  string       `json:"category"`
+	CreatedAt time.Time    `json:"created_at"`
+	DeletedAt sql.NullTime `json:"deleted_at"`
 }
