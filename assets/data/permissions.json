@@ -17,7 +17,6 @@
             }
         ]
     },
-
     {
         "module": "Users",
         "key": "users",
@@ -52,10 +51,8 @@
                 "sub_module": "user",
                 "action": "update_user_password"
             }
-
         ]
     },
-
     {
         "module": "Settings",
         "key": "settings",
@@ -173,6 +170,18 @@
                 "name": "Edit Company",
                 "sub_module": "Companies",
                 "action": "edit_company"
+            }
+        ]
+    },
+    {
+        "module": "Files",
+        "key": "files",
+        "permissions": [
+            {
+                "permission_id": 103,
+                "name": "Upload files",
+                "sub_module": "Files",
+                "action": "upload_files"
             }
         ]
     },

@@ -102,6 +102,9 @@ func runProgram() {
 	router.Use(middlewares.JwtAuthMiddleware())
 	router.Use(middlewares.PermissionMiddleware())
 
+	router.MaxMultipartMemory = 8 << 20  // 8 MiB
+	
+	router.POST("/upload_files",middlewares.PermissionBlockerMiddleware("upload_files"),controllers.UploadController{}.UploadFiles)
 	router.GET("/users", middlewares.PermissionBlockerMiddleware("view_user"), usersController.GetAllUsers)
 	//main organizations is
 	router.GET("/users/main_organization", middlewares.PermissionBlockerMiddleware("view_user"), usersController.GetAllMainOrganizationUsers)
