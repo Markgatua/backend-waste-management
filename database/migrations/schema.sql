@@ -14,7 +14,8 @@ CREATE TABLE uploads(
     type VARCHAR(100),
     path TEXT,
     related_table VARCHAR(150),
-    meta JSON NULL
+    meta JSON NULL,
+    UNIQUE(item_id,related_table)
 );
 
 CREATE TABLE permissions (

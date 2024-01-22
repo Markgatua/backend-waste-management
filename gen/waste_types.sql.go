@@ -7,29 +7,41 @@ package gen
 
 import (
 	"context"
+	"database/sql"
+	"time"
 )
 
 const getAllWasteTypes = `-- name: GetAllWasteTypes :many
 
-select id, name, is_active, category, created_at from waste_types
+select waste_types.id, waste_types.name, waste_types.is_active, waste_types.category, waste_types.created_at,uploads.path as file_path from waste_types left join uploads on uploads.item_id=waste_types.id and uploads.related_table='waste_types'
 `
 
+type GetAllWasteTypesRow struct {
+	ID        int32          `json:"id"`
+	Name      string         `json:"name"`
+	IsActive  bool           `json:"is_active"`
+	Category  string         `json:"category"`
+	CreatedAt time.Time      `json:"created_at"`
+	FilePath  sql.NullString `json:"file_path"`
+}
+
 // waste_types.sql
-func (q *Queries) GetAllWasteTypes(ctx context.Context) ([]WasteType, error) {
+func (q *Queries) GetAllWasteTypes(ctx context.Context) ([]GetAllWasteTypesRow, error) {
 	rows, err := q.db.QueryContext(ctx, getAllWasteTypes)
 	if err != nil {
 		return nil, err
 	}
 	defer rows.Close()
-	items := []WasteType{}
+	items := []GetAllWasteTypesRow{}
 	for rows.Next() {
-		var i WasteType
+		var i GetAllWasteTypesRow
 		if err := rows.Scan(
 			&i.ID,
 			&i.Name,
 			&i.IsActive,
 			&i.Category,
 			&i.CreatedAt,
+			&i.FilePath,
 		); err != nil {
 			return nil, err
 		}
