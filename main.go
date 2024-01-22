@@ -90,12 +90,14 @@ func runProgram() {
 		auth.POST("/login/phone", authController.LoginPhone)
 		auth.POST("/challenge/register/verify_otp_code_phone", authController.RegisterVerifyOTPCodePhone)
 		auth.POST("/challenge/register/verify_otp_code_phone_create_wallet", authController.RegisterVerifyOTPCodePhoneAndCreateWallet)
-
+    
 		auth.POST("/challenge/forgot_pin/send_otp_phone", authController.ForgotPinSendOTPPhone)
 		auth.POST("/challenge/forgot_pin/verify_otp_phone", authController.ForgotPinVerifyOTPPhone)
 		auth.POST("/challenge/forgot_pin/enter_new_pin", authController.ForgotPinEnterNewPin)
 
 	}
+
+
 
 	// apiGroup := router.Group("/api:BVaDN9hl")
 	router.GET("/uploads/:file",controllers.FileController{}.GetFile)
