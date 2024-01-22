@@ -3,11 +3,9 @@ package controllers
 import (
 	"net/http"
 	"strconv"
-	"time"
 	"ttnmwastemanagementsystem/gen"
 
 	"github.com/gin-gonic/gin"
-	"github.com/guregu/null"
 )
 
 
@@ -15,14 +13,14 @@ type WasteTypesController struct{}
 
 type InsertWasteGroupParams struct {
 	Name      string `json:"name"  binding:"required"`
-	Category      string `json:"category"  binding:"required"`
+	Category      string `json:"category"`
 }
 
 type UpdateWasteGroupParams struct {
 	ID     		  int `json:"id"  binding:"required"`
 	Name 		  string `json:"name"  binding:"required"`
-	Category      string `json:"category"  binding:"required"`
-	DeletedAt	  bool   `json:"delete"`
+	Category      string `json:"category"`
+	IsActive	  *bool   `json:"is_active"`
 }
 
 
@@ -54,7 +52,7 @@ func (wasteGroupsController WasteTypesController) InsertWasteGroup(context *gin.
 	context.JSON(http.StatusOK, gin.H{
 		"error":   false,
 		"message": "Successfully Created Waste Type",
-		"waste_group": WasteGroup, // Include the company details in the response
+		"waste_type": WasteGroup, // Include the company details in the response
 	})
 
 }
@@ -87,7 +85,7 @@ func(wasteGroupsController  WasteTypesController) GetUsersWasteGroups(context *g
 	
 	context.JSON(http.StatusOK,gin.H{
 		"error":false,
-		"Waste Groups":wasteGroups,
+		"waste_types":wasteGroups,
 	})
 }
 
@@ -108,7 +106,7 @@ func(wasteGroupController WasteTypesController) GetOneWasteGroup(context *gin.Co
 
 	context.JSON(http.StatusOK,gin.H{
 		"error":  false,
-		"Waste Group": wasteGroup,
+		"waste_type": wasteGroup,
 	})
 }
 
@@ -124,19 +122,13 @@ func (wasteGroupController WasteTypesController) UpdateWasteGroup(context *gin.C
 		return
 	}
 
-	var isToDelete null.Time
-
-	if (params.DeletedAt == true) {
-		isToDelete = null.TimeFrom(time.Now())
-	} else {
-		
-	}
+	
 	// Update Waste Group
 	updateError := gen.REPO.UpdateWasteType(context, gen.UpdateWasteTypeParams{
 		Category: params.Category,
 		Name: params.Name,
 		ID:     int32(params.ID),
-		DeletedAt: isToDelete.NullTime,
+		IsActive: *params.IsActive,
 	})
 	if updateError != nil {
 		context.JSON(http.StatusUnprocessableEntity, gin.H{

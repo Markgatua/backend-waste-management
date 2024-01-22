@@ -7,12 +7,11 @@ package gen
 
 import (
 	"context"
-	"database/sql"
 )
 
 const getAllWasteTypes = `-- name: GetAllWasteTypes :many
 
-select id, name, category, created_at, deleted_at from waste_types
+select id, name, is_active, category, created_at from waste_types
 `
 
 // waste_types.sql
@@ -28,9 +27,9 @@ func (q *Queries) GetAllWasteTypes(ctx context.Context) ([]WasteType, error) {
 		if err := rows.Scan(
 			&i.ID,
 			&i.Name,
+			&i.IsActive,
 			&i.Category,
 			&i.CreatedAt,
-			&i.DeletedAt,
 		); err != nil {
 			return nil, err
 		}
@@ -46,7 +45,7 @@ func (q *Queries) GetAllWasteTypes(ctx context.Context) ([]WasteType, error) {
 }
 
 const getOneWasteType = `-- name: GetOneWasteType :one
-select id, name, category, created_at, deleted_at from waste_types where id=$1
+select id, name, is_active, category, created_at from waste_types where id=$1
 `
 
 func (q *Queries) GetOneWasteType(ctx context.Context, id int32) (WasteType, error) {
@@ -55,15 +54,15 @@ func (q *Queries) GetOneWasteType(ctx context.Context, id int32) (WasteType, err
 	err := row.Scan(
 		&i.ID,
 		&i.Name,
+		&i.IsActive,
 		&i.Category,
 		&i.CreatedAt,
-		&i.DeletedAt,
 	)
 	return i, err
 }
 
 const getUsersWasteType = `-- name: GetUsersWasteType :many
-select id, name, category, created_at, deleted_at from waste_types where deleted_at is NULL
+select id, name, is_active, category, created_at from waste_types where deleted_at is NULL
 `
 
 func (q *Queries) GetUsersWasteType(ctx context.Context) ([]WasteType, error) {
@@ -78,9 +77,9 @@ func (q *Queries) GetUsersWasteType(ctx context.Context) ([]WasteType, error) {
 		if err := rows.Scan(
 			&i.ID,
 			&i.Name,
+			&i.IsActive,
 			&i.Category,
 			&i.CreatedAt,
-			&i.DeletedAt,
 		); err != nil {
 			return nil, err
 		}
@@ -96,7 +95,7 @@ func (q *Queries) GetUsersWasteType(ctx context.Context) ([]WasteType, error) {
 }
 
 const insertWasteType = `-- name: InsertWasteType :one
-INSERT INTO waste_types (name,category) VALUES ($1,$2) RETURNING id, name, category, created_at, deleted_at
+INSERT INTO waste_types (name,category) VALUES ($1,$2) RETURNING id, name, is_active, category, created_at
 `
 
 type InsertWasteTypeParams struct {
@@ -110,30 +109,30 @@ func (q *Queries) InsertWasteType(ctx context.Context, arg InsertWasteTypeParams
 	err := row.Scan(
 		&i.ID,
 		&i.Name,
+		&i.IsActive,
 		&i.Category,
 		&i.CreatedAt,
-		&i.DeletedAt,
 	)
 	return i, err
 }
 
 const updateWasteType = `-- name: UpdateWasteType :exec
-update waste_types set name=$2, category=$3, deleted_at=$4 where id=$1
+update waste_types set name=$1, category=$2,is_active=$3 where id=$4
 `
 
 type UpdateWasteTypeParams struct {
-	ID        int32        `json:"id"`
-	Name      string       `json:"name"`
-	Category  string       `json:"category"`
-	DeletedAt sql.NullTime `json:"deleted_at"`
+	Name     string `json:"name"`
+	Category string `json:"category"`
+	IsActive bool   `json:"is_active"`
+	ID       int32  `json:"id"`
 }
 
 func (q *Queries) UpdateWasteType(ctx context.Context, arg UpdateWasteTypeParams) error {
 	_, err := q.db.ExecContext(ctx, updateWasteType,
-		arg.ID,
 		arg.Name,
 		arg.Category,
-		arg.DeletedAt,
+		arg.IsActive,
+		arg.ID,
 	)
 	return err
 }

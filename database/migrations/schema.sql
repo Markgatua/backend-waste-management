@@ -171,9 +171,9 @@ CREATE TABLE champion_aggregator_assignments (
 CREATE TABLE waste_types (
   id SERIAL PRIMARY KEY,
   name VARCHAR(255) NOT NULL,
+  is_active BOOLEAN not null DEFAULT true,
   category VARCHAR(255) NOT NULL,
-  created_at TIMESTAMP NOT NULL DEFAULT NOW(),
-  deleted_at timestamp NULL DEFAULT NULL
+  created_at TIMESTAMP NOT NULL DEFAULT NOW()
 );
 CREATE UNIQUE INDEX waste_types_unique_name_idx on waste_types (LOWER(name));  
 
