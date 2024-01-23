@@ -23,6 +23,15 @@ type UpdateOrganizationParams struct {
 	Name      string `json:"name"  binding:"required"`
 }
 
+func (c OrgnizationController) GetPresets(context *gin.Context) {
+	countries, _ := gen.REPO.GetAllCountries(context)
+	context.JSON(http.StatusOK, gin.H{
+		"error":     false,
+		"countries": countries,
+	})
+
+}
+
 func (c OrgnizationController) InsertOrganization(context *gin.Context) {
 	var params InsertOrganizationParam
 	err := context.ShouldBindJSON(&params)

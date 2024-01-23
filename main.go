@@ -101,6 +101,8 @@ func runProgram() {
 
 	// apiGroup := router.Group("/api:BVaDN9hl")
 	router.GET("/uploads/:file",controllers.FileController{}.GetFile)
+	router.GET("/flag/:file",controllers.FileController{}.GetFlag)
+
 
 	router.Use(middlewares.JwtAuthMiddleware())
 	router.Use(middlewares.PermissionMiddleware())
