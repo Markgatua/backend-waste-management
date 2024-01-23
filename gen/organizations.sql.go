@@ -218,17 +218,23 @@ func (q *Queries) InsertOrganization(ctx context.Context, arg InsertOrganization
 }
 
 const updateOrganization = `-- name: UpdateOrganization :exec
-update organizations set name = $1, country_id = $2 where id = $3
+update organizations set name = $1, country_id = $2, organization_type=$3 where id = $4
 `
 
 type UpdateOrganizationParams struct {
-	Name      string `json:"name"`
-	CountryID int32  `json:"country_id"`
-	ID        int32  `json:"id"`
+	Name             string `json:"name"`
+	CountryID        int32  `json:"country_id"`
+	OrganizationType int32  `json:"organization_type"`
+	ID               int32  `json:"id"`
 }
 
 func (q *Queries) UpdateOrganization(ctx context.Context, arg UpdateOrganizationParams) error {
-	_, err := q.db.ExecContext(ctx, updateOrganization, arg.Name, arg.CountryID, arg.ID)
+	_, err := q.db.ExecContext(ctx, updateOrganization,
+		arg.Name,
+		arg.CountryID,
+		arg.OrganizationType,
+		arg.ID,
+	)
 	return err
 }
 

@@ -1,6 +1,7 @@
 package controllers
 
 import (
+	"database/sql"
 	"net/http"
 	"strconv"
 	_ "strconv"
@@ -10,6 +11,7 @@ import (
 	"ttnmwastemanagementsystem/helpers"
 
 	"github.com/gin-gonic/gin"
+	"gopkg.in/guregu/null.v3"
 )
 
 type OrgnizationController struct{}
@@ -242,12 +244,49 @@ func (c OrgnizationController) UpdateOrganization(context *gin.Context) {
 		return
 	}
 
+	usersWithEmailWithoutID, err := gen.REPO.GetUserWithEmailWithoutID(context, gen.GetUserWithEmailWithoutIDParams{
+		Email: sql.NullString{String: params.Email, Valid: true},
+		ID:    params.UserID,
+	})
+	if err != nil {
+		context.JSON(http.StatusUnprocessableEntity, gin.H{
+			"error":   true,
+			"message": err.Error(),
+		})
+		return
+	}
+	if len(usersWithEmailWithoutID) > 0 {
+		context.JSON(http.StatusUnprocessableEntity, gin.H{
+			"error":   true,
+			"message": "Another user has the same email",
+		})
+		return
+	}
+
 	// Update Waste Group
 	updateError := gen.REPO.UpdateOrganization(context, gen.UpdateOrganizationParams{
-		Name:      params.Name,
-		CountryID: int32(params.CountryID),
-		ID:        int32(params.ID),
+		Name:             params.Name,
+		CountryID:        int32(params.CountryID),
+		OrganizationType: params.OrganizationType,
+		ID:               int32(params.ID),
 	})
+	var roleID = -1
+	var userType = -1
+	if params.OrganizationType == 1 {
+		roleID = 2
+		userType = 2
+	} else if params.OrganizationType == 2 {
+		roleID = 6
+		userType = 8
+	}
+	gen.REPO.UpdateUserEmailRoleUserTypeAndPassword(context, gen.UpdateUserEmailRoleUserTypeAndPasswordParams{
+		Email:    null.StringFrom(params.Email).NullString,
+		RoleID:   sql.NullInt32{Int32: int32(roleID), Valid: true},
+		UserType: sql.NullInt16{Int16: int16(userType), Valid: true},
+		ID:       params.UserID,
+		Password: null.StringFrom(helpers.Functions{}.HashPassword(params.Password)).NullString,
+	})
+
 	if updateError != nil {
 		context.JSON(http.StatusUnprocessableEntity, gin.H{
 			"error":   true,

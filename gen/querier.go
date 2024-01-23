@@ -61,6 +61,7 @@ type Querier interface {
 	GetRoles(ctx context.Context) ([]Role, error)
 	GetSubCountiesForACounty(ctx context.Context, countyID int32) ([]SubCounty, error)
 	GetTheCollectorForAChampion(ctx context.Context, championID sql.NullInt32) (GetTheCollectorForAChampionRow, error)
+	GetUserWithEmailWithoutID(ctx context.Context, arg GetUserWithEmailWithoutIDParams) ([]User, error)
 	GetUsersWasteType(ctx context.Context) ([]WasteType, error)
 	GetUsersWithRole(ctx context.Context) ([]GetUsersWithRoleRow, error)
 	InsertCompany(ctx context.Context, arg InsertCompanyParams) (Company, error)
@@ -84,6 +85,7 @@ type Querier interface {
 	UpdateOrganization(ctx context.Context, arg UpdateOrganizationParams) error
 	UpdateOrganizationIsActive(ctx context.Context, arg UpdateOrganizationIsActiveParams) error
 	UpdateRole(ctx context.Context, arg UpdateRoleParams) error
+	UpdateUserEmailRoleUserTypeAndPassword(ctx context.Context, arg UpdateUserEmailRoleUserTypeAndPasswordParams) error
 	UpdateUserIsActive(ctx context.Context, arg UpdateUserIsActiveParams) error
 	UpdateWasteType(ctx context.Context, arg UpdateWasteTypeParams) error
 	ViewCounties(ctx context.Context) ([]County, error)

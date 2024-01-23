@@ -11,7 +11,6 @@ left join uploads on uploads.item_id=organizations.id and uploads.related_table=
 update organizations set is_active=$1 where id =$2;
 
 
-
 -- name: GetOrganization :one
 SELECT organizations.*,countries.name as country FROM organizations left join countries on countries.id=organizations.country_id WHERE organizations.id = $1;
 
@@ -36,7 +35,7 @@ where
     and country_id = $3;
 
 -- name: UpdateOrganization :exec
-update organizations set name = $1, country_id = $2 where id = $3;
+update organizations set name = $1, country_id = $2, organization_type=$3 where id = $4;
 
 -- name: DeleteOrganization :exec
 delete from organizations where id = $1;
