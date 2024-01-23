@@ -31,9 +31,16 @@ type SetActiveInactiveOrganizationStatusParam struct {
 }
 
 type UpdateOrganizationParams struct {
-	ID        int    `json:"id"  binding:"required"`
-	CountryID int    `json:"country_id" binding:"required"`
-	Name      string `json:"name"  binding:"required"`
+	ID               int    `json:"id"  binding:"required"`
+	Name             string `json:"name"  binding:"required"`
+	CountryID        int32  `json:"country_id"  binding:"required"`
+	OrganizationType int32  `json:"organization_type" binding:"required"`
+	LogoPath         string `json:"logo_path"`
+
+	Email     string `json:"email" binding:"required"`
+	FirstName string `json:"first_name" binding:"required"`
+	LastName  string `json:"last_name" binding:"required"`
+	Password  string `json:"password" binding:"required"`
 }
 
 func (controller OrgnizationController) SetActiveInActiveStatus(context *gin.Context) {
