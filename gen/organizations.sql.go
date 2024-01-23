@@ -21,14 +21,23 @@ func (q *Queries) DeleteOrganization(ctx context.Context, id int32) error {
 
 const getAllOrganizations = `-- name: GetAllOrganizations :many
 
-SELECT organizations.id, organizations.name, organizations.country_id, organizations.organization_type,countries.name as country from organizations left join countries on countries.id=organizations.country_id
+SELECT organizations.id, organizations.name, organizations.country_id, organizations.is_active, organizations.organization_type,uploads.path as file_path,users.first_name,users.id as user_id,users.last_name,users.email, countries.name as country from organizations 
+left join countries on countries.id=organizations.country_id
+left join users on users.user_organization_id = organizations.id and users.is_organization_super_admin=true
+left join uploads on uploads.item_id=organizations.id and uploads.related_table='organizations'
 `
 
 type GetAllOrganizationsRow struct {
 	ID               int32          `json:"id"`
 	Name             string         `json:"name"`
 	CountryID        int32          `json:"country_id"`
+	IsActive         bool           `json:"is_active"`
 	OrganizationType int32          `json:"organization_type"`
+	FilePath         sql.NullString `json:"file_path"`
+	FirstName        sql.NullString `json:"first_name"`
+	UserID           sql.NullInt32  `json:"user_id"`
+	LastName         sql.NullString `json:"last_name"`
+	Email            sql.NullString `json:"email"`
 	Country          sql.NullString `json:"country"`
 }
 
@@ -46,7 +55,13 @@ func (q *Queries) GetAllOrganizations(ctx context.Context) ([]GetAllOrganization
 			&i.ID,
 			&i.Name,
 			&i.CountryID,
+			&i.IsActive,
 			&i.OrganizationType,
+			&i.FilePath,
+			&i.FirstName,
+			&i.UserID,
+			&i.LastName,
+			&i.Email,
 			&i.Country,
 		); err != nil {
 			return nil, err
@@ -63,7 +78,7 @@ func (q *Queries) GetAllOrganizations(ctx context.Context) ([]GetAllOrganization
 }
 
 const getDuplicateOrganization = `-- name: GetDuplicateOrganization :many
-SELECT id, name, country_id, organization_type
+SELECT id, name, country_id, is_active, organization_type
 FROM organizations
 where
     id != $1
@@ -90,6 +105,7 @@ func (q *Queries) GetDuplicateOrganization(ctx context.Context, arg GetDuplicate
 			&i.ID,
 			&i.Name,
 			&i.CountryID,
+			&i.IsActive,
 			&i.OrganizationType,
 		); err != nil {
 			return nil, err
@@ -106,13 +122,14 @@ func (q *Queries) GetDuplicateOrganization(ctx context.Context, arg GetDuplicate
 }
 
 const getOrganization = `-- name: GetOrganization :one
-SELECT organizations.id, organizations.name, organizations.country_id, organizations.organization_type,countries.name as country FROM organizations left join countries on countries.id=organizations.country_id WHERE organizations.id = $1
+SELECT organizations.id, organizations.name, organizations.country_id, organizations.is_active, organizations.organization_type,countries.name as country FROM organizations left join countries on countries.id=organizations.country_id WHERE organizations.id = $1
 `
 
 type GetOrganizationRow struct {
 	ID               int32          `json:"id"`
 	Name             string         `json:"name"`
 	CountryID        int32          `json:"country_id"`
+	IsActive         bool           `json:"is_active"`
 	OrganizationType int32          `json:"organization_type"`
 	Country          sql.NullString `json:"country"`
 }
@@ -124,6 +141,7 @@ func (q *Queries) GetOrganization(ctx context.Context, id int32) (GetOrganizatio
 		&i.ID,
 		&i.Name,
 		&i.CountryID,
+		&i.IsActive,
 		&i.OrganizationType,
 		&i.Country,
 	)
@@ -131,7 +149,7 @@ func (q *Queries) GetOrganization(ctx context.Context, id int32) (GetOrganizatio
 }
 
 const getOrganizationCountWithNameAndCountry = `-- name: GetOrganizationCountWithNameAndCountry :many
-SELECT id, name, country_id, organization_type
+SELECT id, name, country_id, is_active, organization_type
 from organizations
 where
     LOWER(name) = $1
@@ -156,6 +174,7 @@ func (q *Queries) GetOrganizationCountWithNameAndCountry(ctx context.Context, ar
 			&i.ID,
 			&i.Name,
 			&i.CountryID,
+			&i.IsActive,
 			&i.OrganizationType,
 		); err != nil {
 			return nil, err
@@ -174,7 +193,7 @@ func (q *Queries) GetOrganizationCountWithNameAndCountry(ctx context.Context, ar
 const insertOrganization = `-- name: InsertOrganization :one
 insert into
     organizations(name, country_id,organization_type)
-values($1, $2,$3) returning id, name, country_id, organization_type
+values($1, $2,$3) returning id, name, country_id, is_active, organization_type
 `
 
 type InsertOrganizationParams struct {
@@ -190,6 +209,7 @@ func (q *Queries) InsertOrganization(ctx context.Context, arg InsertOrganization
 		&i.ID,
 		&i.Name,
 		&i.CountryID,
+		&i.IsActive,
 		&i.OrganizationType,
 	)
 	return i, err
@@ -207,5 +227,19 @@ type UpdateOrganizationParams struct {
 
 func (q *Queries) UpdateOrganization(ctx context.Context, arg UpdateOrganizationParams) error {
 	_, err := q.db.ExecContext(ctx, updateOrganization, arg.Name, arg.CountryID, arg.ID)
+	return err
+}
+
+const updateOrganizationIsActive = `-- name: UpdateOrganizationIsActive :exec
+update organizations set is_active=$1 where id =$2
+`
+
+type UpdateOrganizationIsActiveParams struct {
+	IsActive bool  `json:"is_active"`
+	ID       int32 `json:"id"`
+}
+
+func (q *Queries) UpdateOrganizationIsActive(ctx context.Context, arg UpdateOrganizationIsActiveParams) error {
+	_, err := q.db.ExecContext(ctx, updateOrganizationIsActive, arg.IsActive, arg.ID)
 	return err
 }

@@ -87,6 +87,7 @@ type Organization struct {
 	ID               int32  `json:"id"`
 	Name             string `json:"name"`
 	CountryID        int32  `json:"country_id"`
+	IsActive         bool   `json:"is_active"`
 	OrganizationType int32  `json:"organization_type"`
 }
 

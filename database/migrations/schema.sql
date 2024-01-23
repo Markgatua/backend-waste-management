@@ -73,6 +73,7 @@ CREATE TABLE organizations(
   id SERIAL PRIMARY KEY,
   name VARCHAR(255) NOT NULL,
   country_id INTEGER NOT NULL,
+  is_active BOOLEAN NOT NULL DEFAULT TRUE,
   organization_type INTEGER NOT NULL, --1 aggrigators, 2 -green champion
   FOREIGN Key (country_id) REFERENCES countries(id)
 );

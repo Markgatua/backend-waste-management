@@ -53,7 +53,7 @@ func runProgram() {
 	companiesController := controllers.CompaniesController{}
 	wasteTypesController := controllers.WasteTypesController{}
 	organzationController := controllers.OrgnizationController{}
-	geoController := controllers.GeoController{}
+	//geoController := controllers.GeoController{}
 	championCollectorController := controllers.ChampionCollectorController{}
 	// rolesController := controllers.RolesController{}
 	// rolespermissions := controllers.RoleAndPermissionsController{}
@@ -129,13 +129,15 @@ func runProgram() {
 
 
 	//---------------------------countries-------------------------------------------------------
-	router.GET("countries", geoController.GetAllCountries)
+	//router.GET("countries", geoController.GetAllCountries)
 	//-------------------------------------------------------------------------------------------
 
 	//---------------------------organization----------------------------------------------------
 	router.POST("organization/add", middlewares.PermissionBlockerMiddleware("add_organization"), organzationController.InsertOrganization)
 	router.PUT("organization/update", middlewares.PermissionBlockerMiddleware("edit_organization"), organzationController.UpdateOrganization)
 	router.GET("organizations", middlewares.PermissionBlockerMiddleware("view_organizations"), organzationController.GetAllOrganizations)
+	router.PUT("organization/set_active_inactive_status", middlewares.PermissionBlockerMiddleware("edit_organization"), organzationController.SetActiveInActiveStatus)
+
 	router.DELETE("organization/delete/:id", middlewares.PermissionBlockerMiddleware("delete_organization"), organzationController.DeleteOrganization)
 	router.GET("organization/:id", middlewares.PermissionBlockerMiddleware("view_organizations"), organzationController.GetOrganization)
 	//-------------------------------------------------------------------------------------------

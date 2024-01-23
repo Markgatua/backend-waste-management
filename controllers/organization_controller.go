@@ -25,11 +25,43 @@ type InsertOrganizationParam struct {
 	LastName  string `json:"last_name" binding:"required"`
 	Password  string `json:"password" binding:"required"`
 }
+type SetActiveInactiveOrganizationStatusParam struct {
+	OrganizationID int64 `json:"organization_id" binding:"required"`
+	IsActive       *bool `json:"is_active" binding:"required"`
+}
 
 type UpdateOrganizationParams struct {
 	ID        int    `json:"id"  binding:"required"`
 	CountryID int    `json:"country_id" binding:"required"`
 	Name      string `json:"name"  binding:"required"`
+}
+
+func (controller OrgnizationController) SetActiveInActiveStatus(context *gin.Context) {
+	var param SetActiveInactiveOrganizationStatusParam
+	err := context.ShouldBindJSON(&param)
+	if err != nil {
+		context.JSON(http.StatusUnprocessableEntity, gin.H{
+			"error":   true,
+			"message": err.Error(),
+		})
+		return
+	}
+
+	err = gen.REPO.UpdateOrganizationIsActive(context, gen.UpdateOrganizationIsActiveParams{
+		IsActive: *param.IsActive,
+		ID:       int32(param.OrganizationID),
+	})
+	if err != nil {
+		context.JSON(http.StatusUnprocessableEntity, gin.H{
+			"error":   true,
+			"message": "Error setting user status",
+		})
+	} else {
+		context.JSON(http.StatusOK, gin.H{
+			"error":   false,
+			"message": "Updated user status",
+		})
+	}
 }
 
 func (c OrgnizationController) GetPresets(context *gin.Context) {
@@ -63,6 +95,21 @@ func (c OrgnizationController) InsertOrganization(context *gin.Context) {
 		return
 	}
 
+	user, err := GetEmailUser(params.Email)
+	if err != nil {
+		context.JSON(http.StatusUnprocessableEntity, gin.H{
+			"error":   true,
+			"message": "Error adding organization",
+		})
+		return
+	}
+	if user != nil {
+		context.JSON(http.StatusUnprocessableEntity, gin.H{
+			"error":   true,
+			"message": "User with the given email already exists`",
+		})
+		return
+	}
 	ogranization, insertError := gen.REPO.InsertOrganization(context, gen.InsertOrganizationParams{
 		Name:             params.Name,
 		CountryID:        params.CountryID,
@@ -79,18 +126,19 @@ func (c OrgnizationController) InsertOrganization(context *gin.Context) {
 		userType = 8
 	}
 
-	_, err = gen.REPO.DB.NamedExec(`INSERT INTO users (email,first_name,last_name,provider,role_id,user_organization_id,user_type,created_at,updated_at,password) VALUES (:email,:first_name,:last_name,:provider,:role_id,:user_organization_id,:user_type,:created_at,:updated_at,:password)`,
+	_, err = gen.REPO.DB.NamedExec(`INSERT INTO users (email,first_name,last_name,provider,role_id,user_organization_id,user_type,created_at,updated_at,password,is_organization_super_admin) VALUES (:email,:first_name,:last_name,:provider,:role_id,:user_organization_id,:user_type,:created_at,:updated_at,:password,:is_organization_super_admin)`,
 		map[string]interface{}{
-			"email":                params.Email,
-			"first_name":           params.FirstName,
-			"last_name":            params.LastName,
-			"provider":             "email",
-			"role_id":              roleID,
-			"user_organization_id": ogranization.ID,
-			"user_type":            userType,
-			"password":             helpers.Functions{}.HashPassword(params.Password),
-			"created_at":           time.Now(),
-			"updated_at":           time.Now(),
+			"email":                       params.Email,
+			"first_name":                  params.FirstName,
+			"last_name":                   params.LastName,
+			"provider":                    "email",
+			"role_id":                     roleID,
+			"user_organization_id":        ogranization.ID,
+			"is_organization_super_admin": true,
+			"user_type":                   userType,
+			"password":                    helpers.Functions{}.HashPassword(params.Password),
+			"created_at":                  time.Now(),
+			"updated_at":                  time.Now(),
 		})
 
 	if params.LogoPath != "" {

@@ -82,6 +82,7 @@ type Querier interface {
 	UpdateMainOrganizationProfile(ctx context.Context, arg UpdateMainOrganizationProfileParams) error
 	UpdateMainOrganizationUser(ctx context.Context, arg UpdateMainOrganizationUserParams) error
 	UpdateOrganization(ctx context.Context, arg UpdateOrganizationParams) error
+	UpdateOrganizationIsActive(ctx context.Context, arg UpdateOrganizationIsActiveParams) error
 	UpdateRole(ctx context.Context, arg UpdateRoleParams) error
 	UpdateUserIsActive(ctx context.Context, arg UpdateUserIsActiveParams) error
 	UpdateWasteType(ctx context.Context, arg UpdateWasteTypeParams) error
