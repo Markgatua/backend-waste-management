@@ -73,8 +73,11 @@ CREATE TABLE organizations(
   id SERIAL PRIMARY KEY,
   name VARCHAR(255) NOT NULL,
   country_id INTEGER NOT NULL,
+  organization_type INTEGER NOT NULL, --1 aggrigators, 2 -green champion
   FOREIGN Key (country_id) REFERENCES countries(id)
 );
+ALTER TABLE organizations ADD CONSTRAINT check_organizations_type CHECK (organization_type IN (1,2)); -- make sure organization type is either 1 or 2
+
 
 CREATE TABLE main_organization(
   id SERIAL PRIMARY KEY,
@@ -126,12 +129,12 @@ CREATE TABLE users(
     FOREIGN Key (user_company_id) REFERENCES companies(id),
     FOREIGN Key (user_organization_id) REFERENCES organizations(id),
     is_main_organization_user BOOLEAN DEFAULT false not null,
-    is_super_admin_for_organization BOOLEAN DEFAULT false not null,
-    
+    is_organization_super_admin BOOLEAN DEFAULT false not null,
+
     email VARCHAR(255) DEFAULT NULL UNIQUE,
     password TEXT DEFAULT NULL,
     avatar_url TEXT NULL,
-    user_type SMALLINT, -- 1 for TTNM ADMINS || 2 AGG GLOBAL ADMINS || 3 AGG ADMINS || 4 AGG USERS || 5 AGG COLLECTORS || 6 EXTERNAL COLLECTORS || 7 GREEN CHAMPIONS 
+    user_type SMALLINT, -- 1 for TTNM ADMINS || 2 AGG GLOBAL ADMINS || 3 AGG ADMINS || 4 AGG USERS || 5 AGG COLLECTORS || 6 EXTERNAL COLLECTORS || 7 GREEN CHAMPIONS 8|| Greenchamption global admin
     is_active BOOLEAN DEFAULT TRUE,
     calling_code VARCHAR(6) NULL,
     phone VARCHAR(15) NULL DEFAULT NULL,

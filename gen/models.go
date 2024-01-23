@@ -84,9 +84,10 @@ type MainOrganization struct {
 }
 
 type Organization struct {
-	ID        int32  `json:"id"`
-	Name      string `json:"name"`
-	CountryID int32  `json:"country_id"`
+	ID               int32  `json:"id"`
+	Name             string `json:"name"`
+	CountryID        int32  `json:"country_id"`
+	OrganizationType int32  `json:"organization_type"`
 }
 
 type PaymentMethod struct {
@@ -144,29 +145,31 @@ type Upload struct {
 }
 
 type User struct {
-	ID                     int32          `json:"id"`
-	FirstName              sql.NullString `json:"first_name"`
-	LastName               sql.NullString `json:"last_name"`
-	Provider               sql.NullString `json:"provider"`
-	RoleID                 sql.NullInt32  `json:"role_id"`
-	UserCompanyID          sql.NullInt32  `json:"user_company_id"`
-	IsMainOrganizationUser bool           `json:"is_main_organization_user"`
-	Email                  sql.NullString `json:"email"`
-	Password               sql.NullString `json:"password"`
-	AvatarUrl              sql.NullString `json:"avatar_url"`
-	UserType               sql.NullInt16  `json:"user_type"`
-	IsActive               sql.NullBool   `json:"is_active"`
-	CallingCode            sql.NullString `json:"calling_code"`
-	Phone                  sql.NullString `json:"phone"`
-	PhoneConfirmedAt       sql.NullTime   `json:"phone_confirmed_at"`
-	ConfirmedAt            sql.NullTime   `json:"confirmed_at"`
-	ConfirmationToken      sql.NullString `json:"confirmation_token"`
-	ConfirmationSentAt     sql.NullTime   `json:"confirmation_sent_at"`
-	RecoveryToken          sql.NullString `json:"recovery_token"`
-	RecoverySentAt         sql.NullTime   `json:"recovery_sent_at"`
-	LastLogin              sql.NullTime   `json:"last_login"`
-	CreatedAt              time.Time      `json:"created_at"`
-	UpdatedAt              time.Time      `json:"updated_at"`
+	ID                       int32          `json:"id"`
+	FirstName                sql.NullString `json:"first_name"`
+	LastName                 sql.NullString `json:"last_name"`
+	Provider                 sql.NullString `json:"provider"`
+	RoleID                   sql.NullInt32  `json:"role_id"`
+	UserCompanyID            sql.NullInt32  `json:"user_company_id"`
+	UserOrganizationID       sql.NullInt32  `json:"user_organization_id"`
+	IsMainOrganizationUser   bool           `json:"is_main_organization_user"`
+	IsOrganizationSuperAdmin bool           `json:"is_organization_super_admin"`
+	Email                    sql.NullString `json:"email"`
+	Password                 sql.NullString `json:"password"`
+	AvatarUrl                sql.NullString `json:"avatar_url"`
+	UserType                 sql.NullInt16  `json:"user_type"`
+	IsActive                 sql.NullBool   `json:"is_active"`
+	CallingCode              sql.NullString `json:"calling_code"`
+	Phone                    sql.NullString `json:"phone"`
+	PhoneConfirmedAt         sql.NullTime   `json:"phone_confirmed_at"`
+	ConfirmedAt              sql.NullTime   `json:"confirmed_at"`
+	ConfirmationToken        sql.NullString `json:"confirmation_token"`
+	ConfirmationSentAt       sql.NullTime   `json:"confirmation_sent_at"`
+	RecoveryToken            sql.NullString `json:"recovery_token"`
+	RecoverySentAt           sql.NullTime   `json:"recovery_sent_at"`
+	LastLogin                sql.NullTime   `json:"last_login"`
+	CreatedAt                time.Time      `json:"created_at"`
+	UpdatedAt                time.Time      `json:"updated_at"`
 }
 
 type WasteBuyer struct {

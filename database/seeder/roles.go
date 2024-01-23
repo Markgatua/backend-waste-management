@@ -28,64 +28,67 @@ func (roleSeeder RoleSeeder) Run(q *gen.Queries) {
 	})	
 	q.CreateRole(context.Background(), gen.CreateRoleParams{
 		ID:          3,
-		Name:        "Aggregator Admin",
+		Name:        "Aggregator Super Admin",
 		GuardName:   "Web",
 		IsActive: true,
 		Description: null.StringFrom("").NullString,
 	})
 	q.CreateRole(context.Background(), gen.CreateRoleParams{
 		ID:          4,
-		Name:        "Aggregator System User",
+		Name:        "Aggregator admin",
 		GuardName:   "Web",
 		IsActive: true,
 		Description: null.StringFrom("").NullString,
 	})
 	q.CreateRole(context.Background(), gen.CreateRoleParams{
 		ID:          5,
-		Name:        "Aggregator Collector",
+		Name:        "Aggregator system user",
 		GuardName:   "Web",
 		Description: null.StringFrom("").NullString,
 	})
+
+
 	q.CreateRole(context.Background(), gen.CreateRoleParams{
 		ID:          6,
-		Name:        "External Collector",
+		Name:        "Green champion global admin",
 		GuardName:   "Web",
+		IsActive: true,
 		Description: null.StringFrom("").NullString,
-	})
+	})	
 	q.CreateRole(context.Background(), gen.CreateRoleParams{
 		ID:          7,
-		Name:        "Green Champion",
+		Name:        "Green champion super admin",
 		GuardName:   "Web",
+		IsActive: true,
 		Description: null.StringFrom("").NullString,
 	})
 	q.CreateRole(context.Background(), gen.CreateRoleParams{
 		ID:          8,
-		Name:        "Corporate Global Admin",
+		Name:        "Green champion admin",
 		GuardName:   "Web",
+		IsActive: true,
 		Description: null.StringFrom("").NullString,
 	})
+
 	q.CreateRole(context.Background(), gen.CreateRoleParams{
 		ID:          9,
-		Name:        "Corporate Admin",
+		Name:        "Green champion system user",
 		GuardName:   "Web",
 		Description: null.StringFrom("").NullString,
 	})
+	
 	q.CreateRole(context.Background(), gen.CreateRoleParams{
 		ID:          10,
-		Name:        "Corporate System User",
+		Name:        "External Collector",
 		GuardName:   "Web",
 		Description: null.StringFrom("").NullString,
 	})
-	q.CreateRole(context.Background(), gen.CreateRoleParams{
-		ID:          11,
-		Name:        "Green Regulator",
-		GuardName:   "Web",
-		Description: null.StringFrom("").NullString,
-	})
+
 	q.CreateRole(context.Background(), gen.CreateRoleParams{
 		ID:          12,
-		Name:        "Super admin",
-		GuardName:   "Web",
-		Description: null.StringFrom("").NullString,
+		Name:        "TTNM super Admin",
+		GuardName:   "super_admin_web",
+		IsActive: true,
+		Description: null.StringFrom("Super Admin can perform most actions in the system").NullString,
 	})
 }

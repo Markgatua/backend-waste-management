@@ -21,14 +21,15 @@ func (q *Queries) DeleteOrganization(ctx context.Context, id int32) error {
 
 const getAllOrganizations = `-- name: GetAllOrganizations :many
 
-SELECT organizations.id, organizations.name, organizations.country_id,countries.name as country from organizations left join countries on countries.id=organizations.country_id
+SELECT organizations.id, organizations.name, organizations.country_id, organizations.organization_type,countries.name as country from organizations left join countries on countries.id=organizations.country_id
 `
 
 type GetAllOrganizationsRow struct {
-	ID        int32          `json:"id"`
-	Name      string         `json:"name"`
-	CountryID int32          `json:"country_id"`
-	Country   sql.NullString `json:"country"`
+	ID               int32          `json:"id"`
+	Name             string         `json:"name"`
+	CountryID        int32          `json:"country_id"`
+	OrganizationType int32          `json:"organization_type"`
+	Country          sql.NullString `json:"country"`
 }
 
 // regions.sql
@@ -45,6 +46,7 @@ func (q *Queries) GetAllOrganizations(ctx context.Context) ([]GetAllOrganization
 			&i.ID,
 			&i.Name,
 			&i.CountryID,
+			&i.OrganizationType,
 			&i.Country,
 		); err != nil {
 			return nil, err
@@ -61,7 +63,7 @@ func (q *Queries) GetAllOrganizations(ctx context.Context) ([]GetAllOrganization
 }
 
 const getDuplicateOrganization = `-- name: GetDuplicateOrganization :many
-SELECT id, name, country_id
+SELECT id, name, country_id, organization_type
 FROM organizations
 where
     id != $1
@@ -84,7 +86,12 @@ func (q *Queries) GetDuplicateOrganization(ctx context.Context, arg GetDuplicate
 	items := []Organization{}
 	for rows.Next() {
 		var i Organization
-		if err := rows.Scan(&i.ID, &i.Name, &i.CountryID); err != nil {
+		if err := rows.Scan(
+			&i.ID,
+			&i.Name,
+			&i.CountryID,
+			&i.OrganizationType,
+		); err != nil {
 			return nil, err
 		}
 		items = append(items, i)
@@ -99,14 +106,15 @@ func (q *Queries) GetDuplicateOrganization(ctx context.Context, arg GetDuplicate
 }
 
 const getOrganization = `-- name: GetOrganization :one
-SELECT organizations.id, organizations.name, organizations.country_id,countries.name as country FROM organizations left join countries on countries.id=organizations.country_id WHERE organizations.id = $1
+SELECT organizations.id, organizations.name, organizations.country_id, organizations.organization_type,countries.name as country FROM organizations left join countries on countries.id=organizations.country_id WHERE organizations.id = $1
 `
 
 type GetOrganizationRow struct {
-	ID        int32          `json:"id"`
-	Name      string         `json:"name"`
-	CountryID int32          `json:"country_id"`
-	Country   sql.NullString `json:"country"`
+	ID               int32          `json:"id"`
+	Name             string         `json:"name"`
+	CountryID        int32          `json:"country_id"`
+	OrganizationType int32          `json:"organization_type"`
+	Country          sql.NullString `json:"country"`
 }
 
 func (q *Queries) GetOrganization(ctx context.Context, id int32) (GetOrganizationRow, error) {
@@ -116,13 +124,14 @@ func (q *Queries) GetOrganization(ctx context.Context, id int32) (GetOrganizatio
 		&i.ID,
 		&i.Name,
 		&i.CountryID,
+		&i.OrganizationType,
 		&i.Country,
 	)
 	return i, err
 }
 
 const getOrganizationCountWithNameAndCountry = `-- name: GetOrganizationCountWithNameAndCountry :many
-SELECT id, name, country_id
+SELECT id, name, country_id, organization_type
 from organizations
 where
     LOWER(name) = $1
@@ -143,7 +152,12 @@ func (q *Queries) GetOrganizationCountWithNameAndCountry(ctx context.Context, ar
 	items := []Organization{}
 	for rows.Next() {
 		var i Organization
-		if err := rows.Scan(&i.ID, &i.Name, &i.CountryID); err != nil {
+		if err := rows.Scan(
+			&i.ID,
+			&i.Name,
+			&i.CountryID,
+			&i.OrganizationType,
+		); err != nil {
 			return nil, err
 		}
 		items = append(items, i)
@@ -159,19 +173,25 @@ func (q *Queries) GetOrganizationCountWithNameAndCountry(ctx context.Context, ar
 
 const insertOrganization = `-- name: InsertOrganization :one
 insert into
-    organizations(name, country_id)
-values($1, $2) returning id, name, country_id
+    organizations(name, country_id,organization_type)
+values($1, $2,$3) returning id, name, country_id, organization_type
 `
 
 type InsertOrganizationParams struct {
-	Name      string `json:"name"`
-	CountryID int32  `json:"country_id"`
+	Name             string `json:"name"`
+	CountryID        int32  `json:"country_id"`
+	OrganizationType int32  `json:"organization_type"`
 }
 
 func (q *Queries) InsertOrganization(ctx context.Context, arg InsertOrganizationParams) (Organization, error) {
-	row := q.db.QueryRowContext(ctx, insertOrganization, arg.Name, arg.CountryID)
+	row := q.db.QueryRowContext(ctx, insertOrganization, arg.Name, arg.CountryID, arg.OrganizationType)
 	var i Organization
-	err := row.Scan(&i.ID, &i.Name, &i.CountryID)
+	err := row.Scan(
+		&i.ID,
+		&i.Name,
+		&i.CountryID,
+		&i.OrganizationType,
+	)
 	return i, err
 }
 

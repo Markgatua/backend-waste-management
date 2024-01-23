@@ -5,7 +5,9 @@ import (
 	"strconv"
 	_ "strconv"
 	"strings"
+	"time"
 	"ttnmwastemanagementsystem/gen"
+	"ttnmwastemanagementsystem/helpers"
 
 	"github.com/gin-gonic/gin"
 )
@@ -13,8 +15,15 @@ import (
 type OrgnizationController struct{}
 
 type InsertOrganizationParam struct {
-	Name      string `json:"name"  binding:"required"`
-	CountryID int32  `json:"country_id"  binding:"required"`
+	Name             string `json:"name"  binding:"required"`
+	CountryID        int32  `json:"country_id"  binding:"required"`
+	OrganizationType int32  `json:"organization_type" binding:"required"`
+	LogoPath         string `json:"logo_path"`
+
+	Email     string `json:"email" binding:"required"`
+	FirstName string `json:"first_name" binding:"required"`
+	LastName  string `json:"last_name" binding:"required"`
+	Password  string `json:"password" binding:"required"`
 }
 
 type UpdateOrganizationParams struct {
@@ -55,10 +64,38 @@ func (c OrgnizationController) InsertOrganization(context *gin.Context) {
 	}
 
 	ogranization, insertError := gen.REPO.InsertOrganization(context, gen.InsertOrganizationParams{
-		Name:      params.Name,
-		CountryID: params.CountryID,
+		Name:             params.Name,
+		CountryID:        params.CountryID,
+		OrganizationType: params.OrganizationType,
 	})
 
+	var roleID = -1
+	var userType = -1
+	if params.OrganizationType == 1 {
+		roleID = 2
+		userType = 2
+	} else if params.OrganizationType == 2 {
+		roleID = 6
+		userType = 8
+	}
+
+	_, err = gen.REPO.DB.NamedExec(`INSERT INTO users (email,first_name,last_name,provider,role_id,user_organization_id,user_type,created_at,updated_at,password) VALUES (:email,:first_name,:last_name,:provider,:role_id,:user_organization_id,:user_type,:created_at,:updated_at,:password)`,
+		map[string]interface{}{
+			"email":                params.Email,
+			"first_name":           params.FirstName,
+			"last_name":            params.LastName,
+			"provider":             "email",
+			"role_id":              roleID,
+			"user_organization_id": ogranization.ID,
+			"user_type":            userType,
+			"password":             helpers.Functions{}.HashPassword(params.Password),
+			"created_at":           time.Now(),
+			"updated_at":           time.Now(),
+		})
+
+	if params.LogoPath != "" {
+		UploadController{}.SaveToUploadsTable(params.LogoPath, "organizations", ogranization.ID)
+	}
 	if insertError != nil {
 		context.JSON(http.StatusUnprocessableEntity, gin.H{
 			"error":   true,

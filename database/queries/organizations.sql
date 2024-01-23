@@ -8,8 +8,8 @@ SELECT organizations.*,countries.name as country FROM organizations left join co
 
 -- name: InsertOrganization :one
 insert into
-    organizations(name, country_id)
-values($1, $2) returning *;
+    organizations(name, country_id,organization_type)
+values($1, $2,$3) returning *;
 
 -- name: GetOrganizationCountWithNameAndCountry :many
 SELECT *
