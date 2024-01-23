@@ -73,7 +73,7 @@ CREATE TABLE organizations(
   id SERIAL PRIMARY KEY,
   name VARCHAR(255) NOT NULL,
   country_id INTEGER NOT NULL,
-  FOREIGN Key (country_id) REFERENCES countries(id) on delete set null
+  FOREIGN Key (country_id) REFERENCES countries(id)
 );
 
 CREATE TABLE main_organization(
@@ -122,8 +122,12 @@ CREATE TABLE users(
     role_id INTEGER,
     FOREIGN Key (role_id) REFERENCES roles(id),
     user_company_id INTEGER NULL,
+    user_organization_id INTEGER NULL,
     FOREIGN Key (user_company_id) REFERENCES companies(id),
+    FOREIGN Key (user_organization_id) REFERENCES organizations(id),
     is_main_organization_user BOOLEAN DEFAULT false not null,
+    is_super_admin_for_organization BOOLEAN DEFAULT false not null,
+    
     email VARCHAR(255) DEFAULT NULL UNIQUE,
     password TEXT DEFAULT NULL,
     avatar_url TEXT NULL,
