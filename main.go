@@ -209,6 +209,8 @@ func runProgram() {
 
 	//--------------------------- Request Collections -----------------------------------------------------
 	router.POST("collection_request_data", wasteItemsController.InsertWasteItem)
+	router.GET("collection_request_latest/:id", requestCollectionController.GetLatestCollection)
+
 	//--------------------------------------------------------------------------------------------
 
 	router.Run()

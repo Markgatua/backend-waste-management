@@ -119,3 +119,27 @@ select sum(waste_items.weight) as total_weight,waste_types.name from waste_items
 inner join waste_types on waste_types.id=waste_items.waste_type_id 
 inner join collection_requests on collection_requests.id=waste_items.collection_request_id
 where collection_requests.producer_id=$1 GROUP BY waste_types.name;
+
+-- name: GetLatestCollection :one
+SELECT
+    collection_requests.*,
+    collector.name AS collector_name,
+    CAST(SUM(totals.weight) AS DECIMAL(10,2)) AS total_weight
+FROM
+    collection_requests
+LEFT JOIN
+    companies AS collector ON collector.id = collection_requests.collector_id
+LEFT JOIN
+    waste_items AS totals ON totals.collection_request_id = collection_requests.id
+WHERE
+    collection_requests.id = $1
+GROUP BY
+    collection_requests.id, collector.name;
+
+
+-- name: GetProducerLatestCollectionId :one
+SELECT *
+FROM collection_requests
+WHERE producer_id = $1
+ORDER BY created_at DESC
+LIMIT 1;

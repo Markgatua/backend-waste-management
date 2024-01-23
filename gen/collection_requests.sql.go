@@ -33,7 +33,7 @@ where collection_requests.producer_id=$1 GROUP BY waste_types.name
 `
 
 type CollectionWeightTotalsRow struct {
-	TotalWeight []uint8   `json:"total_weight"`
+	TotalWeight int64  `json:"total_weight"`
 	Name        string `json:"name"`
 }
 
@@ -463,6 +463,81 @@ func (q *Queries) GetAllPendingConfirmationCollectionRequests(ctx context.Contex
 		return nil, err
 	}
 	return items, nil
+}
+
+const getLatestCollection = `-- name: GetLatestCollection :one
+SELECT
+    collection_requests.id, collection_requests.producer_id, collection_requests.collector_id, collection_requests.request_date, collection_requests.pickup_date, collection_requests.confirmed, collection_requests.cancelled, collection_requests.status, collection_requests.created_at,
+    collector.name AS collector_name,
+    CAST(SUM(totals.weight) AS DECIMAL(10,2)) AS total_weight
+FROM
+    collection_requests
+LEFT JOIN
+    companies AS collector ON collector.id = collection_requests.collector_id
+LEFT JOIN
+    waste_items AS totals ON totals.collection_request_id = collection_requests.id
+WHERE
+    collection_requests.id = $1
+GROUP BY
+    collection_requests.id, collector.name
+`
+
+type GetLatestCollectionRow struct {
+	ID            int32          `json:"id"`
+	ProducerID    int32          `json:"producer_id"`
+	CollectorID   int32          `json:"collector_id"`
+	RequestDate   time.Time      `json:"request_date"`
+	PickupDate    sql.NullTime   `json:"pickup_date"`
+	Confirmed     sql.NullBool   `json:"confirmed"`
+	Cancelled     sql.NullBool   `json:"cancelled"`
+	Status        sql.NullBool   `json:"status"`
+	CreatedAt     time.Time      `json:"created_at"`
+	CollectorName sql.NullString `json:"collector_name"`
+	TotalWeight   string         `json:"total_weight"`
+}
+
+func (q *Queries) GetLatestCollection(ctx context.Context, id int32) (GetLatestCollectionRow, error) {
+	row := q.db.QueryRowContext(ctx, getLatestCollection, id)
+	var i GetLatestCollectionRow
+	err := row.Scan(
+		&i.ID,
+		&i.ProducerID,
+		&i.CollectorID,
+		&i.RequestDate,
+		&i.PickupDate,
+		&i.Confirmed,
+		&i.Cancelled,
+		&i.Status,
+		&i.CreatedAt,
+		&i.CollectorName,
+		&i.TotalWeight,
+	)
+	return i, err
+}
+
+const getProducerLatestCollectionId = `-- name: GetProducerLatestCollectionId :one
+SELECT id, producer_id, collector_id, request_date, pickup_date, confirmed, cancelled, status, created_at
+FROM collection_requests
+WHERE producer_id = $1
+ORDER BY created_at DESC
+LIMIT 1
+`
+
+func (q *Queries) GetProducerLatestCollectionId(ctx context.Context, producerID int32) (CollectionRequest, error) {
+	row := q.db.QueryRowContext(ctx, getProducerLatestCollectionId, producerID)
+	var i CollectionRequest
+	err := row.Scan(
+		&i.ID,
+		&i.ProducerID,
+		&i.CollectorID,
+		&i.RequestDate,
+		&i.PickupDate,
+		&i.Confirmed,
+		&i.Cancelled,
+		&i.Status,
+		&i.CreatedAt,
+	)
+	return i, err
 }
 
 const insertNewCollectionRequest = `-- name: InsertNewCollectionRequest :exec

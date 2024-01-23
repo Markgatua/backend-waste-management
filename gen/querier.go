@@ -58,6 +58,7 @@ type Querier interface {
 	GetDuplicateCompaniesWithoutID(ctx context.Context, arg GetDuplicateCompaniesWithoutIDParams) ([]Company, error)
 	GetDuplicateOrganization(ctx context.Context, arg GetDuplicateOrganizationParams) ([]Organization, error)
 	GetDuplicateRoleHasPermission(ctx context.Context, arg GetDuplicateRoleHasPermissionParams) (int64, error)
+	GetLatestCollection(ctx context.Context, id int32) (GetLatestCollectionRow, error)
 	GetMainOrganization(ctx context.Context, organizationID string) ([]MainOrganization, error)
 	GetMainOrganizationUser(ctx context.Context, id int32) (User, error)
 	GetMainOrganizationUserByEmail(ctx context.Context, email sql.NullString) (User, error)
@@ -66,6 +67,7 @@ type Querier interface {
 	GetOrganization(ctx context.Context, id int32) (GetOrganizationRow, error)
 	GetOrganizationCountWithNameAndCountry(ctx context.Context, arg GetOrganizationCountWithNameAndCountryParams) ([]Organization, error)
 	GetPermissionsForRoleID(ctx context.Context, roleID int32) ([]GetPermissionsForRoleIDRow, error)
+	GetProducerLatestCollectionId(ctx context.Context, producerID int32) (CollectionRequest, error)
 	GetRole(ctx context.Context, id int32) (Role, error)
 	// role_has_permissions.sql
 	GetRolePermissions(ctx context.Context, roleID int32) ([]RoleHasPermission, error)
