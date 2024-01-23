@@ -20,7 +20,6 @@ type RequestCollectionController struct{}
 
 type InsertNewCollectionRequestParams struct {
 	ProducerID     int32 `json:"producer_id"  binding:"required"`
-	CollectorID    int32 `json:"collector_id"  binding:"required"`
 	RequestDate    time.Time `json:"request_date"  binding:"required"`
 }
 
@@ -57,11 +56,17 @@ func (requestCollectionController RequestCollectionController) InsertNewCollecti
 		return
 	}
 
+	championIDNullable := sql.NullInt32{Int32: int32(params.ProducerID), Valid: true}
+
+	ChampionCollector, err := gen.REPO.GetTheCollectorForAChampion(context, championIDNullable)
+
+	championCID := ChampionCollector.CollectorID
+
 	// var params2 InsertNewNotificationRequestParams
 
 	 insertError := gen.REPO.InsertNewCollectionRequest(context, gen.InsertNewCollectionRequestParams{
 		ProducerID: params.ProducerID,
-		CollectorID: params.CollectorID,
+		CollectorID: championCID.Int32,
 		RequestDate: params.RequestDate,
 	})
 
@@ -74,7 +79,7 @@ func (requestCollectionController RequestCollectionController) InsertNewCollecti
 		return
 	}
 
-	notificationUsers, _ := gen.REPO.GetCompanyUsers(context, sql.NullInt32{Int32: params.CollectorID,Valid: true})
+	notificationUsers, _ := gen.REPO.GetCompanyUsers(context, sql.NullInt32{Int32: championCID.Int32,Valid: true})
 
 	producerData, _ := gen.REPO.GetCompany(context, params.ProducerID)
 	var subject = producerData.Name +" "+ producerData.Location.String;

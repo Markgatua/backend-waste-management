@@ -200,7 +200,7 @@ func runProgram() {
 	//--------------------------------------------------------------------------------------------
 
 	//--------------------------- Request Collections -----------------------------------------------------
-	router.POST("request_collection", middlewares.PermissionBlockerMiddleware("request_collection"), requestCollectionController.InsertNewCollectionRequestParams)
+	router.POST("request_collection", requestCollectionController.InsertNewCollectionRequestParams)
 	router.POST("confirm_collection_request", requestCollectionController.ConfirmCollectionRequest)
 	router.POST("cancel_collection_request", requestCollectionController.CancelCollectionRequest)
 	router.POST("update_collection_request", requestCollectionController.UpdateCollectionRequest)
