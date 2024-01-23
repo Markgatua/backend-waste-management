@@ -37,6 +37,7 @@ type UpdateOrganizationParams struct {
 	OrganizationType int32  `json:"organization_type" binding:"required"`
 	LogoPath         string `json:"logo_path"`
 
+	UserID    int32  `json:"user_id" binding:"required"`
 	Email     string `json:"email" binding:"required"`
 	FirstName string `json:"first_name" binding:"required"`
 	LastName  string `json:"last_name" binding:"required"`
