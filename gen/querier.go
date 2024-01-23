@@ -85,7 +85,8 @@ type Querier interface {
 	UpdateOrganization(ctx context.Context, arg UpdateOrganizationParams) error
 	UpdateOrganizationIsActive(ctx context.Context, arg UpdateOrganizationIsActiveParams) error
 	UpdateRole(ctx context.Context, arg UpdateRoleParams) error
-	UpdateUserEmailRoleUserTypeAndPassword(ctx context.Context, arg UpdateUserEmailRoleUserTypeAndPasswordParams) error
+	UpdateUserFirstNameLastNameEmailRoleAndUserType(ctx context.Context, arg UpdateUserFirstNameLastNameEmailRoleAndUserTypeParams) error
+	UpdateUserFirstNameLastNameEmailRoleUserTypeAndPassword(ctx context.Context, arg UpdateUserFirstNameLastNameEmailRoleUserTypeAndPasswordParams) error
 	UpdateUserIsActive(ctx context.Context, arg UpdateUserIsActiveParams) error
 	UpdateWasteType(ctx context.Context, arg UpdateWasteTypeParams) error
 	ViewCounties(ctx context.Context) ([]County, error)

@@ -49,15 +49,28 @@ select * from users where email = $1;
 -- name: GetUserWithEmailWithoutID :many
 select * from users where email = $1 and id != $2;
 
--- name: UpdateUserEmailRoleUserTypeAndPassword :exec
+-- name: UpdateUserFirstNameLastNameEmailRoleUserTypeAndPassword :exec
 update users
 set
     email = $1,
     role_id = $2,
     password = $3,
-    user_type = $4
+    user_type = $4,
+    first_name=$5,
+    last_name=$6
 where
-    id = $5;
+    id = $7;
+
+-- name: UpdateUserFirstNameLastNameEmailRoleAndUserType :exec
+update users
+set
+    email = $1,
+    role_id = $2,
+    user_type = $3,
+    first_name=$4,
+    last_name=$5
+where
+    id = $6;
 
 -- name: GetUsersWithRole :many
 select users.*, roles.name

@@ -410,31 +410,70 @@ func (q *Queries) UpdateMainOrganizationUser(ctx context.Context, arg UpdateMain
 	return err
 }
 
-const updateUserEmailRoleUserTypeAndPassword = `-- name: UpdateUserEmailRoleUserTypeAndPassword :exec
+const updateUserFirstNameLastNameEmailRoleAndUserType = `-- name: UpdateUserFirstNameLastNameEmailRoleAndUserType :exec
+update users
+set
+    email = $1,
+    role_id = $2,
+    user_type = $3,
+    first_name=$4,
+    last_name=$5
+where
+    id = $6
+`
+
+type UpdateUserFirstNameLastNameEmailRoleAndUserTypeParams struct {
+	Email     sql.NullString `json:"email"`
+	RoleID    sql.NullInt32  `json:"role_id"`
+	UserType  sql.NullInt16  `json:"user_type"`
+	FirstName sql.NullString `json:"first_name"`
+	LastName  sql.NullString `json:"last_name"`
+	ID        int32          `json:"id"`
+}
+
+func (q *Queries) UpdateUserFirstNameLastNameEmailRoleAndUserType(ctx context.Context, arg UpdateUserFirstNameLastNameEmailRoleAndUserTypeParams) error {
+	_, err := q.db.ExecContext(ctx, updateUserFirstNameLastNameEmailRoleAndUserType,
+		arg.Email,
+		arg.RoleID,
+		arg.UserType,
+		arg.FirstName,
+		arg.LastName,
+		arg.ID,
+	)
+	return err
+}
+
+const updateUserFirstNameLastNameEmailRoleUserTypeAndPassword = `-- name: UpdateUserFirstNameLastNameEmailRoleUserTypeAndPassword :exec
 update users
 set
     email = $1,
     role_id = $2,
     password = $3,
-    user_type = $4
+    user_type = $4,
+    first_name=$5,
+    last_name=$6
 where
-    id = $5
+    id = $7
 `
 
-type UpdateUserEmailRoleUserTypeAndPasswordParams struct {
-	Email    sql.NullString `json:"email"`
-	RoleID   sql.NullInt32  `json:"role_id"`
-	Password sql.NullString `json:"password"`
-	UserType sql.NullInt16  `json:"user_type"`
-	ID       int32          `json:"id"`
+type UpdateUserFirstNameLastNameEmailRoleUserTypeAndPasswordParams struct {
+	Email     sql.NullString `json:"email"`
+	RoleID    sql.NullInt32  `json:"role_id"`
+	Password  sql.NullString `json:"password"`
+	UserType  sql.NullInt16  `json:"user_type"`
+	FirstName sql.NullString `json:"first_name"`
+	LastName  sql.NullString `json:"last_name"`
+	ID        int32          `json:"id"`
 }
 
-func (q *Queries) UpdateUserEmailRoleUserTypeAndPassword(ctx context.Context, arg UpdateUserEmailRoleUserTypeAndPasswordParams) error {
-	_, err := q.db.ExecContext(ctx, updateUserEmailRoleUserTypeAndPassword,
+func (q *Queries) UpdateUserFirstNameLastNameEmailRoleUserTypeAndPassword(ctx context.Context, arg UpdateUserFirstNameLastNameEmailRoleUserTypeAndPasswordParams) error {
+	_, err := q.db.ExecContext(ctx, updateUserFirstNameLastNameEmailRoleUserTypeAndPassword,
 		arg.Email,
 		arg.RoleID,
 		arg.Password,
 		arg.UserType,
+		arg.FirstName,
+		arg.LastName,
 		arg.ID,
 	)
 	return err

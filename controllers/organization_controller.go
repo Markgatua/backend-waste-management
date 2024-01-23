@@ -43,7 +43,7 @@ type UpdateOrganizationParams struct {
 	Email     string `json:"email" binding:"required"`
 	FirstName string `json:"first_name" binding:"required"`
 	LastName  string `json:"last_name" binding:"required"`
-	Password  string `json:"password" binding:"required"`
+	Password  string `json:"password"`
 }
 
 func (controller OrgnizationController) SetActiveInActiveStatus(context *gin.Context) {
@@ -279,13 +279,29 @@ func (c OrgnizationController) UpdateOrganization(context *gin.Context) {
 		roleID = 6
 		userType = 8
 	}
-	gen.REPO.UpdateUserEmailRoleUserTypeAndPassword(context, gen.UpdateUserEmailRoleUserTypeAndPasswordParams{
-		Email:    null.StringFrom(params.Email).NullString,
-		RoleID:   sql.NullInt32{Int32: int32(roleID), Valid: true},
-		UserType: sql.NullInt16{Int16: int16(userType), Valid: true},
-		ID:       params.UserID,
-		Password: null.StringFrom(helpers.Functions{}.HashPassword(params.Password)).NullString,
-	})
+
+	if params.Password == "" {
+		gen.REPO.UpdateUserFirstNameLastNameEmailRoleAndUserType(context, gen.UpdateUserFirstNameLastNameEmailRoleAndUserTypeParams{
+			Email:     null.StringFrom(params.Email).NullString,
+			RoleID:    sql.NullInt32{Int32: int32(roleID), Valid: true},
+			UserType:  sql.NullInt16{Int16: int16(userType), Valid: true},
+			FirstName: sql.NullString{String: params.FirstName, Valid: true},
+			LastName:  sql.NullString{String: params.LastName, Valid: true},
+			ID:        params.UserID,
+		})
+
+	} else {
+		gen.REPO.UpdateUserFirstNameLastNameEmailRoleUserTypeAndPassword(context, gen.UpdateUserFirstNameLastNameEmailRoleUserTypeAndPasswordParams{
+			Email:     null.StringFrom(params.Email).NullString,
+			RoleID:    sql.NullInt32{Int32: int32(roleID), Valid: true},
+			UserType:  sql.NullInt16{Int16: int16(userType), Valid: true},
+			ID:        params.UserID,
+			FirstName: sql.NullString{String: params.FirstName, Valid: true},
+			LastName:  sql.NullString{String: params.LastName, Valid: true},
+			Password:  null.StringFrom(helpers.Functions{}.HashPassword(params.Password)).NullString,
+		})
+
+	}
 
 	if updateError != nil {
 		context.JSON(http.StatusUnprocessableEntity, gin.H{
