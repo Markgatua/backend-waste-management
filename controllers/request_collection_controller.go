@@ -315,3 +315,141 @@ func (requestCollectionController RequestCollectionController) GetProducerLatest
 		"count": count,
 	})
 }
+
+
+
+func (requestCollectionController RequestCollectionController) GetWasteItemsProducerData(context *gin.Context){
+
+	id, _ := context.Params.Get("id")
+	var id32 int32
+	fmt.Sscan(id, &id32)
+
+	fmt.Println("********************");
+	fmt.Println(id32);
+
+	
+	count,insertError := gen.REPO.GetWasteItemsProducerData(context,id32)
+
+	if insertError != nil {
+		logger.Log("RequestCollectionController",insertError.Error(),logger.LOG_LEVEL_ERROR)
+
+		context.JSON(http.StatusUnprocessableEntity, gin.H{
+			"error":   true,
+			"message": "Failed to Update Collection Request",
+		})
+		return
+	}else{
+		//logger.Log("RequestCollectionController",insertError.Error(),logger.LOG_LEVEL_ERROR)
+	}
+
+	fmt.Println(count)
+
+
+	context.JSON(http.StatusOK, gin.H{
+		"error":   false,
+		"message": "Successfully Updated the Collection Request",
+		"count": count,
+	})
+}
+
+func (requestCollectionController RequestCollectionController) GetCollectionStats(context *gin.Context){
+
+	id, _ := context.Params.Get("id")
+	var id32 int32
+	fmt.Sscan(id, &id32)
+
+	fmt.Println("********************");
+	fmt.Println(id32);
+
+	
+	count,insertError := gen.REPO.GetCollectionStats(context,id32)
+
+	if insertError != nil {
+		logger.Log("RequestCollectionController",insertError.Error(),logger.LOG_LEVEL_ERROR)
+
+		context.JSON(http.StatusUnprocessableEntity, gin.H{
+			"error":   true,
+			"message": "Failed to Update Collection Request",
+		})
+		return
+	}else{
+		//logger.Log("RequestCollectionController",insertError.Error(),logger.LOG_LEVEL_ERROR)
+	}
+
+	fmt.Println(count)
+
+
+	context.JSON(http.StatusOK, gin.H{
+		"error":   false,
+		"message": "Successfully Updated the Collection Request",
+		"count": count,
+	})
+}
+
+func (requestCollectionController RequestCollectionController) GetAllProducerCompletedCollectionRequests(context *gin.Context){
+
+	id, _ := context.Params.Get("id")
+	var id32 int32
+	fmt.Sscan(id, &id32)
+
+	fmt.Println("********************");
+	fmt.Println(id32);
+
+	
+	count,insertError := gen.REPO.GetAllProducerCompletedCollectionRequests(context,id32)
+
+	if insertError != nil {
+		logger.Log("RequestCollectionController",insertError.Error(),logger.LOG_LEVEL_ERROR)
+
+		context.JSON(http.StatusUnprocessableEntity, gin.H{
+			"error":   true,
+			"message": "Failed to Update Collection Request",
+		})
+		return
+	}else{
+		//logger.Log("RequestCollectionController",insertError.Error(),logger.LOG_LEVEL_ERROR)
+	}
+
+	fmt.Println(count)
+
+
+	context.JSON(http.StatusOK, gin.H{
+		"error":   false,
+		"message": "Successfully Updated the Collection Request",
+		"count": count,
+	})
+}
+
+func (requestCollectionController RequestCollectionController) GetAllProducerPendingCollectionRequests(context *gin.Context){
+
+	id, _ := context.Params.Get("id")
+	var id32 int32
+	fmt.Sscan(id, &id32)
+
+	fmt.Println("********************");
+	fmt.Println(id32);
+
+	
+	count,insertError := gen.REPO.GetAllProducerPendingCollectionRequests(context,id32)
+
+	if insertError != nil {
+		logger.Log("RequestCollectionController",insertError.Error(),logger.LOG_LEVEL_ERROR)
+
+		context.JSON(http.StatusUnprocessableEntity, gin.H{
+			"error":   true,
+			"message": "Failed to Update Collection Request",
+		})
+		return
+	}else{
+		//logger.Log("RequestCollectionController",insertError.Error(),logger.LOG_LEVEL_ERROR)
+	}
+
+	fmt.Println(count)
+
+
+	context.JSON(http.StatusOK, gin.H{
+		"error":   false,
+		"message": "Successfully Updated the Collection Request",
+		"count": count,
+	})
+}

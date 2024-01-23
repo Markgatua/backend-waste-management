@@ -107,7 +107,7 @@ func runProgram() {
 	router.GET("/uploads/:file",controllers.FileController{}.GetFile)
 
 	router.Use(middlewares.JwtAuthMiddleware())
-	router.Use(middlewares.PermissionMiddleware())
+	// router.Use(middlewares.PermissionMiddleware())
 
 	//---------------------------    Files ------------------------------------------------------
 	router.MaxMultipartMemory = 8 << 20  // 8 MiB
@@ -210,7 +210,10 @@ func runProgram() {
 	//--------------------------- Request Collections -----------------------------------------------------
 	router.POST("collection_request_data", wasteItemsController.InsertWasteItem)
 	router.GET("collection_request_latest/:id", requestCollectionController.GetLatestCollection)
-
+	router.GET("collections_producer_waste_data/:id", requestCollectionController.GetWasteItemsProducerData)
+	router.GET("collections_producer_stats/:id", requestCollectionController.GetCollectionStats)
+	router.GET("collections_producer_complete/:id", requestCollectionController.GetAllProducerCompletedCollectionRequests)
+	router.GET("collections_producer_pending/:id", requestCollectionController.GetAllProducerPendingCollectionRequests)
 	//--------------------------------------------------------------------------------------------
 
 	router.Run()

@@ -143,3 +143,66 @@ FROM collection_requests
 WHERE producer_id = $1
 ORDER BY created_at DESC
 LIMIT 1;
+
+
+-- name: GetCollectionStats :many
+SELECT
+    collection_requests.*,
+    CAST(SUM(totals.weight) AS DECIMAL(10,2)) AS total_weight
+FROM
+    collection_requests
+LEFT JOIN
+    waste_items AS totals ON totals.collection_request_id = collection_requests.id
+WHERE
+    collection_requests.producer_id = $1
+GROUP BY
+    collection_requests.id;
+
+
+-- name: GetWasteItemsProducerData :one
+SELECT
+    COALESCE(CAST(SUM(waste_items.weight) AS DECIMAL(10,2)), 0) AS total_weight,
+    waste.name AS waste_name,
+    collections.status AS collection_status
+FROM
+    waste_items
+LEFT JOIN
+    waste_types AS waste ON waste_items.waste_type_id = waste.id
+LEFT JOIN
+    collection_requests AS collections ON collections.id = waste_items.collection_request_id
+WHERE
+    collections.producer_id = $1
+GROUP BY
+    collections.id, waste.name, collections.status;
+
+-- name: GetAllProducerCompletedCollectionRequests :many
+SELECT
+    collection_requests.*,
+    collector.name AS collector_name,
+    CAST(SUM(totals.weight) AS DECIMAL(10,2)) AS total_weight
+FROM
+    collection_requests
+LEFT JOIN
+    companies AS collector ON collector.id = collection_requests.collector_id
+LEFT JOIN
+    waste_items AS totals ON totals.collection_request_id = collection_requests.id
+WHERE
+    collection_requests.producer_id = $1 AND collection_requests.status = true
+GROUP BY
+    collection_requests.id, collector.name;
+
+-- name: GetAllProducerPendingCollectionRequests :many
+SELECT
+    collection_requests.*,
+    collector.name AS collector_name,
+    CAST(SUM(totals.weight) AS DECIMAL(10,2)) AS total_weight
+FROM
+    collection_requests
+LEFT JOIN
+    companies AS collector ON collector.id = collection_requests.collector_id
+LEFT JOIN
+    waste_items AS totals ON totals.collection_request_id = collection_requests.id
+WHERE
+    collection_requests.producer_id = $1 AND collection_requests.status = false
+GROUP BY
+    collection_requests.id, collector.name;

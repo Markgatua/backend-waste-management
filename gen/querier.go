@@ -47,10 +47,13 @@ type Querier interface {
 	GetAllPendingConfirmationCollectionRequests(ctx context.Context, confirmed sql.NullBool) ([]GetAllPendingConfirmationCollectionRequestsRow, error)
 	GetAllPermissionGroupedByModule(ctx context.Context) ([]Permission, error)
 	GetAllPermissions(ctx context.Context) ([]Permission, error)
+	GetAllProducerCompletedCollectionRequests(ctx context.Context, producerID int32) ([]GetAllProducerCompletedCollectionRequestsRow, error)
+	GetAllProducerPendingCollectionRequests(ctx context.Context, producerID int32) ([]GetAllProducerPendingCollectionRequestsRow, error)
 	GetAllUsers(ctx context.Context) ([]GetAllUsersRow, error)
 	// waste_types.sql
 	GetAllWasteTypes(ctx context.Context) ([]GetAllWasteTypesRow, error)
 	GetAssignedCollectorsToGreenChampion(ctx context.Context, championID sql.NullInt32) ([]ChampionAggregatorAssignment, error)
+	GetCollectionStats(ctx context.Context, producerID int32) ([]GetCollectionStatsRow, error)
 	GetCompany(ctx context.Context, id int32) (GetCompanyRow, error)
 	GetCompanyUsers(ctx context.Context, userCompanyID sql.NullInt32) ([]GetCompanyUsersRow, error)
 	GetCountryBeCountryCode(ctx context.Context, countryCode string) ([]Country, error)
@@ -76,6 +79,7 @@ type Querier interface {
 	GetTheCollectorForAChampion(ctx context.Context, championID sql.NullInt32) (GetTheCollectorForAChampionRow, error)
 	GetUsersWasteType(ctx context.Context) ([]WasteType, error)
 	GetUsersWithRole(ctx context.Context) ([]GetUsersWithRoleRow, error)
+	GetWasteItemsProducerData(ctx context.Context, producerID int32) (GetWasteItemsProducerDataRow, error)
 	InsertCompany(ctx context.Context, arg InsertCompanyParams) (Company, error)
 	// counties.sql
 	InsertCounties(ctx context.Context, name string) error

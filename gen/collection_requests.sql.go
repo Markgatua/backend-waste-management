@@ -465,6 +465,199 @@ func (q *Queries) GetAllPendingConfirmationCollectionRequests(ctx context.Contex
 	return items, nil
 }
 
+const getAllProducerCompletedCollectionRequests = `-- name: GetAllProducerCompletedCollectionRequests :many
+SELECT
+    collection_requests.id, collection_requests.producer_id, collection_requests.collector_id, collection_requests.request_date, collection_requests.pickup_date, collection_requests.confirmed, collection_requests.cancelled, collection_requests.status, collection_requests.created_at,
+    collector.name AS collector_name,
+    CAST(SUM(totals.weight) AS DECIMAL(10,2)) AS total_weight
+FROM
+    collection_requests
+LEFT JOIN
+    companies AS collector ON collector.id = collection_requests.collector_id
+LEFT JOIN
+    waste_items AS totals ON totals.collection_request_id = collection_requests.id
+WHERE
+    collection_requests.producer_id = $1 AND collection_requests.status = true
+GROUP BY
+    collection_requests.id, collector.name
+`
+
+type GetAllProducerCompletedCollectionRequestsRow struct {
+	ID            int32          `json:"id"`
+	ProducerID    int32          `json:"producer_id"`
+	CollectorID   int32          `json:"collector_id"`
+	RequestDate   time.Time      `json:"request_date"`
+	PickupDate    sql.NullTime   `json:"pickup_date"`
+	Confirmed     sql.NullBool   `json:"confirmed"`
+	Cancelled     sql.NullBool   `json:"cancelled"`
+	Status        sql.NullBool   `json:"status"`
+	CreatedAt     time.Time      `json:"created_at"`
+	CollectorName sql.NullString `json:"collector_name"`
+	TotalWeight   string         `json:"total_weight"`
+}
+
+func (q *Queries) GetAllProducerCompletedCollectionRequests(ctx context.Context, producerID int32) ([]GetAllProducerCompletedCollectionRequestsRow, error) {
+	rows, err := q.db.QueryContext(ctx, getAllProducerCompletedCollectionRequests, producerID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	items := []GetAllProducerCompletedCollectionRequestsRow{}
+	for rows.Next() {
+		var i GetAllProducerCompletedCollectionRequestsRow
+		if err := rows.Scan(
+			&i.ID,
+			&i.ProducerID,
+			&i.CollectorID,
+			&i.RequestDate,
+			&i.PickupDate,
+			&i.Confirmed,
+			&i.Cancelled,
+			&i.Status,
+			&i.CreatedAt,
+			&i.CollectorName,
+			&i.TotalWeight,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const getAllProducerPendingCollectionRequests = `-- name: GetAllProducerPendingCollectionRequests :many
+SELECT
+    collection_requests.id, collection_requests.producer_id, collection_requests.collector_id, collection_requests.request_date, collection_requests.pickup_date, collection_requests.confirmed, collection_requests.cancelled, collection_requests.status, collection_requests.created_at,
+    collector.name AS collector_name,
+    CAST(SUM(totals.weight) AS DECIMAL(10,2)) AS total_weight
+FROM
+    collection_requests
+LEFT JOIN
+    companies AS collector ON collector.id = collection_requests.collector_id
+LEFT JOIN
+    waste_items AS totals ON totals.collection_request_id = collection_requests.id
+WHERE
+    collection_requests.producer_id = $1 AND collection_requests.status = false
+GROUP BY
+    collection_requests.id, collector.name
+`
+
+type GetAllProducerPendingCollectionRequestsRow struct {
+	ID            int32          `json:"id"`
+	ProducerID    int32          `json:"producer_id"`
+	CollectorID   int32          `json:"collector_id"`
+	RequestDate   time.Time      `json:"request_date"`
+	PickupDate    sql.NullTime   `json:"pickup_date"`
+	Confirmed     sql.NullBool   `json:"confirmed"`
+	Cancelled     sql.NullBool   `json:"cancelled"`
+	Status        sql.NullBool   `json:"status"`
+	CreatedAt     time.Time      `json:"created_at"`
+	CollectorName sql.NullString `json:"collector_name"`
+	TotalWeight   string         `json:"total_weight"`
+}
+
+func (q *Queries) GetAllProducerPendingCollectionRequests(ctx context.Context, producerID int32) ([]GetAllProducerPendingCollectionRequestsRow, error) {
+	rows, err := q.db.QueryContext(ctx, getAllProducerPendingCollectionRequests, producerID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	items := []GetAllProducerPendingCollectionRequestsRow{}
+	for rows.Next() {
+		var i GetAllProducerPendingCollectionRequestsRow
+		if err := rows.Scan(
+			&i.ID,
+			&i.ProducerID,
+			&i.CollectorID,
+			&i.RequestDate,
+			&i.PickupDate,
+			&i.Confirmed,
+			&i.Cancelled,
+			&i.Status,
+			&i.CreatedAt,
+			&i.CollectorName,
+			&i.TotalWeight,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const getCollectionStats = `-- name: GetCollectionStats :many
+SELECT
+    collection_requests.id, collection_requests.producer_id, collection_requests.collector_id, collection_requests.request_date, collection_requests.pickup_date, collection_requests.confirmed, collection_requests.cancelled, collection_requests.status, collection_requests.created_at,
+    CAST(SUM(totals.weight) AS DECIMAL(10,2)) AS total_weight
+FROM
+    collection_requests
+LEFT JOIN
+    waste_items AS totals ON totals.collection_request_id = collection_requests.id
+WHERE
+    collection_requests.producer_id = $1
+GROUP BY
+    collection_requests.id
+`
+
+type GetCollectionStatsRow struct {
+	ID          int32        `json:"id"`
+	ProducerID  int32        `json:"producer_id"`
+	CollectorID int32        `json:"collector_id"`
+	RequestDate time.Time    `json:"request_date"`
+	PickupDate  sql.NullTime `json:"pickup_date"`
+	Confirmed   sql.NullBool `json:"confirmed"`
+	Cancelled   sql.NullBool `json:"cancelled"`
+	Status      sql.NullBool `json:"status"`
+	CreatedAt   time.Time    `json:"created_at"`
+	TotalWeight string       `json:"total_weight"`
+}
+
+func (q *Queries) GetCollectionStats(ctx context.Context, producerID int32) ([]GetCollectionStatsRow, error) {
+	rows, err := q.db.QueryContext(ctx, getCollectionStats, producerID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	items := []GetCollectionStatsRow{}
+	for rows.Next() {
+		var i GetCollectionStatsRow
+		if err := rows.Scan(
+			&i.ID,
+			&i.ProducerID,
+			&i.CollectorID,
+			&i.RequestDate,
+			&i.PickupDate,
+			&i.Confirmed,
+			&i.Cancelled,
+			&i.Status,
+			&i.CreatedAt,
+			&i.TotalWeight,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
 const getLatestCollection = `-- name: GetLatestCollection :one
 SELECT
     collection_requests.id, collection_requests.producer_id, collection_requests.collector_id, collection_requests.request_date, collection_requests.pickup_date, collection_requests.confirmed, collection_requests.cancelled, collection_requests.status, collection_requests.created_at,
@@ -537,6 +730,36 @@ func (q *Queries) GetProducerLatestCollectionId(ctx context.Context, producerID 
 		&i.Status,
 		&i.CreatedAt,
 	)
+	return i, err
+}
+
+const getWasteItemsProducerData = `-- name: GetWasteItemsProducerData :one
+SELECT
+    COALESCE(CAST(SUM(waste_items.weight) AS DECIMAL(10,2)), 0) AS total_weight,
+    waste.name AS waste_name,
+    collections.status AS collection_status
+FROM
+    waste_items
+LEFT JOIN
+    waste_types AS waste ON waste_items.waste_type_id = waste.id
+LEFT JOIN
+    collection_requests AS collections ON collections.id = waste_items.collection_request_id
+WHERE
+    collections.producer_id = $1
+GROUP BY
+    collections.id, waste.name, collections.status
+`
+
+type GetWasteItemsProducerDataRow struct {
+	TotalWeight      interface{}    `json:"total_weight"`
+	WasteName        sql.NullString `json:"waste_name"`
+	CollectionStatus sql.NullBool   `json:"collection_status"`
+}
+
+func (q *Queries) GetWasteItemsProducerData(ctx context.Context, producerID int32) (GetWasteItemsProducerDataRow, error) {
+	row := q.db.QueryRowContext(ctx, getWasteItemsProducerData, producerID)
+	var i GetWasteItemsProducerDataRow
+	err := row.Scan(&i.TotalWeight, &i.WasteName, &i.CollectionStatus)
 	return i, err
 }
 
