@@ -14,10 +14,10 @@ select waste_types.*,uploads.path as file_path from waste_types left join upload
 select * from waste_types where id=$1;
 
 -- name: InsertWasteType :one
-INSERT INTO waste_types (name,category,parent_id) VALUES ($1,$2,$3) RETURNING *;
+INSERT INTO waste_types (name,parent_id) VALUES ($1,$2) RETURNING *;
 
 -- name: UpdateWasteType :exec
-update waste_types set name=$1, category=$2,is_active=$3,parent_id=$4 where id=$5;
+update waste_types set name=$1,is_active=$2,parent_id=$3 where id=$4;
 
 -- name: GetUsersWasteType :many
 select * from waste_types where deleted_at is NULL;

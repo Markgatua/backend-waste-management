@@ -184,9 +184,9 @@ CREATE TABLE waste_types (
   is_active BOOLEAN not null DEFAULT true,
   parent_id INTEGER NULL,
   FOREIGN Key (parent_id) REFERENCES waste_types(id),
-  category VARCHAR(255) NOT NULL,
   created_at TIMESTAMP NOT NULL DEFAULT NOW()
 );
+
 CREATE UNIQUE INDEX waste_types_unique_name_idx on waste_types (LOWER(name));  
 
 
