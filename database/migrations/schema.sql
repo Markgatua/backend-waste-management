@@ -77,6 +77,7 @@ CREATE TABLE organizations(
   organization_type INTEGER NOT NULL, --1 aggrigators, 2 -green champion
   FOREIGN Key (country_id) REFERENCES countries(id)
 );
+
 ALTER TABLE organizations ADD CONSTRAINT check_organizations_type CHECK (organization_type IN (1,2)); -- make sure organization type is either 1 or 2
 
 
@@ -181,6 +182,8 @@ CREATE TABLE waste_types (
   id SERIAL PRIMARY KEY,
   name VARCHAR(255) NOT NULL,
   is_active BOOLEAN not null DEFAULT true,
+  parent_id INTEGER NULL,
+  FOREIGN Key (parent_id) REFERENCES waste_types(id),
   category VARCHAR(255) NOT NULL,
   created_at TIMESTAMP NOT NULL DEFAULT NOW()
 );

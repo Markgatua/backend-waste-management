@@ -106,13 +106,14 @@ func (c OrgnizationController) InsertOrganization(context *gin.Context) {
 	}
 
 	user, err := GetEmailUser(params.Email)
-	if err != nil {
-		context.JSON(http.StatusUnprocessableEntity, gin.H{
-			"error":   true,
-			"message": "Error adding organization",
-		})
-		return
-	}
+	// if err != nil {
+	// 	fmt.Print(err.Error())
+	// 	context.JSON(http.StatusUnprocessableEntity, gin.H{
+	// 		"error":   true,
+	// 		"message": "Error adding organization",
+	// 	})
+	// 	return
+	// }
 	if user != nil {
 		context.JSON(http.StatusUnprocessableEntity, gin.H{
 			"error":   true,

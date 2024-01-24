@@ -865,7 +865,7 @@ func (auth AuthController) RegisterUserEmail(context *gin.Context) {
 	} else {
 
 		if organization == "main_organization" {
-			_, err = gen.REPO.DB.NamedExec(`INSERT INTO users (email,first_name,last_name,user_type,provider,role_id,created_at,updated_at,password,is_ttnm_user,confirmed_at) VALUES (:email,:first_name,:last_name,:user_type,:provider,:role_id,:created_at,:updated_at,:password,:is_ttnm_user,:confirmed_at)`,
+			_, err = gen.REPO.DB.NamedExec(`INSERT INTO users (email,first_name,last_name,user_type,provider,role_id,created_at,updated_at,password,is_main_organization_user,confirmed_at) VALUES (:email,:first_name,:last_name,:user_type,:provider,:role_id,:created_at,:updated_at,:password,:is_main_organization_user,:confirmed_at)`,
 				map[string]interface{}{
 					"email":                registerUserEmailParam.Email,
 					"first_name":           registerUserEmailParam.FirstName,
@@ -873,14 +873,14 @@ func (auth AuthController) RegisterUserEmail(context *gin.Context) {
 					"user_type":            registerUserEmailParam.UserType,
 					"role_id":              registerUserEmailParam.RoleId,
 					"provider":             "email",
-					"is_main_organization": organization == "main_organization",
+					"is_main_organization_user": organization == "main_organization",
 					"confirmed_at":         time.Now(),
 					"password":             helpers.Functions{}.HashPassword(registerUserEmailParam.Password),
 					"created_at":           time.Now(),
 					"updated_at":           time.Now(),
 				})
 		} else {
-			_, err = gen.REPO.DB.NamedExec(`INSERT INTO users (email,first_name,last_name,user_type,provider,role_id,created_at,updated_at,password,is_ttnm_user) VALUES (:email,:first_name,:last_name,:user_type,:provider,:role_id,:created_at,:updated_at,:password,:is_ttnm_user)`,
+			_, err = gen.REPO.DB.NamedExec(`INSERT INTO users (email,first_name,last_name,user_type,provider,role_id,created_at,updated_at,password,is_main_organization_user) VALUES (:email,:first_name,:last_name,:user_type,:provider,:role_id,:created_at,:updated_at,:password,:is_main_organization_user)`,
 				map[string]interface{}{
 					"email":                registerUserEmailParam.Email,
 					"first_name":           registerUserEmailParam.FirstName,
@@ -888,7 +888,7 @@ func (auth AuthController) RegisterUserEmail(context *gin.Context) {
 					"user_type":            registerUserEmailParam.UserType,
 					"role_id":              registerUserEmailParam.RoleId,
 					"provider":             "email",
-					"is_main_organization": organization == "main_organization",
+					"is_main_organization_user": organization == "main_organization",
 					"password":             helpers.Functions{}.HashPassword(registerUserEmailParam.Password),
 					"created_at":           time.Now(),
 					"updated_at":           time.Now(),
@@ -898,6 +898,8 @@ func (auth AuthController) RegisterUserEmail(context *gin.Context) {
 	}
 
 	if err != nil {
+		fmt.Println(err.Error())
+
 		context.JSON(http.StatusUnprocessableEntity, gin.H{
 			"error":   true,
 			"message": "Error creating user",

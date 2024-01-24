@@ -215,9 +215,10 @@ type WasteTransaction struct {
 }
 
 type WasteType struct {
-	ID        int32     `json:"id"`
-	Name      string    `json:"name"`
-	IsActive  bool      `json:"is_active"`
-	Category  string    `json:"category"`
-	CreatedAt time.Time `json:"created_at"`
+	ID        int32         `json:"id"`
+	Name      string        `json:"name"`
+	IsActive  bool          `json:"is_active"`
+	ParentID  sql.NullInt32 `json:"parent_id"`
+	Category  string        `json:"category"`
+	CreatedAt time.Time     `json:"created_at"`
 }

@@ -42,6 +42,7 @@ type Querier interface {
 	// waste_types.sql
 	GetAllWasteTypes(ctx context.Context) ([]GetAllWasteTypesRow, error)
 	GetAssignedCollectorsToGreenChampion(ctx context.Context, championID sql.NullInt32) ([]ChampionAggregatorAssignment, error)
+	GetChildrenWasteTypes(ctx context.Context, parentID sql.NullInt32) ([]GetChildrenWasteTypesRow, error)
 	GetCompany(ctx context.Context, id int32) (GetCompanyRow, error)
 	GetCountryBeCountryCode(ctx context.Context, countryCode string) ([]Country, error)
 	GetDuplicateCompanies(ctx context.Context, arg GetDuplicateCompaniesParams) ([]Company, error)
@@ -51,6 +52,7 @@ type Querier interface {
 	GetMainOrganization(ctx context.Context, organizationID string) ([]MainOrganization, error)
 	GetMainOrganizationUser(ctx context.Context, id int32) (User, error)
 	GetMainOrganizationUserByEmail(ctx context.Context, email sql.NullString) (User, error)
+	GetMainWasteTypes(ctx context.Context) ([]GetMainWasteTypesRow, error)
 	GetOneWasteType(ctx context.Context, id int32) (WasteType, error)
 	GetOrganization(ctx context.Context, id int32) (GetOrganizationRow, error)
 	GetOrganizationCountWithNameAndCountry(ctx context.Context, arg GetOrganizationCountWithNameAndCountryParams) ([]Organization, error)

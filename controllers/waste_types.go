@@ -1,6 +1,7 @@
 package controllers
 
 import (
+	"database/sql"
 	"net/http"
 	"strconv"
 	"ttnmwastemanagementsystem/gen"
@@ -13,6 +14,7 @@ type WasteTypesController struct{}
 type InsertWasteGroupParams struct {
 	Name     string `json:"name"  binding:"required"`
 	Category string `json:"category"`
+	ParentID int32  `json:"parent_id"`
 	FilePath string `json:"file_path" binding:"required"`
 }
 
@@ -20,6 +22,7 @@ type UpdateWasteGroupParams struct {
 	ID       int    `json:"id"  binding:"required"`
 	Name     string `json:"name"  binding:"required"`
 	Category string `json:"category"`
+	ParentID int32  `json:"parent_id"`
 	IsActive *bool  `json:"is_active"`
 	FilePath string `json:"file_path"`
 }
@@ -38,6 +41,7 @@ func (wasteGroupsController WasteTypesController) InsertWasteGroup(context *gin.
 	wasteType, insertError := gen.REPO.InsertWasteType(context, gen.InsertWasteTypeParams{
 		Name:     params.Name,
 		Category: params.Category,
+		ParentID: sql.NullInt32{Int32: params.ParentID, Valid: params.ParentID != 0},
 	})
 
 	if insertError != nil {
@@ -126,6 +130,7 @@ func (wasteGroupController WasteTypesController) UpdateWasteType(context *gin.Co
 	updateError := gen.REPO.UpdateWasteType(context, gen.UpdateWasteTypeParams{
 		Category: params.Category,
 		Name:     params.Name,
+		ParentID: sql.NullInt32{Int32: params.ParentID, Valid: params.ParentID != 0},
 		ID:       int32(params.ID),
 		IsActive: *params.IsActive,
 	})
