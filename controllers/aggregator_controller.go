@@ -1,6 +1,7 @@
 package controllers
 
 import (
+	"database/sql"
 	"net/http"
 	"strconv"
 	"strings"
@@ -14,36 +15,34 @@ type AggregatorController struct{}
 
 type CreateAggregatorParams struct {
 	CountyID         int32  `json:"county_id"  binding:"required"`
-	SubCountyID      int32  `json:"sub_county_id"  binding:"required"`
 	PhysicalPosition string `json:"physical_position" binding:"required"`
 	Name             string `json:"name"  binding:"required"`
 	Companytype      int32  `json:"company_type"  binding:"required"`
 	Location         string `json:"location"  binding:"required"`
 	OrganizationID   int32  `json:"organization_id"  binding:"required"`
-	IsActive         bool   `json:"is_active"  binding:"required"`
+	IsActive         *bool  `json:"is_active"  binding:"required"`
 	Region           string `json:"region"  binding:"required"`
 }
 
 type UpdateAggregatorDataParams struct {
 	CountyID         int32  `json:"county_id"  binding:"required"`
-	SubCountyID      int32  `json:"sub_county_id"  binding:"required"`
 	PhysicalPosition string `json:"physical_position" binding:"required"`
 	Name             string `json:"name"  binding:"required"`
 	Companytype      int32  `json:"company_type"  binding:"required"`
 	Location         string `json:"location"  binding:"required"`
 	OrganizationID   int32  `json:"organization_id"  binding:"required"`
-	IsActive         bool   `json:"is_active"  binding:"required"`
+	IsActive         *bool  `json:"is_active"  binding:"required"`
 	ID               int64  `json:"id"  binding:"required"`
 	Region           string `json:"region"  binding:"required"`
 }
 
 type UpdateAggregatorStatusParams struct {
-	ID       int    `json:"id"  binding:"required"`
-	IsActive string `json:"status"  binding:"required"`
+	ID       int   `json:"id"  binding:"required"`
+	IsActive *bool `json:"status"  binding:"required"`
 }
 
-func (controller AggregatorController) InsertCompany(context *gin.Context) {
-	var params CreateCompanyParams
+func (controller AggregatorController) InsertAggregator(context *gin.Context) {
+	var params CreateAggregatorParams
 	err := context.ShouldBindJSON(&params)
 	if err != nil {
 		context.JSON(http.StatusUnprocessableEntity, gin.H{
@@ -55,7 +54,7 @@ func (controller AggregatorController) InsertCompany(context *gin.Context) {
 
 	count, err := gen.REPO.GetDuplicateCompanies(context, gen.GetDuplicateCompaniesParams{
 		Name:           strings.ToLower(params.Name),
-		OrganizationID: params.OrganizationID,
+		OrganizationID: sql.NullInt32{Int32: params.OrganizationID, Valid: params.OrganizationID != 0},
 	})
 	if len(count) > 0 {
 		context.JSON(http.StatusUnprocessableEntity, gin.H{
@@ -66,13 +65,12 @@ func (controller AggregatorController) InsertCompany(context *gin.Context) {
 	}
 
 	company, insertError := gen.REPO.InsertCompany(context, gen.InsertCompanyParams{
-		CountyID:         params.CountyID,
-		SubCountyID:      params.SubCountyID,
+		CountyID:         sql.NullInt32{Int32: params.CountyID, Valid: params.CountyID != 0},
 		PhysicalPosition: params.PhysicalPosition,
 		Name:             params.Name,
 		Location:         null.StringFrom(params.Location).NullString,
-		IsActive:         params.IsActive,
-		OrganizationID:   params.OrganizationID,
+		IsActive:         *params.IsActive,
+		OrganizationID:   sql.NullInt32{Int32: params.OrganizationID, Valid: params.OrganizationID != 0},
 		Region:           null.StringFrom(params.Region).NullString,
 		CompanyType:      params.Companytype,
 	})
@@ -80,7 +78,7 @@ func (controller AggregatorController) InsertCompany(context *gin.Context) {
 	if insertError != nil {
 		context.JSON(http.StatusUnprocessableEntity, gin.H{
 			"error":   true,
-			"message": "Failed to add Company",
+			"message": "Failed to add aggregator",
 		})
 		return
 	}
@@ -88,13 +86,13 @@ func (controller AggregatorController) InsertCompany(context *gin.Context) {
 	// If you want to return the created company as part of the response
 	context.JSON(http.StatusOK, gin.H{
 		"error":   false,
-		"message": "Successfully Created Company",
+		"message": "Successfully Created Aggregator",
 		"company": company, // Include the company details in the response
 	})
 }
 
-func (controller AggregatorController) GetAllCompanies(context *gin.Context) {
-	companies, err := gen.REPO.GetAllCompanies(context)
+func (controller AggregatorController) GetAllAggregators(context *gin.Context) {
+	companies, err := gen.REPO.GetAllAggregators(context)
 	if err != nil {
 		context.JSON(http.StatusUnprocessableEntity, gin.H{
 			"error":   true,
@@ -105,11 +103,11 @@ func (controller AggregatorController) GetAllCompanies(context *gin.Context) {
 
 	context.JSON(http.StatusOK, gin.H{
 		"error":     false,
-		"companies": companies,
+		"content": companies,
 	})
 }
 
-func (controller AggregatorController) GetCompany(context *gin.Context) {
+func (controller AggregatorController) GetAggregator(context *gin.Context) {
 	id := context.Param("id")
 
 	id_, _ := strconv.ParseUint(id, 10, 32)
@@ -130,7 +128,7 @@ func (controller AggregatorController) GetCompany(context *gin.Context) {
 	})
 }
 
-func (c AggregatorController) DeleteCompany(context *gin.Context) {
+func (c AggregatorController) DeleteAggregator(context *gin.Context) {
 	id := context.Param("id")
 	id_, _ := strconv.ParseUint(id, 10, 32)
 	println("------------------------------", id_)
@@ -148,8 +146,8 @@ func (c AggregatorController) DeleteCompany(context *gin.Context) {
 	})
 }
 
-func (aggregatorController AggregatorController) UpdateCompanyStatus(context *gin.Context) {
-	var params UpdateCompanyStatusParams
+func (aggregatorController AggregatorController) UpdateAggregatorStatus(context *gin.Context) {
+	var params UpdateAggregatorStatusParams
 	err := context.ShouldBindJSON(&params)
 	if err != nil {
 		context.JSON(http.StatusUnprocessableEntity, gin.H{
@@ -159,19 +157,9 @@ func (aggregatorController AggregatorController) UpdateCompanyStatus(context *gi
 		return
 	}
 
-	// Convert Status from string to bool
-	status, err := strconv.ParseBool(params.IsActive)
-	if err != nil {
-		context.JSON(http.StatusUnprocessableEntity, gin.H{
-			"error":   true,
-			"message": "Invalid value for 'status'",
-		})
-		return
-	}
-
 	// Update company status
 	updateError := gen.REPO.UpdateCompanyStatus(context, gen.UpdateCompanyStatusParams{
-		IsActive: status,
+		IsActive: *params.IsActive,
 		ID:       int32(params.ID),
 	})
 	if updateError != nil {
@@ -184,13 +172,13 @@ func (aggregatorController AggregatorController) UpdateCompanyStatus(context *gi
 
 	context.JSON(http.StatusOK, gin.H{
 		"error":   false,
-		"message": "Successfully updated Company Status",
-		"status":  status, // Use the variable for the parsed status
+		"message": "Successfully updated Aggregator",
+		"status":  params.IsActive, // Use the variable for the parsed status
 	})
 }
 
-func (aggregatorController AggregatorController) UpdateCompany(context *gin.Context) {
-	var params UpdateCompanyDataParams
+func (aggregatorController AggregatorController) UpdateAggregator(context *gin.Context) {
+	var params UpdateAggregatorDataParams
 	err := context.ShouldBindJSON(&params)
 	if err != nil {
 		context.JSON(http.StatusUnprocessableEntity, gin.H{
@@ -203,7 +191,7 @@ func (aggregatorController AggregatorController) UpdateCompany(context *gin.Cont
 	count, err := gen.REPO.GetDuplicateCompaniesWithoutID(context, gen.GetDuplicateCompaniesWithoutIDParams{
 		Name:           strings.ToLower(params.Name),
 		ID:             int32(params.ID),
-		OrganizationID: params.OrganizationID,
+		OrganizationID: sql.NullInt32{Int32: params.OrganizationID, Valid: true},
 	})
 	if len(count) > 0 {
 		context.JSON(http.StatusUnprocessableEntity, gin.H{
@@ -215,14 +203,13 @@ func (aggregatorController AggregatorController) UpdateCompany(context *gin.Cont
 
 	// Update company status
 	updateError := gen.REPO.UpdateCompany(context, gen.UpdateCompanyParams{
-		CountyID:         params.CountyID,
-		SubCountyID:      params.SubCountyID,
+		CountyID:         sql.NullInt32{Int32: params.CountyID, Valid: params.CountyID != 0},
 		PhysicalPosition: params.PhysicalPosition,
-		IsActive:         params.IsActive,
+		IsActive:         *params.IsActive,
 		Name:             params.Name,
 		Location:         null.StringFrom(params.Location).NullString,
 		Region:           null.StringFrom(params.Region).NullString,
-		OrganizationID:   params.OrganizationID,
+		OrganizationID:    sql.NullInt32{Int32: params.OrganizationID, Valid: params.OrganizationID != 0},
 		CompanyType:      params.Companytype,
 		ID:               int32(params.ID),
 	})

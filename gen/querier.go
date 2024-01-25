@@ -27,12 +27,13 @@ type Querier interface {
 	DeletePermissionByIds(ctx context.Context, permissionIds []int32) error
 	DeleteRole(ctx context.Context, id int32) error
 	DuplicateCounties(ctx context.Context, name string) (int64, error)
+	// companies.sql
+	GetAllAggregators(ctx context.Context) ([]GetAllAggregatorsRow, error)
 	// champion_aggregator_assignments.sql
 	GetAllChampionCollectorsAssignments(ctx context.Context) ([]GetAllChampionCollectorsAssignmentsRow, error)
 	GetAllChampionsForACollector(ctx context.Context, collectorID sql.NullInt32) ([]GetAllChampionsForACollectorRow, error)
-	// companies.sql
-	GetAllCompanies(ctx context.Context) ([]GetAllCompaniesRow, error)
 	GetAllCountries(ctx context.Context) ([]Country, error)
+	GetAllGreenChampions(ctx context.Context) ([]GetAllGreenChampionsRow, error)
 	GetAllMainOrganizationUsers(ctx context.Context) ([]GetAllMainOrganizationUsersRow, error)
 	// regions.sql
 	GetAllOrganizations(ctx context.Context) ([]GetAllOrganizationsRow, error)

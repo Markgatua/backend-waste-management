@@ -20,65 +20,126 @@ func (q *Queries) DeleteCompany(ctx context.Context, id int32) error {
 	return err
 }
 
-const getAllCompanies = `-- name: GetAllCompanies :many
+const getAllAggregators = `-- name: GetAllAggregators :many
 
 SELECT
-  companies.id, companies.name, companies.company_type, companies.organization_id, companies.county_id, companies.sub_county_id, companies.physical_position, companies.region, companies.location, companies.is_active, companies.created_at,
+  companies.id, companies.name, companies.company_type, companies.organization_id, companies.county_id, companies.physical_position, companies.region, companies.location, companies.is_active, companies.created_at,
   organizations.name AS organization_name,
-  counties.name AS county,
-  sub_counties.name AS sub_county
-FROM
-  companies
-LEFT JOIN
-  organizations ON organizations.id = companies.organization_id
-LEFT JOIN
-  counties ON counties.id = companies.county_id
-LEFT JOIN
-  sub_counties ON sub_counties.id = companies.sub_county_id
+  uploads.path as file_path,
+  counties.name AS county
+FROM companies
+left JOIN uploads on uploads.item_id=companies.id and uploads.related_table='companies'
+LEFT JOIN organizations ON organizations.id = companies.organization_id
+LEFT JOIN counties ON counties.id = companies.county_id
+WHERE companies.company_type=2
 `
 
-type GetAllCompaniesRow struct {
+type GetAllAggregatorsRow struct {
 	ID               int32          `json:"id"`
 	Name             string         `json:"name"`
 	CompanyType      int32          `json:"company_type"`
-	OrganizationID   int32          `json:"organization_id"`
-	CountyID         int32          `json:"county_id"`
-	SubCountyID      int32          `json:"sub_county_id"`
+	OrganizationID   sql.NullInt32  `json:"organization_id"`
+	CountyID         sql.NullInt32  `json:"county_id"`
 	PhysicalPosition string         `json:"physical_position"`
 	Region           sql.NullString `json:"region"`
 	Location         sql.NullString `json:"location"`
 	IsActive         bool           `json:"is_active"`
 	CreatedAt        time.Time      `json:"created_at"`
 	OrganizationName sql.NullString `json:"organization_name"`
+	FilePath         sql.NullString `json:"file_path"`
 	County           sql.NullString `json:"county"`
-	SubCounty        sql.NullString `json:"sub_county"`
 }
 
 // companies.sql
-func (q *Queries) GetAllCompanies(ctx context.Context) ([]GetAllCompaniesRow, error) {
-	rows, err := q.db.QueryContext(ctx, getAllCompanies)
+func (q *Queries) GetAllAggregators(ctx context.Context) ([]GetAllAggregatorsRow, error) {
+	rows, err := q.db.QueryContext(ctx, getAllAggregators)
 	if err != nil {
 		return nil, err
 	}
 	defer rows.Close()
-	items := []GetAllCompaniesRow{}
+	items := []GetAllAggregatorsRow{}
 	for rows.Next() {
-		var i GetAllCompaniesRow
+		var i GetAllAggregatorsRow
 		if err := rows.Scan(
 			&i.ID,
 			&i.Name,
 			&i.CompanyType,
 			&i.OrganizationID,
 			&i.CountyID,
-			&i.SubCountyID,
 			&i.PhysicalPosition,
 			&i.Region,
 			&i.Location,
 			&i.IsActive,
 			&i.CreatedAt,
 			&i.OrganizationName,
+			&i.FilePath,
 			&i.County,
-			&i.SubCounty,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const getAllGreenChampions = `-- name: GetAllGreenChampions :many
+SELECT
+  companies.id, companies.name, companies.company_type, companies.organization_id, companies.county_id, companies.physical_position, companies.region, companies.location, companies.is_active, companies.created_at,
+  organizations.name AS organization_name,
+  uploads.path as file_path,
+  counties.name AS county
+FROM companies
+left JOIN uploads on uploads.item_id=companies.id and uploads.related_table='companies'
+LEFT JOIN organizations ON organizations.id = companies.organization_id
+LEFT JOIN counties ON counties.id = companies.county_id
+WHERE companies.company_type=2
+`
+
+type GetAllGreenChampionsRow struct {
+	ID               int32          `json:"id"`
+	Name             string         `json:"name"`
+	CompanyType      int32          `json:"company_type"`
+	OrganizationID   sql.NullInt32  `json:"organization_id"`
+	CountyID         sql.NullInt32  `json:"county_id"`
+	PhysicalPosition string         `json:"physical_position"`
+	Region           sql.NullString `json:"region"`
+	Location         sql.NullString `json:"location"`
+	IsActive         bool           `json:"is_active"`
+	CreatedAt        time.Time      `json:"created_at"`
+	OrganizationName sql.NullString `json:"organization_name"`
+	FilePath         sql.NullString `json:"file_path"`
+	County           sql.NullString `json:"county"`
+}
+
+func (q *Queries) GetAllGreenChampions(ctx context.Context) ([]GetAllGreenChampionsRow, error) {
+	rows, err := q.db.QueryContext(ctx, getAllGreenChampions)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	items := []GetAllGreenChampionsRow{}
+	for rows.Next() {
+		var i GetAllGreenChampionsRow
+		if err := rows.Scan(
+			&i.ID,
+			&i.Name,
+			&i.CompanyType,
+			&i.OrganizationID,
+			&i.CountyID,
+			&i.PhysicalPosition,
+			&i.Region,
+			&i.Location,
+			&i.IsActive,
+			&i.CreatedAt,
+			&i.OrganizationName,
+			&i.FilePath,
+			&i.County,
 		); err != nil {
 			return nil, err
 		}
@@ -95,18 +156,15 @@ func (q *Queries) GetAllCompanies(ctx context.Context) ([]GetAllCompaniesRow, er
 
 const getCompany = `-- name: GetCompany :one
 SELECT
-  companies.id, companies.name, companies.company_type, companies.organization_id, companies.county_id, companies.sub_county_id, companies.physical_position, companies.region, companies.location, companies.is_active, companies.created_at,
+  companies.id, companies.name, companies.company_type, companies.organization_id, companies.county_id, companies.physical_position, companies.region, companies.location, companies.is_active, companies.created_at,
   organizations.name AS organization_name,
-  counties.name AS county,
-  sub_counties.name AS sub_county
+  counties.name AS county
 FROM
   companies
 LEFT JOIN
   organizations ON organizations.id = companies.organization_id
 LEFT JOIN
   counties ON counties.id = companies.county_id
-LEFT JOIN
-  sub_counties ON sub_counties.id = companies.sub_county_id
 WHERE companies.id = $1
 `
 
@@ -114,9 +172,8 @@ type GetCompanyRow struct {
 	ID               int32          `json:"id"`
 	Name             string         `json:"name"`
 	CompanyType      int32          `json:"company_type"`
-	OrganizationID   int32          `json:"organization_id"`
-	CountyID         int32          `json:"county_id"`
-	SubCountyID      int32          `json:"sub_county_id"`
+	OrganizationID   sql.NullInt32  `json:"organization_id"`
+	CountyID         sql.NullInt32  `json:"county_id"`
 	PhysicalPosition string         `json:"physical_position"`
 	Region           sql.NullString `json:"region"`
 	Location         sql.NullString `json:"location"`
@@ -124,7 +181,6 @@ type GetCompanyRow struct {
 	CreatedAt        time.Time      `json:"created_at"`
 	OrganizationName sql.NullString `json:"organization_name"`
 	County           sql.NullString `json:"county"`
-	SubCounty        sql.NullString `json:"sub_county"`
 }
 
 func (q *Queries) GetCompany(ctx context.Context, id int32) (GetCompanyRow, error) {
@@ -136,7 +192,6 @@ func (q *Queries) GetCompany(ctx context.Context, id int32) (GetCompanyRow, erro
 		&i.CompanyType,
 		&i.OrganizationID,
 		&i.CountyID,
-		&i.SubCountyID,
 		&i.PhysicalPosition,
 		&i.Region,
 		&i.Location,
@@ -144,13 +199,12 @@ func (q *Queries) GetCompany(ctx context.Context, id int32) (GetCompanyRow, erro
 		&i.CreatedAt,
 		&i.OrganizationName,
 		&i.County,
-		&i.SubCounty,
 	)
 	return i, err
 }
 
 const getDuplicateCompanies = `-- name: GetDuplicateCompanies :many
-select id, name, company_type, organization_id, county_id, sub_county_id, physical_position, region, location, is_active, created_at
+select id, name, company_type, organization_id, county_id, physical_position, region, location, is_active, created_at
 from companies
 where
     lower(name) = $1
@@ -158,8 +212,8 @@ where
 `
 
 type GetDuplicateCompaniesParams struct {
-	Name           string `json:"name"`
-	OrganizationID int32  `json:"organization_id"`
+	Name           string        `json:"name"`
+	OrganizationID sql.NullInt32 `json:"organization_id"`
 }
 
 func (q *Queries) GetDuplicateCompanies(ctx context.Context, arg GetDuplicateCompaniesParams) ([]Company, error) {
@@ -177,7 +231,6 @@ func (q *Queries) GetDuplicateCompanies(ctx context.Context, arg GetDuplicateCom
 			&i.CompanyType,
 			&i.OrganizationID,
 			&i.CountyID,
-			&i.SubCountyID,
 			&i.PhysicalPosition,
 			&i.Region,
 			&i.Location,
@@ -198,7 +251,7 @@ func (q *Queries) GetDuplicateCompanies(ctx context.Context, arg GetDuplicateCom
 }
 
 const getDuplicateCompaniesWithoutID = `-- name: GetDuplicateCompaniesWithoutID :many
-select id, name, company_type, organization_id, county_id, sub_county_id, physical_position, region, location, is_active, created_at
+select id, name, company_type, organization_id, county_id, physical_position, region, location, is_active, created_at
 from companies
 where
     id = $1
@@ -207,9 +260,9 @@ where
 `
 
 type GetDuplicateCompaniesWithoutIDParams struct {
-	ID             int32  `json:"id"`
-	Name           string `json:"name"`
-	OrganizationID int32  `json:"organization_id"`
+	ID             int32         `json:"id"`
+	Name           string        `json:"name"`
+	OrganizationID sql.NullInt32 `json:"organization_id"`
 }
 
 func (q *Queries) GetDuplicateCompaniesWithoutID(ctx context.Context, arg GetDuplicateCompaniesWithoutIDParams) ([]Company, error) {
@@ -227,7 +280,6 @@ func (q *Queries) GetDuplicateCompaniesWithoutID(ctx context.Context, arg GetDup
 			&i.CompanyType,
 			&i.OrganizationID,
 			&i.CountyID,
-			&i.SubCountyID,
 			&i.PhysicalPosition,
 			&i.Region,
 			&i.Location,
@@ -251,7 +303,6 @@ const insertCompany = `-- name: InsertCompany :one
 insert into
     companies(
         county_id,
-        sub_county_id,
         physical_position,
         name,
         company_type,
@@ -260,16 +311,15 @@ insert into
         location,
         is_active
     )
-values ($1, $2, $3, $4, $5, $6, $7, $8, $9) returning id, name, company_type, organization_id, county_id, sub_county_id, physical_position, region, location, is_active, created_at
+values ($1, $2, $3, $4, $5, $6, $7, $8) returning id, name, company_type, organization_id, county_id, physical_position, region, location, is_active, created_at
 `
 
 type InsertCompanyParams struct {
-	CountyID         int32          `json:"county_id"`
-	SubCountyID      int32          `json:"sub_county_id"`
+	CountyID         sql.NullInt32  `json:"county_id"`
 	PhysicalPosition string         `json:"physical_position"`
 	Name             string         `json:"name"`
 	CompanyType      int32          `json:"company_type"`
-	OrganizationID   int32          `json:"organization_id"`
+	OrganizationID   sql.NullInt32  `json:"organization_id"`
 	Region           sql.NullString `json:"region"`
 	Location         sql.NullString `json:"location"`
 	IsActive         bool           `json:"is_active"`
@@ -278,7 +328,6 @@ type InsertCompanyParams struct {
 func (q *Queries) InsertCompany(ctx context.Context, arg InsertCompanyParams) (Company, error) {
 	row := q.db.QueryRowContext(ctx, insertCompany,
 		arg.CountyID,
-		arg.SubCountyID,
 		arg.PhysicalPosition,
 		arg.Name,
 		arg.CompanyType,
@@ -294,7 +343,6 @@ func (q *Queries) InsertCompany(ctx context.Context, arg InsertCompanyParams) (C
 		&i.CompanyType,
 		&i.OrganizationID,
 		&i.CountyID,
-		&i.SubCountyID,
 		&i.PhysicalPosition,
 		&i.Region,
 		&i.Location,
@@ -308,24 +356,22 @@ const updateCompany = `-- name: UpdateCompany :exec
 update companies
 set
     county_id = $1,
-    sub_county_id = $2,
-    physical_position = $3,
-    name = $4,
-    company_type = $5,
-    organization_id = $6,
-    region = $7,
-    location = $8,
-    is_active = $9
-where id = $10
+    physical_position = $2,
+    name = $3,
+    company_type = $4,
+    organization_id = $5,
+    region = $6,
+    location = $7,
+    is_active = $8
+where id = $9
 `
 
 type UpdateCompanyParams struct {
-	CountyID         int32          `json:"county_id"`
-	SubCountyID      int32          `json:"sub_county_id"`
+	CountyID         sql.NullInt32  `json:"county_id"`
 	PhysicalPosition string         `json:"physical_position"`
 	Name             string         `json:"name"`
 	CompanyType      int32          `json:"company_type"`
-	OrganizationID   int32          `json:"organization_id"`
+	OrganizationID   sql.NullInt32  `json:"organization_id"`
 	Region           sql.NullString `json:"region"`
 	Location         sql.NullString `json:"location"`
 	IsActive         bool           `json:"is_active"`
@@ -335,7 +381,6 @@ type UpdateCompanyParams struct {
 func (q *Queries) UpdateCompany(ctx context.Context, arg UpdateCompanyParams) error {
 	_, err := q.db.ExecContext(ctx, updateCompany,
 		arg.CountyID,
-		arg.SubCountyID,
 		arg.PhysicalPosition,
 		arg.Name,
 		arg.CompanyType,

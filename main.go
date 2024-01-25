@@ -139,23 +139,22 @@ func runProgram() {
 	//-------------------------------------------------------------------------------------------
 
 	//---------------------------Aggregator ------------------------------------------------------
-	router.POST("aggregator/add", middlewares.PermissionBlockerMiddleware("add_aggregator"), controllers.AggregatorController{}.InsertCompany)
-	router.GET("aggregators", middlewares.PermissionBlockerMiddleware("view_aggregator"), controllers.AggregatorController{}.GetAllCompanies)
-	router.GET("aggregator/:id", middlewares.PermissionBlockerMiddleware("view_aggregator"), controllers.AggregatorController{}.GetCompany)
-	router.POST("aggregator/status", middlewares.PermissionBlockerMiddleware("edit_aggregator"), controllers.AggregatorController{}.UpdateCompanyStatus)
-	router.DELETE("aggregator/delete/:id", middlewares.PermissionBlockerMiddleware("delete_aggregator"), controllers.AggregatorController{}.DeleteCompany)
-	router.POST("aggregator/update", middlewares.PermissionBlockerMiddleware("edit_aggregator"), controllers.AggregatorController{}.UpdateCompany)
+	router.POST("aggregator/add", middlewares.PermissionBlockerMiddleware("add_aggregator"), controllers.AggregatorController{}.InsertAggregator)
+	router.GET("aggregators", middlewares.PermissionBlockerMiddleware("view_aggregator"), controllers.AggregatorController{}.GetAllAggregators)
+	router.GET("aggregator/:id", middlewares.PermissionBlockerMiddleware("view_aggregator"), controllers.AggregatorController{}.GetAggregator)
+	router.PUT("aggregator/status", middlewares.PermissionBlockerMiddleware("edit_aggregator"), controllers.AggregatorController{}.UpdateAggregatorStatus)
+	router.DELETE("aggregator/delete/:id", middlewares.PermissionBlockerMiddleware("delete_aggregator"), controllers.AggregatorController{}.DeleteAggregator)
+	router.POST("aggregator/update", middlewares.PermissionBlockerMiddleware("edit_aggregator"), controllers.AggregatorController{}.UpdateAggregator)
 	//-------------------------------------------------------------------------------------------
 
 	//---------------------------Green Champion -------------------------------------------------
-	router.POST("green_champion/add", middlewares.PermissionBlockerMiddleware("add_green_champion"), controllers.AggregatorController{}.InsertCompany)
-	router.GET("green_champion", middlewares.PermissionBlockerMiddleware("view_green_champion"), controllers.AggregatorController{}.GetAllCompanies)
-	router.GET("green_champion/:id", middlewares.PermissionBlockerMiddleware("view_green_champion"), controllers.AggregatorController{}.GetCompany)
-	router.POST("green_champion/status", middlewares.PermissionBlockerMiddleware("edit_green_champion"), controllers.AggregatorController{}.UpdateCompanyStatus)
-	router.DELETE("green_champion/delete/:id", middlewares.PermissionBlockerMiddleware("delete_green_champion"), controllers.AggregatorController{}.DeleteCompany)
-	router.POST("green_champion/update", middlewares.PermissionBlockerMiddleware("edit_green_champion"), controllers.AggregatorController{}.UpdateCompany)
-	//-------------------------------------------------------------------------------------------
-
+	// router.POST("green_champion/add", middlewares.PermissionBlockerMiddleware("add_green_champion"), controllers.AggregatorController{}.InsertCompany)
+	// router.GET("green_champion", middlewares.PermissionBlockerMiddleware("view_green_champion"), controllers.AggregatorController{}.GetAllCompanies)
+	// router.GET("green_champion/:id", middlewares.PermissionBlockerMiddleware("view_green_champion"), controllers.AggregatorController{}.GetCompany)
+	// router.POST("green_champion/status", middlewares.PermissionBlockerMiddleware("edit_green_champion"), controllers.AggregatorController{}.UpdateCompanyStatus)
+	// router.DELETE("green_champion/delete/:id", middlewares.PermissionBlockerMiddleware("delete_green_champion"), controllers.AggregatorController{}.DeleteCompany)
+	// router.POST("green_champion/update", middlewares.PermissionBlockerMiddleware("edit_green_champion"), controllers.AggregatorController{}.UpdateCompany)
+	// //-------------------------------------------------------------------------------------------
 
 	//---------------------------Roles ------------------------------------------------------
 	// router.GET("roles", rolesController.GetRoles)

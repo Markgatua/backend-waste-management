@@ -22,9 +22,8 @@ type Company struct {
 	ID               int32          `json:"id"`
 	Name             string         `json:"name"`
 	CompanyType      int32          `json:"company_type"`
-	OrganizationID   int32          `json:"organization_id"`
-	CountyID         int32          `json:"county_id"`
-	SubCountyID      int32          `json:"sub_county_id"`
+	OrganizationID   sql.NullInt32  `json:"organization_id"`
+	CountyID         sql.NullInt32  `json:"county_id"`
 	PhysicalPosition string         `json:"physical_position"`
 	Region           sql.NullString `json:"region"`
 	Location         sql.NullString `json:"location"`

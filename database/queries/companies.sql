@@ -1,35 +1,40 @@
 -- companies.sql
 
--- name: GetAllCompanies :many
+-- name: GetAllAggregators :many
 SELECT
   companies.*,
   organizations.name AS organization_name,
-  counties.name AS county,
-  sub_counties.name AS sub_county
-FROM
-  companies
-LEFT JOIN
-  organizations ON organizations.id = companies.organization_id
-LEFT JOIN
-  counties ON counties.id = companies.county_id
-LEFT JOIN
-  sub_counties ON sub_counties.id = companies.sub_county_id;
+  uploads.path as file_path,
+  counties.name AS county
+FROM companies
+left JOIN uploads on uploads.item_id=companies.id and uploads.related_table='companies'
+LEFT JOIN organizations ON organizations.id = companies.organization_id
+LEFT JOIN counties ON counties.id = companies.county_id
+WHERE companies.company_type=2;
 
+-- name: GetAllGreenChampions :many
+SELECT
+  companies.*,
+  organizations.name AS organization_name,
+  uploads.path as file_path,
+  counties.name AS county
+FROM companies
+left JOIN uploads on uploads.item_id=companies.id and uploads.related_table='companies'
+LEFT JOIN organizations ON organizations.id = companies.organization_id
+LEFT JOIN counties ON counties.id = companies.county_id
+WHERE companies.company_type=2;
 
 -- name: GetCompany :one
 SELECT
   companies.*,
   organizations.name AS organization_name,
-  counties.name AS county,
-  sub_counties.name AS sub_county
+  counties.name AS county
 FROM
   companies
 LEFT JOIN
   organizations ON organizations.id = companies.organization_id
 LEFT JOIN
   counties ON counties.id = companies.county_id
-LEFT JOIN
-  sub_counties ON sub_counties.id = companies.sub_county_id
 WHERE companies.id = $1;
 
 -- name: UpdateCompanyStatus :exec
@@ -39,7 +44,6 @@ update companies set is_active = $2 where id = $1;
 insert into
     companies(
         county_id,
-        sub_county_id,
         physical_position,
         name,
         company_type,
@@ -48,21 +52,20 @@ insert into
         location,
         is_active
     )
-values ($1, $2, $3, $4, $5, $6, $7, $8, $9) returning *;
+values ($1, $2, $3, $4, $5, $6, $7, $8) returning *;
 
 -- name: UpdateCompany :exec
 update companies
 set
     county_id = $1,
-    sub_county_id = $2,
-    physical_position = $3,
-    name = $4,
-    company_type = $5,
-    organization_id = $6,
-    region = $7,
-    location = $8,
-    is_active = $9
-where id = $10;
+    physical_position = $2,
+    name = $3,
+    company_type = $4,
+    organization_id = $5,
+    region = $6,
+    location = $7,
+    is_active = $8
+where id = $9;
 
 -- name: GetDuplicateCompanies :many
 select *
