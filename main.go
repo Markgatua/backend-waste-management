@@ -140,7 +140,7 @@ func runProgram() {
 
 	//---------------------------Aggregator ------------------------------------------------------
 	router.POST("aggregator/add", middlewares.PermissionBlockerMiddleware("add_aggregator"), controllers.AggregatorController{}.InsertCompany)
-	router.GET("aggregator", middlewares.PermissionBlockerMiddleware("view_aggregator"), controllers.AggregatorController{}.GetAllCompanies)
+	router.GET("aggregators", middlewares.PermissionBlockerMiddleware("view_aggregator"), controllers.AggregatorController{}.GetAllCompanies)
 	router.GET("aggregator/:id", middlewares.PermissionBlockerMiddleware("view_aggregator"), controllers.AggregatorController{}.GetCompany)
 	router.POST("aggregator/status", middlewares.PermissionBlockerMiddleware("edit_aggregator"), controllers.AggregatorController{}.UpdateCompanyStatus)
 	router.DELETE("aggregator/delete/:id", middlewares.PermissionBlockerMiddleware("delete_aggregator"), controllers.AggregatorController{}.DeleteCompany)
