@@ -50,7 +50,6 @@ func runProgram() {
 	gen.LoadRepo()
 
 	usersController := controllers.UsersController{}
-	companiesController := controllers.CompaniesController{}
 	wasteTypesController := controllers.WasteTypesController{}
 	organzationController := controllers.OrgnizationController{}
 	//geoController := controllers.GeoController{}
@@ -90,29 +89,28 @@ func runProgram() {
 		auth.POST("/login/phone", authController.LoginPhone)
 		auth.POST("/challenge/register/verify_otp_code_phone", authController.RegisterVerifyOTPCodePhone)
 		auth.POST("/challenge/register/verify_otp_code_phone_create_wallet", authController.RegisterVerifyOTPCodePhoneAndCreateWallet)
-    
+
 		auth.POST("/challenge/forgot_pin/send_otp_phone", authController.ForgotPinSendOTPPhone)
 		auth.POST("/challenge/forgot_pin/verify_otp_phone", authController.ForgotPinVerifyOTPPhone)
 		auth.POST("/challenge/forgot_pin/enter_new_pin", authController.ForgotPinEnterNewPin)
 
 	}
 
-
-
 	// apiGroup := router.Group("/api:BVaDN9hl")
-	router.GET("/uploads/:file",controllers.FileController{}.GetFile)
-	router.GET("/flag/:file",controllers.FileController{}.GetFlag)
-	router.GET("/countries",controllers.PresetController{}.GetCountries)
+	router.GET("/uploads/:file", controllers.FileController{}.GetFile)
+	router.GET("/flag/:file", controllers.FileController{}.GetFlag)
 
+	//presets ----------------------------------------------------------|
+	router.GET("/presets", controllers.PresetController{}.GetPresetValue)
+	//------------------------------------------------------------------|
 
 	router.Use(middlewares.JwtAuthMiddleware())
 	router.Use(middlewares.PermissionMiddleware())
 
 	//---------------------------    Files ------------------------------------------------------
-	router.MaxMultipartMemory = 8 << 20  // 8 MiB
-	router.POST("/upload_files",middlewares.PermissionBlockerMiddleware("upload_files"),controllers.FileController{}.UploadFiles)
+	router.MaxMultipartMemory = 8 << 20 // 8 MiB
+	router.POST("/upload_files", middlewares.PermissionBlockerMiddleware("upload_files"), controllers.FileController{}.UploadFiles)
 	//-------------------------------------------------------------------------------------------
-
 
 	router.GET("/users", middlewares.PermissionBlockerMiddleware("view_user"), usersController.GetAllUsers)
 	//main organizations is
@@ -121,12 +119,10 @@ func runProgram() {
 	router.PUT("/users/edit/email/:organization", middlewares.PermissionBlockerMiddleware("edit_user"), authController.EditUserEmail)
 	router.PUT("/user/update_password", middlewares.PermissionBlockerMiddleware("update_user_password"), authController.UpdateUserPassword)
 
-
 	// router.POST("update/user",usersController.UpdateUSer)
 	// router.GET("/users/roles",usersController.GetUsersWithRole)
 	router.GET("/user/:id/main_organization", middlewares.PermissionBlockerMiddleware("view_user"), usersController.GetMainOrganizationUser)
 	router.GET("/user/:id", middlewares.PermissionBlockerMiddleware("view_user"), usersController.GetUser)
-
 
 	//---------------------------countries-------------------------------------------------------
 	//router.GET("countries", geoController.GetAllCountries)
@@ -142,14 +138,24 @@ func runProgram() {
 	router.GET("organization/:id", middlewares.PermissionBlockerMiddleware("view_organizations"), organzationController.GetOrganization)
 	//-------------------------------------------------------------------------------------------
 
-	//---------------------------companies ------------------------------------------------------
-	router.POST("companies/add", middlewares.PermissionBlockerMiddleware("add_company"), companiesController.InsertCompany)
-	router.GET("companies", middlewares.PermissionBlockerMiddleware("view_companies"), companiesController.GetAllCompanies)
-	router.GET("company/:id", middlewares.PermissionBlockerMiddleware("view_companies"), companiesController.GetCompany)
-	router.POST("companies/status", middlewares.PermissionBlockerMiddleware("edit_company"), companiesController.UpdateCompanyStatus)
-	router.DELETE("company/delete/:id", middlewares.PermissionBlockerMiddleware("delete_company"), companiesController.DeleteCompany)
-	router.POST("companies/update", middlewares.PermissionBlockerMiddleware("edit_company"), companiesController.UpdateCompany)
+	//---------------------------Aggregator ------------------------------------------------------
+	router.POST("aggregator/add", middlewares.PermissionBlockerMiddleware("add_aggregator"), controllers.AggregatorController{}.InsertCompany)
+	router.GET("aggregator", middlewares.PermissionBlockerMiddleware("view_aggregator"), controllers.AggregatorController{}.GetAllCompanies)
+	router.GET("aggregator/:id", middlewares.PermissionBlockerMiddleware("view_aggregator"), controllers.AggregatorController{}.GetCompany)
+	router.POST("aggregator/status", middlewares.PermissionBlockerMiddleware("edit_aggregator"), controllers.AggregatorController{}.UpdateCompanyStatus)
+	router.DELETE("aggregator/delete/:id", middlewares.PermissionBlockerMiddleware("delete_aggregator"), controllers.AggregatorController{}.DeleteCompany)
+	router.POST("aggregator/update", middlewares.PermissionBlockerMiddleware("edit_aggregator"), controllers.AggregatorController{}.UpdateCompany)
 	//-------------------------------------------------------------------------------------------
+
+	//---------------------------Green Champion -------------------------------------------------
+	router.POST("green_champion/add", middlewares.PermissionBlockerMiddleware("add_green_champion"), controllers.AggregatorController{}.InsertCompany)
+	router.GET("green_champion", middlewares.PermissionBlockerMiddleware("view_green_champion"), controllers.AggregatorController{}.GetAllCompanies)
+	router.GET("green_champion/:id", middlewares.PermissionBlockerMiddleware("view_green_champion"), controllers.AggregatorController{}.GetCompany)
+	router.POST("green_champion/status", middlewares.PermissionBlockerMiddleware("edit_green_champion"), controllers.AggregatorController{}.UpdateCompanyStatus)
+	router.DELETE("green_champion/delete/:id", middlewares.PermissionBlockerMiddleware("delete_green_champion"), controllers.AggregatorController{}.DeleteCompany)
+	router.POST("green_champion/update", middlewares.PermissionBlockerMiddleware("edit_green_champion"), controllers.AggregatorController{}.UpdateCompany)
+	//-------------------------------------------------------------------------------------------
+
 
 	//---------------------------Roles ------------------------------------------------------
 	// router.GET("roles", rolesController.GetRoles)

@@ -2,6 +2,7 @@ package controllers
 
 import (
 	"database/sql"
+	"fmt"
 	_ "fmt"
 	"net/http"
 	"strconv"
@@ -40,12 +41,14 @@ func (wasteGroupsController WasteTypesController) InsertWasteGroup(context *gin.
 		return
 	}
 
+
 	wasteType, insertError := gen.REPO.InsertWasteType(context, gen.InsertWasteTypeParams{
 		Name:     params.Name,
 		ParentID: sql.NullInt32{Int32: params.ParentID, Valid: params.ParentID != 0},
 	})
 
 	if insertError != nil {
+		fmt.Println(insertError.Error())
 		context.JSON(http.StatusUnprocessableEntity, gin.H{
 			"error":   true,
 			"message": "Failed to add Waste Type",
@@ -95,7 +98,8 @@ func (wasteGroupsController WasteTypesController) GetAllWasteTypes(context *gin.
 		result.FilePath = v.FilePath
 
 		children := []Result{}
-		childrenWasteTypes, _ := gen.REPO.GetChildrenWasteTypes(context, v.ParentID)
+		fmt.Println(v.ParentID.Int32)
+		childrenWasteTypes, _ := gen.REPO.GetChildrenWasteTypes(context, sql.NullInt32{Int32: v.ID,Valid: true})
 		for _, x := range childrenWasteTypes {
 			child := Result{}
 			child.ID = x.ID
