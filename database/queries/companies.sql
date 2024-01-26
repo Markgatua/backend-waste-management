@@ -24,6 +24,10 @@ WHERE
 SELECT
     companies.*,
     organizations.name AS organization_name,
+     users.first_name,
+    users.id as user_id,
+    users.last_name,
+    users.email,
     uploads.path as file_path,
     countries.name AS country_name
 FROM
@@ -31,6 +35,7 @@ FROM
     left JOIN uploads on uploads.item_id = companies.id
     and uploads.related_table = 'companies'
     LEFT JOIN organizations ON organizations.id = companies.organization_id
+        left join users on users.user_company_id = companies.id and users.is_company_super_admin = true
     LEFT JOIN countries ON countries.id = companies.country_id
 WHERE
     companies.company_type = 1;
