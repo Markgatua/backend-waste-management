@@ -158,12 +158,12 @@ func runProgram() {
 	//-------------------------------------------------------------------------------------------
 
 	//---------------------------Green champion ------------------------------------------------------
-	router.POST("green_champion/add", middlewares.PermissionBlockerMiddleware("add_green_champion"), controllers.GreenChampionController{}.InsertAggregator)
-	router.GET("green_champions", middlewares.PermissionBlockerMiddleware("view_green_champion"), controllers.GreenChampionController{}.GetAllAggregators)
-	router.GET("green_champion/:id", middlewares.PermissionBlockerMiddleware("view_green_champion"), controllers.GreenChampionController{}.GetAggregator)
-	router.PUT("green_champion/set_active_inactive_status", middlewares.PermissionBlockerMiddleware("edit_green_champion"), controllers.GreenChampionController{}.UpdateAggregatorStatus)
-	router.DELETE("green_champion/delete/:id", middlewares.PermissionBlockerMiddleware("delete_green_champion"), controllers.GreenChampionController{}.DeleteAggregator)
-	router.PUT("green_champion/update", middlewares.PermissionBlockerMiddleware("edit_green_champion"), controllers.GreenChampionController{}.UpdateAggregator)
+	router.POST("green_champion/add", middlewares.PermissionBlockerMiddleware("add_green_champion"), controllers.GreenChampionController{}.InsertGreenChampion)
+	router.GET("green_champions", middlewares.PermissionBlockerMiddleware("view_green_champion"), controllers.GreenChampionController{}.GetAllGreenChampions)
+	router.GET("green_champion/:id", middlewares.PermissionBlockerMiddleware("view_green_champion"), controllers.GreenChampionController{}.GetGreenChampion)
+	router.PUT("green_champion/set_active_inactive_status", middlewares.PermissionBlockerMiddleware("edit_green_champion"), controllers.GreenChampionController{}.UpdateGreenChampionStatus)
+	router.DELETE("green_champion/delete/:id", middlewares.PermissionBlockerMiddleware("delete_green_champion"), controllers.GreenChampionController{}.DeleteGreenChampion)
+	router.PUT("green_champion/update", middlewares.PermissionBlockerMiddleware("edit_green_champion"), controllers.GreenChampionController{}.UpdateGreenChampion)
 	//-------------------------------------------------------------------------------------------
 
 	//---------------------------Roles ------------------------------------------------------
