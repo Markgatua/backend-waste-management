@@ -5,7 +5,9 @@ import (
 	"net/http"
 	"strconv"
 	"strings"
+	"time"
 	"ttnmwastemanagementsystem/gen"
+	"ttnmwastemanagementsystem/helpers"
 
 	"github.com/gin-gonic/gin"
 	"github.com/guregu/null"
@@ -17,11 +19,16 @@ type CreateAggregatorParams struct {
 	CountyID         int32  `json:"county_id"  binding:"required"`
 	PhysicalPosition string `json:"physical_position" binding:"required"`
 	Name             string `json:"name"  binding:"required"`
-	Companytype      int32  `json:"company_type"  binding:"required"`
 	Location         string `json:"location"  binding:"required"`
-	OrganizationID   int32  `json:"organization_id"  binding:"required"`
-	IsActive         *bool  `json:"is_active"  binding:"required"`
-	Region           string `json:"region"  binding:"required"`
+	Email            string `json:"email" binding:"required"`
+	FirstName        string `json:"first_name" binding:"required"`
+	LastName         string `json:"last_name" binding:"required"`
+	Password         string `json:"password" binding:"required"`
+	OrganizationID   int32  `json:"organization_id"`
+	LogoPath         string `json:"logo_path"`
+
+	IsActive *bool  `json:"is_active"  binding:"required"`
+	Region   string `json:"region"  binding:"required"`
 }
 
 type UpdateAggregatorDataParams struct {
@@ -33,7 +40,13 @@ type UpdateAggregatorDataParams struct {
 	OrganizationID   int32  `json:"organization_id"  binding:"required"`
 	IsActive         *bool  `json:"is_active"  binding:"required"`
 	ID               int64  `json:"id"  binding:"required"`
+	LogoPath         string `json:"logo_path"`
 	Region           string `json:"region"  binding:"required"`
+	UserID           int32  `json:"user_id" binding:"required"`
+	Email            string `json:"email" binding:"required"`
+	FirstName        string `json:"first_name" binding:"required"`
+	LastName         string `json:"last_name" binding:"required"`
+	Password         string `json:"password"`
 }
 
 type UpdateAggregatorStatusParams struct {
@@ -48,6 +61,23 @@ func (controller AggregatorController) InsertAggregator(context *gin.Context) {
 		context.JSON(http.StatusUnprocessableEntity, gin.H{
 			"error":   true,
 			"message": err.Error(),
+		})
+		return
+	}
+
+	user, err := GetEmailUser(params.Email)
+	// if err != nil {
+	// 	fmt.Print(err.Error())
+	// 	context.JSON(http.StatusUnprocessableEntity, gin.H{
+	// 		"error":   true,
+	// 		"message": "Error adding organization",
+	// 	})
+	// 	return
+	// }
+	if user != nil {
+		context.JSON(http.StatusUnprocessableEntity, gin.H{
+			"error":   true,
+			"message": "User with the given email already exists`",
 		})
 		return
 	}
@@ -83,6 +113,26 @@ func (controller AggregatorController) InsertAggregator(context *gin.Context) {
 		return
 	}
 
+	_, err = gen.REPO.DB.NamedExec(`INSERT INTO users (email,first_name,last_name,provider,role_id,user_organization_id,user_type,created_at,updated_at,password,is_organization_super_admin,user_company_id) VALUES (:email,:first_name,:last_name,:provider,:role_id,:user_organization_id,:user_type,:created_at,:updated_at,:password,:is_organization_super_admin,:user_company_id)`,
+		map[string]interface{}{
+			"email":                       params.Email,
+			"first_name":                  params.FirstName,
+			"last_name":                   params.LastName,
+			"provider":                    "email",
+			"role_id":                     3,
+			"user_organization_id":        params.OrganizationID,
+			"is_organization_super_admin": true,
+			"user_type":                   9,
+			"user_company_id":             company.ID,
+			"password":                    helpers.Functions{}.HashPassword(params.Password),
+			"created_at":                  time.Now(),
+			"updated_at":                  time.Now(),
+		})
+
+	if params.LogoPath != "" {
+		UploadController{}.SaveToUploadsTable(params.LogoPath, "companies", company.ID)
+	}
+
 	// If you want to return the created company as part of the response
 	context.JSON(http.StatusOK, gin.H{
 		"error":   false,
@@ -102,7 +152,7 @@ func (controller AggregatorController) GetAllAggregators(context *gin.Context) {
 	}
 
 	context.JSON(http.StatusOK, gin.H{
-		"error":     false,
+		"error":   false,
 		"content": companies,
 	})
 }
@@ -209,7 +259,7 @@ func (aggregatorController AggregatorController) UpdateAggregator(context *gin.C
 		Name:             params.Name,
 		Location:         null.StringFrom(params.Location).NullString,
 		Region:           null.StringFrom(params.Region).NullString,
-		OrganizationID:    sql.NullInt32{Int32: params.OrganizationID, Valid: params.OrganizationID != 0},
+		OrganizationID:   sql.NullInt32{Int32: params.OrganizationID, Valid: params.OrganizationID != 0},
 		CompanyType:      params.Companytype,
 		ID:               int32(params.ID),
 	})
