@@ -14,10 +14,11 @@ import (
 	"github.com/guregu/null"
 )
 
-type AggregatorController struct{}
+type GreenChampionController struct{}
 
 
-type CreateAggregatorParams struct {
+
+type CreateGreenChampionParams struct {
 	Name           string   `json:"name"  binding:"required"`
 	Location       models.Location `json:"location" binding:"required"`
 	Email          string   `json:"email" binding:"required"`
@@ -30,7 +31,7 @@ type CreateAggregatorParams struct {
 	Region         string   `json:"region"`
 }
 
-type UpdateAggregatorDataParams struct {
+type UpdateGreenChampionDataParams struct {
 	Location       models.Location `json:"location" binding:"required"`
 	Name           string   `json:"name"  binding:"required"`
 	OrganizationID int32    `json:"organization_id"`
@@ -45,13 +46,13 @@ type UpdateAggregatorDataParams struct {
 	Password       string   `json:"password"`
 }
 
-type UpdateAggregatorStatusParams struct {
+type UpdateGreenChampionStatusParams struct {
 	ID       int   `json:"id"  binding:"required"`
 	IsActive *bool `json:"status"  binding:"required"`
 }
 
-func (controller AggregatorController) InsertAggregator(context *gin.Context) {
-	var params CreateAggregatorParams
+func (controller GreenChampionController) InsertGreenChampion(context *gin.Context) {
+	var params CreateGreenChampionParams
 	err := context.ShouldBindJSON(&params)
 	if err != nil {
 		context.JSON(http.StatusUnprocessableEntity, gin.H{
@@ -108,13 +109,13 @@ func (controller AggregatorController) InsertAggregator(context *gin.Context) {
 		Lat:                          null.FloatFrom(params.Location.LatLng.Lat).NullFloat64,
 		Lng:                          null.FloatFrom(params.Location.LatLng.Lng).NullFloat64,
 		Region:                       null.StringFrom(params.Region).NullString,
-		CompanyType:                  2, //params.Companytype,
+		CompanyType:                  1, //params.Companytype,
 	})
 
 	if insertError != nil {
 		context.JSON(http.StatusUnprocessableEntity, gin.H{
 			"error":   true,
-			"message": "Failed to add aggregator",
+			"message": "Failed to add green champion",
 		})
 		return
 	}
@@ -125,10 +126,10 @@ func (controller AggregatorController) InsertAggregator(context *gin.Context) {
 			"first_name":             params.FirstName,
 			"last_name":              params.LastName,
 			"provider":               "email",
-			"role_id":                3,
+			"role_id":                7,
 			"user_organization_id":   params.OrganizationID,
 			"is_company_super_admin": true,
-			"user_type":              9,
+			"user_type":              10,
 			"user_company_id":        company.ID,
 			"password":               helpers.Functions{}.HashPassword(params.Password),
 			"created_at":             time.Now(),
@@ -142,13 +143,13 @@ func (controller AggregatorController) InsertAggregator(context *gin.Context) {
 	// If you want to return the created company as part of the response
 	context.JSON(http.StatusOK, gin.H{
 		"error":   false,
-		"message": "Successfully Created Aggregator",
+		"message": "Successfully Created Green champion",
 		"company": company, // Include the company details in the response
 	})
 }
 
-func (controller AggregatorController) GetAllAggregators(context *gin.Context) {
-	companies, err := gen.REPO.GetAllAggregators(context)
+func (controller GreenChampionController) GetAllGreenChampions(context *gin.Context) {
+	companies, err := gen.REPO.GetAllGreenChampions(context)
 	if err != nil {
 		context.JSON(http.StatusUnprocessableEntity, gin.H{
 			"error":   true,
@@ -163,7 +164,7 @@ func (controller AggregatorController) GetAllAggregators(context *gin.Context) {
 	})
 }
 
-func (controller AggregatorController) GetAggregator(context *gin.Context) {
+func (controller GreenChampionController) GetGreenChampion(context *gin.Context) {
 	id := context.Param("id")
 
 	id_, _ := strconv.ParseUint(id, 10, 32)
@@ -184,7 +185,7 @@ func (controller AggregatorController) GetAggregator(context *gin.Context) {
 	})
 }
 
-func (c AggregatorController) DeleteAggregator(context *gin.Context) {
+func (controller GreenChampionController) DeleteGreenChampion(context *gin.Context) {
 	id := context.Param("id")
 	id_, _ := strconv.ParseUint(id, 10, 32)
 	println("------------------------------", id_)
@@ -198,12 +199,12 @@ func (c AggregatorController) DeleteAggregator(context *gin.Context) {
 	}
 	context.JSON(http.StatusOK, gin.H{
 		"error":   false,
-		"message": "Company successfully deleted",
+		"message": "Green champion successfully deleted",
 	})
 }
 
-func (aggregatorController AggregatorController) UpdateAggregatorStatus(context *gin.Context) {
-	var params UpdateAggregatorStatusParams
+func (controller GreenChampionController) UpdateGreenChampionStatus(context *gin.Context) {
+	var params UpdateGreenChampionStatusParams
 	err := context.ShouldBindJSON(&params)
 	if err != nil {
 		context.JSON(http.StatusUnprocessableEntity, gin.H{
@@ -228,13 +229,13 @@ func (aggregatorController AggregatorController) UpdateAggregatorStatus(context 
 
 	context.JSON(http.StatusOK, gin.H{
 		"error":   false,
-		"message": "Successfully updated Aggregator",
+		"message": "Successfully updated Green champion",
 		"status":  params.IsActive, // Use the variable for the parsed status
 	})
 }
 
-func (aggregatorController AggregatorController) UpdateAggregator(context *gin.Context) {
-	var params UpdateAggregatorDataParams
+func (controller GreenChampionController) UpdateGreenChampion(context *gin.Context) {
+	var params UpdateGreenChampionDataParams
 	err := context.ShouldBindJSON(&params)
 	if err != nil {
 		context.JSON(http.StatusUnprocessableEntity, gin.H{
@@ -306,7 +307,7 @@ func (aggregatorController AggregatorController) UpdateAggregator(context *gin.C
 		Lng:            null.FloatFrom(params.Location.LatLng.Lng).NullFloat64,
 		CountryID:      country.ID,
 		OrganizationID: sql.NullInt32{Int32: params.OrganizationID, Valid: params.OrganizationID != 0},
-		CompanyType:    2,
+		CompanyType:    1,
 		ID:             int32(params.ID),
 	})
 	if updateError != nil {
@@ -320,8 +321,8 @@ func (aggregatorController AggregatorController) UpdateAggregator(context *gin.C
 	if params.Password == "" {
 		gen.REPO.UpdateUserFirstNameLastNameEmailRoleAndUserType(context, gen.UpdateUserFirstNameLastNameEmailRoleAndUserTypeParams{
 			Email:     null.StringFrom(params.Email).NullString,
-			RoleID:    sql.NullInt32{Int32: int32(3), Valid: true},
-			UserType:  sql.NullInt16{Int16: int16(9), Valid: true},
+			RoleID:    sql.NullInt32{Int32: int32(7), Valid: true},
+			UserType:  sql.NullInt16{Int16: int16(10), Valid: true},
 			FirstName: sql.NullString{String: params.FirstName, Valid: true},
 			LastName:  sql.NullString{String: params.LastName, Valid: true},
 			ID:        params.UserID,
@@ -330,8 +331,8 @@ func (aggregatorController AggregatorController) UpdateAggregator(context *gin.C
 	} else {
 		gen.REPO.UpdateUserFirstNameLastNameEmailRoleUserTypeAndPassword(context, gen.UpdateUserFirstNameLastNameEmailRoleUserTypeAndPasswordParams{
 			Email:     null.StringFrom(params.Email).NullString,
-			RoleID:    sql.NullInt32{Int32: int32(3), Valid: true},
-			UserType:  sql.NullInt16{Int16: int16(9), Valid: true},
+			RoleID:    sql.NullInt32{Int32: int32(7), Valid: true},
+			UserType:  sql.NullInt16{Int16: int16(19), Valid: true},
 			ID:        params.UserID,
 			FirstName: sql.NullString{String: params.FirstName, Valid: true},
 			LastName:  sql.NullString{String: params.LastName, Valid: true},
@@ -343,6 +344,6 @@ func (aggregatorController AggregatorController) UpdateAggregator(context *gin.C
 
 	context.JSON(http.StatusOK, gin.H{
 		"error":   false,
-		"message": "Successfully updated Company Data",
+		"message": "Successfully updated Green champion data",
 	})
 }

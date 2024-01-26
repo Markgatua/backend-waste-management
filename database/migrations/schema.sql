@@ -137,7 +137,7 @@ CREATE TABLE users(
     email VARCHAR(255) DEFAULT NULL UNIQUE,
     password TEXT DEFAULT NULL,
     avatar_url TEXT NULL,
-    user_type SMALLINT, -- 1 for TTNM ADMINS || 2 AGG GLOBAL ADMINS || 3 AGG ADMINS || 4 AGG USERS || 5 AGG COLLECTORS || 6 EXTERNAL COLLECTORS || 7 GREEN CHAMPIONS 8|| Green chamption global admin, || 9 Global aggregator admins
+    user_type SMALLINT, -- 1 for TTNM ADMINS || 2 AGG GLOBAL ADMINS || 3 AGG ADMINS || 4 AGG USERS || 5 AGG COLLECTORS || 6 EXTERNAL COLLECTORS || 7 GREEN CHAMPIONS 8|| Green chamption global admin, || 9 Global aggregator admins, ||10 green chamption super admin
     is_active BOOLEAN DEFAULT TRUE,
     calling_code VARCHAR(6) NULL,
     phone VARCHAR(15) NULL DEFAULT NULL,

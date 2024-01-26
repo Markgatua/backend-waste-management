@@ -148,14 +148,23 @@ func runProgram() {
 	router.PUT("aggregator/update", middlewares.PermissionBlockerMiddleware("edit_aggregator"), controllers.AggregatorController{}.UpdateAggregator)
 	//-------------------------------------------------------------------------------------------
 
-	//---------------------------Green Champion -------------------------------------------------
-	// router.POST("green_champion/add", middlewares.PermissionBlockerMiddleware("add_green_champion"), controllers.AggregatorController{}.InsertCompany)
-	// router.GET("green_champion", middlewares.PermissionBlockerMiddleware("view_green_champion"), controllers.AggregatorController{}.GetAllCompanies)
-	// router.GET("green_champion/:id", middlewares.PermissionBlockerMiddleware("view_green_champion"), controllers.AggregatorController{}.GetCompany)
-	// router.POST("green_champion/status", middlewares.PermissionBlockerMiddleware("edit_green_champion"), controllers.AggregatorController{}.UpdateCompanyStatus)
-	// router.DELETE("green_champion/delete/:id", middlewares.PermissionBlockerMiddleware("delete_green_champion"), controllers.AggregatorController{}.DeleteCompany)
-	// router.POST("green_champion/update", middlewares.PermissionBlockerMiddleware("edit_green_champion"), controllers.AggregatorController{}.UpdateCompany)
-	// //-------------------------------------------------------------------------------------------
+	//---------------------------Aggregator ------------------------------------------------------
+	router.POST("aggregator/add", middlewares.PermissionBlockerMiddleware("add_aggregator"), controllers.AggregatorController{}.InsertAggregator)
+	router.GET("aggregators", middlewares.PermissionBlockerMiddleware("view_aggregator"), controllers.AggregatorController{}.GetAllAggregators)
+	router.GET("aggregator/:id", middlewares.PermissionBlockerMiddleware("view_aggregator"), controllers.AggregatorController{}.GetAggregator)
+	router.PUT("aggregator/set_active_inactive_status", middlewares.PermissionBlockerMiddleware("edit_aggregator"), controllers.AggregatorController{}.UpdateAggregatorStatus)
+	router.DELETE("aggregator/delete/:id", middlewares.PermissionBlockerMiddleware("delete_aggregator"), controllers.AggregatorController{}.DeleteAggregator)
+	router.PUT("aggregator/update", middlewares.PermissionBlockerMiddleware("edit_aggregator"), controllers.AggregatorController{}.UpdateAggregator)
+	//-------------------------------------------------------------------------------------------
+
+	//---------------------------Green champion ------------------------------------------------------
+	router.POST("green_champion/add", middlewares.PermissionBlockerMiddleware("add_green_champion"), controllers.GreenChampionController{}.InsertAggregator)
+	router.GET("green_champions", middlewares.PermissionBlockerMiddleware("view_green_champion"), controllers.GreenChampionController{}.GetAllAggregators)
+	router.GET("green_champion/:id", middlewares.PermissionBlockerMiddleware("view_green_champion"), controllers.GreenChampionController{}.GetAggregator)
+	router.PUT("green_champion/set_active_inactive_status", middlewares.PermissionBlockerMiddleware("edit_green_champion"), controllers.GreenChampionController{}.UpdateAggregatorStatus)
+	router.DELETE("green_champion/delete/:id", middlewares.PermissionBlockerMiddleware("delete_green_champion"), controllers.GreenChampionController{}.DeleteAggregator)
+	router.PUT("green_champion/update", middlewares.PermissionBlockerMiddleware("edit_green_champion"), controllers.GreenChampionController{}.UpdateAggregator)
+	//-------------------------------------------------------------------------------------------
 
 	//---------------------------Roles ------------------------------------------------------
 	// router.GET("roles", rolesController.GetRoles)

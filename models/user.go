@@ -31,3 +31,15 @@ type User struct {
 	UserType                null.Int    `db:"user_type" json:"-"`
 	LastLogin               null.Time   `db:"last_login" json:"last_login"`
 }
+
+
+type Location struct {
+	LatLng                   LatLng `json:"latLng"`
+	Country                  string `json:"country"`
+	AdministrativeAreaLevel1 string `json:"administrativeAreaLevel1"`
+	Location                 string `json:"location"`
+}
+type LatLng struct {
+	Lat float64 `json:"lat"`
+	Lng float64 `json:"lng"`
+}
