@@ -46,6 +46,7 @@ type Querier interface {
 	GetChildrenWasteTypes(ctx context.Context, parentID sql.NullInt32) ([]GetChildrenWasteTypesRow, error)
 	GetCompany(ctx context.Context, id int32) (GetCompanyRow, error)
 	GetCountryBeCountryCode(ctx context.Context, countryCode string) ([]Country, error)
+	GetCountryByName(ctx context.Context, country string) (Country, error)
 	GetDuplicateCompanies(ctx context.Context, arg GetDuplicateCompaniesParams) ([]Company, error)
 	GetDuplicateCompaniesWithoutID(ctx context.Context, arg GetDuplicateCompaniesWithoutIDParams) ([]Company, error)
 	GetDuplicateOrganization(ctx context.Context, arg GetDuplicateOrganizationParams) ([]Organization, error)

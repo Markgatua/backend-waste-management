@@ -187,3 +187,33 @@ func (q *Queries) GetCountryBeCountryCode(ctx context.Context, countryCode strin
 	}
 	return items, nil
 }
+
+const getCountryByName = `-- name: GetCountryByName :one
+select id, name, currency_code, capital, citizenship, country_code, currency, currency_sub_unit, currency_symbol, currency_decimals, full_name, iso_3166_2, iso_3166_3, region_code, sub_region_code, eea, calling_code, flag from countries where name ilike $1
+`
+
+func (q *Queries) GetCountryByName(ctx context.Context, country string) (Country, error) {
+	row := q.db.QueryRowContext(ctx, getCountryByName, country)
+	var i Country
+	err := row.Scan(
+		&i.ID,
+		&i.Name,
+		&i.CurrencyCode,
+		&i.Capital,
+		&i.Citizenship,
+		&i.CountryCode,
+		&i.Currency,
+		&i.CurrencySubUnit,
+		&i.CurrencySymbol,
+		&i.CurrencyDecimals,
+		&i.FullName,
+		&i.Iso31662,
+		&i.Iso31663,
+		&i.RegionCode,
+		&i.SubRegionCode,
+		&i.Eea,
+		&i.CallingCode,
+		&i.Flag,
+	)
+	return i, err
+}

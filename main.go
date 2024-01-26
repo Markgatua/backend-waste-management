@@ -66,6 +66,7 @@ func runProgram() {
 		AllowedHeaders:   []string{"*"},
 		AllowedMethods:   []string{"PUT", "POST", "DELETE", "OPTIONS", "GET", "PATCH"},
 		AllowCredentials: true,
+
 		// Enable Debugging for testing, consider disabling in production
 		Debug: true,
 	})

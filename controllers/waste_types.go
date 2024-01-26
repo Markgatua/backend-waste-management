@@ -41,7 +41,6 @@ func (wasteGroupsController WasteTypesController) InsertWasteGroup(context *gin.
 		return
 	}
 
-
 	wasteType, insertError := gen.REPO.InsertWasteType(context, gen.InsertWasteTypeParams{
 		Name:     params.Name,
 		ParentID: sql.NullInt32{Int32: params.ParentID, Valid: params.ParentID != 0},
@@ -99,7 +98,7 @@ func (wasteGroupsController WasteTypesController) GetAllWasteTypes(context *gin.
 
 		children := []Result{}
 		fmt.Println(v.ParentID.Int32)
-		childrenWasteTypes, _ := gen.REPO.GetChildrenWasteTypes(context, sql.NullInt32{Int32: v.ID,Valid: true})
+		childrenWasteTypes, _ := gen.REPO.GetChildrenWasteTypes(context, sql.NullInt32{Int32: v.ID, Valid: true})
 		for _, x := range childrenWasteTypes {
 			child := Result{}
 			child.ID = x.ID

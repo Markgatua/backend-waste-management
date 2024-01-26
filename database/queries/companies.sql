@@ -5,24 +5,26 @@ SELECT
   companies.*,
   organizations.name AS organization_name,
   uploads.path as file_path,
-  counties.name AS county
+  countries.name AS country_name
+
 FROM companies
 left JOIN uploads on uploads.item_id=companies.id and uploads.related_table='companies'
 LEFT JOIN organizations ON organizations.id = companies.organization_id
-LEFT JOIN counties ON counties.id = companies.county_id
+LEFT JOIN countries ON countries.id = companies.country_id
 WHERE companies.company_type=2;
+
 
 -- name: GetAllGreenChampions :many
 SELECT
   companies.*,
   organizations.name AS organization_name,
   uploads.path as file_path,
-  counties.name AS county
+  countries.name AS country_name
 FROM companies
 left JOIN uploads on uploads.item_id=companies.id and uploads.related_table='companies'
 LEFT JOIN organizations ON organizations.id = companies.organization_id
-LEFT JOIN counties ON counties.id = companies.county_id
-WHERE companies.company_type=2;
+LEFT JOIN countries ON countries.id = companies.country_id
+WHERE companies.company_type=1;
 
 -- name: GetCompany :one
 SELECT
@@ -43,29 +45,33 @@ update companies set is_active = $2 where id = $1;
 -- name: InsertCompany :one
 insert into
     companies(
-        county_id,
-        physical_position,
+        country_id,
+        region,
         name,
+        administrative_level_1_location,
         company_type,
         organization_id,
-        region,
         location,
-        is_active
+        is_active,
+        lat,
+        lng
     )
-values ($1, $2, $3, $4, $5, $6, $7, $8) returning *;
+values ($1, $2, $3, $4, $5, $6, $7, $8,$9,$10) returning *;
 
 -- name: UpdateCompany :exec
 update companies
 set
-    county_id = $1,
-    physical_position = $2,
-    name = $3,
-    company_type = $4,
-    organization_id = $5,
-    region = $6,
-    location = $7,
-    is_active = $8
-where id = $9;
+    country_id = $1,
+    name = $2,
+    company_type = $3,
+    organization_id = $4,
+    region = $5,
+    location = $6,
+    is_active = $7,
+    lat=$8,
+    lng=$9,
+    administrative_level_1_location=$10
+where id = $11;
 
 -- name: GetDuplicateCompanies :many
 select *

@@ -301,8 +301,9 @@ func (c OrgnizationController) UpdateOrganization(context *gin.Context) {
 			LastName:  sql.NullString{String: params.LastName, Valid: true},
 			Password:  null.StringFrom(helpers.Functions{}.HashPassword(params.Password)).NullString,
 		})
-
 	}
+
+	UploadController{}.SaveToUploadsTable(params.LogoPath, "organizations", int32(params.ID))
 
 	if updateError != nil {
 		context.JSON(http.StatusUnprocessableEntity, gin.H{

@@ -10,7 +10,7 @@ CREATE TABLE roles (
 
 CREATE TABLE uploads(
     id SERIAL PRIMARY KEY,
-    item_id INTEGER, 
+    item_id INTEGER,
     type VARCHAR(100),
     path TEXT,
     related_table VARCHAR(150),
@@ -102,16 +102,18 @@ CREATE TABLE main_organization(
 CREATE TABLE companies (
   id SERIAL PRIMARY KEY,
   name VARCHAR(255) NOT NULL,
+  country_id INTEGER NOT NULL,
   company_type INTEGER NOT NULL,  -- 1 FOR GREEN CORPORATES/CHAMPIONS || 2 FOR AGGREGATOR COMPANIES
   organization_id INTEGER NULL,
-  county_id INTEGER NULL,
-  physical_position VARCHAR(255) NOT NULL,
-  region VARCHAR(255) NULL,
-  location VARCHAR(255),
+  region VARCHAR NULL, --Specific region this company is in
+  location VARCHAR(255) NULL, -- the location of this company ie citadel muthithi road
+  administrative_level_1_location VARCHAR(255) NULL, -- in kenya, this will be county, in uganda it will be a different value , ie Nairobi county
+  lat float NULL,
+  lng float NULL,
   is_active BOOLEAN NOT NULL DEFAULT TRUE,
   created_at TIMESTAMP NOT NULL DEFAULT NOW(),
   FOREIGN Key (organization_id) REFERENCES organizations(id),
-  FOREIGN Key (county_id) REFERENCES counties(id)
+  FOREIGN Key (country_id) REFERENCES countries(id)
 );
 
 ALTER TABLE companies ADD CONSTRAINT check_company_type CHECK (company_type IN (1,2)); -- make sure company type is either 1 or 2
@@ -185,7 +187,7 @@ CREATE TABLE waste_types (
   created_at TIMESTAMP NOT NULL DEFAULT NOW()
 );
 
-CREATE UNIQUE INDEX waste_types_unique_name_idx on waste_types (LOWER(name));  
+CREATE UNIQUE INDEX waste_types_unique_name_idx on waste_types (LOWER(name));
 
 
 CREATE TABLE waste_collections (
