@@ -102,7 +102,7 @@ func (controller AggregatorController) InsertAggregator(context *gin.Context) {
 		IsActive:         *params.IsActive,
 		OrganizationID:   sql.NullInt32{Int32: params.OrganizationID, Valid: params.OrganizationID != 0},
 		Region:           null.StringFrom(params.Region).NullString,
-		CompanyType:      params.Companytype,
+		CompanyType:      2,//params.Companytype,
 	})
 
 	if insertError != nil {
