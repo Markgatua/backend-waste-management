@@ -112,6 +112,10 @@ const getAllGreenChampions = `-- name: GetAllGreenChampions :many
 SELECT
     companies.id, companies.name, companies.country_id, companies.company_type, companies.organization_id, companies.region, companies.location, companies.administrative_level_1_location, companies.lat, companies.lng, companies.is_active, companies.created_at,
     organizations.name AS organization_name,
+     users.first_name,
+    users.id as user_id,
+    users.last_name,
+    users.email,
     uploads.path as file_path,
     countries.name AS country_name
 FROM
@@ -119,6 +123,7 @@ FROM
     left JOIN uploads on uploads.item_id = companies.id
     and uploads.related_table = 'companies'
     LEFT JOIN organizations ON organizations.id = companies.organization_id
+        left join users on users.user_company_id = companies.id and users.is_company_super_admin = true
     LEFT JOIN countries ON countries.id = companies.country_id
 WHERE
     companies.company_type = 1
@@ -138,6 +143,10 @@ type GetAllGreenChampionsRow struct {
 	IsActive                     bool            `json:"is_active"`
 	CreatedAt                    time.Time       `json:"created_at"`
 	OrganizationName             sql.NullString  `json:"organization_name"`
+	FirstName                    sql.NullString  `json:"first_name"`
+	UserID                       sql.NullInt32   `json:"user_id"`
+	LastName                     sql.NullString  `json:"last_name"`
+	Email                        sql.NullString  `json:"email"`
 	FilePath                     sql.NullString  `json:"file_path"`
 	CountryName                  sql.NullString  `json:"country_name"`
 }
@@ -165,6 +174,10 @@ func (q *Queries) GetAllGreenChampions(ctx context.Context) ([]GetAllGreenChampi
 			&i.IsActive,
 			&i.CreatedAt,
 			&i.OrganizationName,
+			&i.FirstName,
+			&i.UserID,
+			&i.LastName,
+			&i.Email,
 			&i.FilePath,
 			&i.CountryName,
 		); err != nil {
