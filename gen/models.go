@@ -156,6 +156,7 @@ type User struct {
 	UserOrganizationID       sql.NullInt32  `json:"user_organization_id"`
 	IsMainOrganizationUser   bool           `json:"is_main_organization_user"`
 	IsOrganizationSuperAdmin bool           `json:"is_organization_super_admin"`
+	IsCompanySuperAdmin      bool           `json:"is_company_super_admin"`
 	Email                    sql.NullString `json:"email"`
 	Password                 sql.NullString `json:"password"`
 	AvatarUrl                sql.NullString `json:"avatar_url"`

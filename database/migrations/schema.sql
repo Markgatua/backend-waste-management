@@ -132,6 +132,7 @@ CREATE TABLE users(
     FOREIGN Key (user_organization_id) REFERENCES organizations(id),
     is_main_organization_user BOOLEAN DEFAULT false not null,
     is_organization_super_admin BOOLEAN DEFAULT false not null,
+    is_company_super_admin BOOLEAN DEFAULT false not null,
 
     email VARCHAR(255) DEFAULT NULL UNIQUE,
     password TEXT DEFAULT NULL,

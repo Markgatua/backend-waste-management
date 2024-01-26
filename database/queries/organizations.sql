@@ -1,7 +1,9 @@
 -- regions.sql
 
 -- name: GetAllOrganizations :many
-SELECT organizations.*,uploads.path as file_path,users.first_name,users.id as user_id,users.last_name,users.email,countries.id as country_id , countries.name as country from organizations 
+SELECT organizations.*,uploads.path as file_path,
+users.first_name,users.id as user_id,users.last_name,users.email,
+countries.id as country_id , countries.name as country from organizations 
 left join countries on countries.id=organizations.country_id
 left join users on users.user_organization_id = organizations.id and users.is_organization_super_admin=true
 left join uploads on uploads.item_id=organizations.id and uploads.related_table='organizations';

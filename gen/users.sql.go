@@ -179,7 +179,7 @@ func (q *Queries) GetAllUsers(ctx context.Context) ([]GetAllUsersRow, error) {
 }
 
 const getMainOrganizationUser = `-- name: GetMainOrganizationUser :one
-select id, first_name, last_name, provider, role_id, user_company_id, user_organization_id, is_main_organization_user, is_organization_super_admin, email, password, avatar_url, user_type, is_active, calling_code, phone, phone_confirmed_at, confirmed_at, confirmation_token, confirmation_sent_at, recovery_token, recovery_sent_at, last_login, created_at, updated_at from users where id = $1
+select id, first_name, last_name, provider, role_id, user_company_id, user_organization_id, is_main_organization_user, is_organization_super_admin, is_company_super_admin, email, password, avatar_url, user_type, is_active, calling_code, phone, phone_confirmed_at, confirmed_at, confirmation_token, confirmation_sent_at, recovery_token, recovery_sent_at, last_login, created_at, updated_at from users where id = $1
 `
 
 func (q *Queries) GetMainOrganizationUser(ctx context.Context, id int32) (User, error) {
@@ -195,6 +195,7 @@ func (q *Queries) GetMainOrganizationUser(ctx context.Context, id int32) (User, 
 		&i.UserOrganizationID,
 		&i.IsMainOrganizationUser,
 		&i.IsOrganizationSuperAdmin,
+		&i.IsCompanySuperAdmin,
 		&i.Email,
 		&i.Password,
 		&i.AvatarUrl,
@@ -216,7 +217,7 @@ func (q *Queries) GetMainOrganizationUser(ctx context.Context, id int32) (User, 
 }
 
 const getMainOrganizationUserByEmail = `-- name: GetMainOrganizationUserByEmail :one
-select id, first_name, last_name, provider, role_id, user_company_id, user_organization_id, is_main_organization_user, is_organization_super_admin, email, password, avatar_url, user_type, is_active, calling_code, phone, phone_confirmed_at, confirmed_at, confirmation_token, confirmation_sent_at, recovery_token, recovery_sent_at, last_login, created_at, updated_at from users where email = $1
+select id, first_name, last_name, provider, role_id, user_company_id, user_organization_id, is_main_organization_user, is_organization_super_admin, is_company_super_admin, email, password, avatar_url, user_type, is_active, calling_code, phone, phone_confirmed_at, confirmed_at, confirmation_token, confirmation_sent_at, recovery_token, recovery_sent_at, last_login, created_at, updated_at from users where email = $1
 `
 
 func (q *Queries) GetMainOrganizationUserByEmail(ctx context.Context, email sql.NullString) (User, error) {
@@ -232,6 +233,7 @@ func (q *Queries) GetMainOrganizationUserByEmail(ctx context.Context, email sql.
 		&i.UserOrganizationID,
 		&i.IsMainOrganizationUser,
 		&i.IsOrganizationSuperAdmin,
+		&i.IsCompanySuperAdmin,
 		&i.Email,
 		&i.Password,
 		&i.AvatarUrl,
@@ -253,7 +255,7 @@ func (q *Queries) GetMainOrganizationUserByEmail(ctx context.Context, email sql.
 }
 
 const getUserWithEmailWithoutID = `-- name: GetUserWithEmailWithoutID :many
-select id, first_name, last_name, provider, role_id, user_company_id, user_organization_id, is_main_organization_user, is_organization_super_admin, email, password, avatar_url, user_type, is_active, calling_code, phone, phone_confirmed_at, confirmed_at, confirmation_token, confirmation_sent_at, recovery_token, recovery_sent_at, last_login, created_at, updated_at from users where email = $1 and id != $2
+select id, first_name, last_name, provider, role_id, user_company_id, user_organization_id, is_main_organization_user, is_organization_super_admin, is_company_super_admin, email, password, avatar_url, user_type, is_active, calling_code, phone, phone_confirmed_at, confirmed_at, confirmation_token, confirmation_sent_at, recovery_token, recovery_sent_at, last_login, created_at, updated_at from users where email = $1 and id != $2
 `
 
 type GetUserWithEmailWithoutIDParams struct {
@@ -280,6 +282,7 @@ func (q *Queries) GetUserWithEmailWithoutID(ctx context.Context, arg GetUserWith
 			&i.UserOrganizationID,
 			&i.IsMainOrganizationUser,
 			&i.IsOrganizationSuperAdmin,
+			&i.IsCompanySuperAdmin,
 			&i.Email,
 			&i.Password,
 			&i.AvatarUrl,
@@ -311,7 +314,7 @@ func (q *Queries) GetUserWithEmailWithoutID(ctx context.Context, arg GetUserWith
 }
 
 const getUsersWithRole = `-- name: GetUsersWithRole :many
-select users.id, users.first_name, users.last_name, users.provider, users.role_id, users.user_company_id, users.user_organization_id, users.is_main_organization_user, users.is_organization_super_admin, users.email, users.password, users.avatar_url, users.user_type, users.is_active, users.calling_code, users.phone, users.phone_confirmed_at, users.confirmed_at, users.confirmation_token, users.confirmation_sent_at, users.recovery_token, users.recovery_sent_at, users.last_login, users.created_at, users.updated_at, roles.name
+select users.id, users.first_name, users.last_name, users.provider, users.role_id, users.user_company_id, users.user_organization_id, users.is_main_organization_user, users.is_organization_super_admin, users.is_company_super_admin, users.email, users.password, users.avatar_url, users.user_type, users.is_active, users.calling_code, users.phone, users.phone_confirmed_at, users.confirmed_at, users.confirmation_token, users.confirmation_sent_at, users.recovery_token, users.recovery_sent_at, users.last_login, users.created_at, users.updated_at, roles.name
 from users
     INNER JOIN roles ON users.role_id = roles.id
 `
@@ -326,6 +329,7 @@ type GetUsersWithRoleRow struct {
 	UserOrganizationID       sql.NullInt32  `json:"user_organization_id"`
 	IsMainOrganizationUser   bool           `json:"is_main_organization_user"`
 	IsOrganizationSuperAdmin bool           `json:"is_organization_super_admin"`
+	IsCompanySuperAdmin      bool           `json:"is_company_super_admin"`
 	Email                    sql.NullString `json:"email"`
 	Password                 sql.NullString `json:"password"`
 	AvatarUrl                sql.NullString `json:"avatar_url"`
@@ -364,6 +368,7 @@ func (q *Queries) GetUsersWithRole(ctx context.Context) ([]GetUsersWithRoleRow, 
 			&i.UserOrganizationID,
 			&i.IsMainOrganizationUser,
 			&i.IsOrganizationSuperAdmin,
+			&i.IsCompanySuperAdmin,
 			&i.Email,
 			&i.Password,
 			&i.AvatarUrl,

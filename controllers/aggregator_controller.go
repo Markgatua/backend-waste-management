@@ -36,7 +36,7 @@ type CreateAggregatorParams struct {
 	OrganizationID int32    `json:"organization_id"`
 	LogoPath       string   `json:"logo_path"`
 	IsActive       *bool    `json:"is_active"  binding:"required"`
-	Region         string   `json:"region"  binding:"required"`
+	Region         string   `json:"region"`
 }
 
 type UpdateAggregatorDataParams struct {
@@ -46,7 +46,7 @@ type UpdateAggregatorDataParams struct {
 	IsActive       *bool    `json:"is_active"  binding:"required"`
 	ID             int64    `json:"id"  binding:"required"`
 	LogoPath       string   `json:"logo_path"`
-	Region         string   `json:"region"  binding:"required"`
+	Region         string   `json:"region"`
 	UserID         int32    `json:"user_id" binding:"required"`
 	Email          string   `json:"email" binding:"required"`
 	FirstName      string   `json:"first_name" binding:"required"`
@@ -128,20 +128,20 @@ func (controller AggregatorController) InsertAggregator(context *gin.Context) {
 		return
 	}
 
-	_, err = gen.REPO.DB.NamedExec(`INSERT INTO users (email,first_name,last_name,provider,role_id,user_organization_id,user_type,created_at,updated_at,password,is_organization_super_admin,user_company_id) VALUES (:email,:first_name,:last_name,:provider,:role_id,:user_organization_id,:user_type,:created_at,:updated_at,:password,:is_organization_super_admin,:user_company_id)`,
+	_, err = gen.REPO.DB.NamedExec(`INSERT INTO users (email,first_name,last_name,provider,role_id,user_organization_id,user_type,created_at,updated_at,password,user_company_id,is_company_super_admin) VALUES (:email,:first_name,:last_name,:provider,:role_id,:user_organization_id,:user_type,:created_at,:updated_at,:password,:user_company_id,:is_company_super_admin)`,
 		map[string]interface{}{
-			"email":                       params.Email,
-			"first_name":                  params.FirstName,
-			"last_name":                   params.LastName,
-			"provider":                    "email",
-			"role_id":                     3,
-			"user_organization_id":        params.OrganizationID,
-			"is_organization_super_admin": true,
-			"user_type":                   9,
-			"user_company_id":             company.ID,
-			"password":                    helpers.Functions{}.HashPassword(params.Password),
-			"created_at":                  time.Now(),
-			"updated_at":                  time.Now(),
+			"email":                  params.Email,
+			"first_name":             params.FirstName,
+			"last_name":              params.LastName,
+			"provider":               "email",
+			"role_id":                3,
+			"user_organization_id":   params.OrganizationID,
+			"is_company_super_admin": true,
+			"user_type":              9,
+			"user_company_id":        company.ID,
+			"password":               helpers.Functions{}.HashPassword(params.Password),
+			"created_at":             time.Now(),
+			"updated_at":             time.Now(),
 		})
 
 	if params.LogoPath != "" {

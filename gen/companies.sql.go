@@ -12,7 +12,7 @@ import (
 )
 
 const deleteCompany = `-- name: DeleteCompany :exec
-delete from companies where id=$1
+delete from companies where id = $1
 `
 
 func (q *Queries) DeleteCompany(ctx context.Context, id int32) error {
@@ -23,16 +23,23 @@ func (q *Queries) DeleteCompany(ctx context.Context, id int32) error {
 const getAllAggregators = `-- name: GetAllAggregators :many
 
 SELECT
-  companies.id, companies.name, companies.country_id, companies.company_type, companies.organization_id, companies.region, companies.location, companies.administrative_level_1_location, companies.lat, companies.lng, companies.is_active, companies.created_at,
-  organizations.name AS organization_name,
-  uploads.path as file_path,
-  countries.name AS country_name
+    companies.id, companies.name, companies.country_id, companies.company_type, companies.organization_id, companies.region, companies.location, companies.administrative_level_1_location, companies.lat, companies.lng, companies.is_active, companies.created_at,
+    organizations.name AS organization_name,
+    users.first_name,
+    users.id as user_id,
+    users.last_name,
+    users.email,
+    uploads.path as file_path,
+    countries.name AS country_name
 
-FROM companies
-left JOIN uploads on uploads.item_id=companies.id and uploads.related_table='companies'
-LEFT JOIN organizations ON organizations.id = companies.organization_id
-LEFT JOIN countries ON countries.id = companies.country_id
-WHERE companies.company_type=2
+FROM
+    companies
+    left JOIN uploads on uploads.item_id = companies.id and uploads.related_table = 'companies'
+    LEFT JOIN organizations ON organizations.id = companies.organization_id
+    left join users on users.user_company_id = companies.id and users.is_company_super_admin = true
+    LEFT JOIN countries ON countries.id = companies.country_id
+WHERE
+    companies.company_type = 2
 `
 
 type GetAllAggregatorsRow struct {
@@ -49,6 +56,10 @@ type GetAllAggregatorsRow struct {
 	IsActive                     bool            `json:"is_active"`
 	CreatedAt                    time.Time       `json:"created_at"`
 	OrganizationName             sql.NullString  `json:"organization_name"`
+	FirstName                    sql.NullString  `json:"first_name"`
+	UserID                       sql.NullInt32   `json:"user_id"`
+	LastName                     sql.NullString  `json:"last_name"`
+	Email                        sql.NullString  `json:"email"`
 	FilePath                     sql.NullString  `json:"file_path"`
 	CountryName                  sql.NullString  `json:"country_name"`
 }
@@ -77,6 +88,10 @@ func (q *Queries) GetAllAggregators(ctx context.Context) ([]GetAllAggregatorsRow
 			&i.IsActive,
 			&i.CreatedAt,
 			&i.OrganizationName,
+			&i.FirstName,
+			&i.UserID,
+			&i.LastName,
+			&i.Email,
 			&i.FilePath,
 			&i.CountryName,
 		); err != nil {
@@ -95,15 +110,18 @@ func (q *Queries) GetAllAggregators(ctx context.Context) ([]GetAllAggregatorsRow
 
 const getAllGreenChampions = `-- name: GetAllGreenChampions :many
 SELECT
-  companies.id, companies.name, companies.country_id, companies.company_type, companies.organization_id, companies.region, companies.location, companies.administrative_level_1_location, companies.lat, companies.lng, companies.is_active, companies.created_at,
-  organizations.name AS organization_name,
-  uploads.path as file_path,
-  countries.name AS country_name
-FROM companies
-left JOIN uploads on uploads.item_id=companies.id and uploads.related_table='companies'
-LEFT JOIN organizations ON organizations.id = companies.organization_id
-LEFT JOIN countries ON countries.id = companies.country_id
-WHERE companies.company_type=1
+    companies.id, companies.name, companies.country_id, companies.company_type, companies.organization_id, companies.region, companies.location, companies.administrative_level_1_location, companies.lat, companies.lng, companies.is_active, companies.created_at,
+    organizations.name AS organization_name,
+    uploads.path as file_path,
+    countries.name AS country_name
+FROM
+    companies
+    left JOIN uploads on uploads.item_id = companies.id
+    and uploads.related_table = 'companies'
+    LEFT JOIN organizations ON organizations.id = companies.organization_id
+    LEFT JOIN countries ON countries.id = companies.country_id
+WHERE
+    companies.company_type = 1
 `
 
 type GetAllGreenChampionsRow struct {
@@ -164,17 +182,13 @@ func (q *Queries) GetAllGreenChampions(ctx context.Context) ([]GetAllGreenChampi
 }
 
 const getCompany = `-- name: GetCompany :one
-SELECT
-  companies.id, companies.name, companies.country_id, companies.company_type, companies.organization_id, companies.region, companies.location, companies.administrative_level_1_location, companies.lat, companies.lng, companies.is_active, companies.created_at,
-  organizations.name AS organization_name,
-  counties.name AS county
+SELECT companies.id, companies.name, companies.country_id, companies.company_type, companies.organization_id, companies.region, companies.location, companies.administrative_level_1_location, companies.lat, companies.lng, companies.is_active, companies.created_at, organizations.name AS organization_name, counties.name AS county
 FROM
-  companies
-LEFT JOIN
-  organizations ON organizations.id = companies.organization_id
-LEFT JOIN
-  counties ON counties.id = companies.county_id
-WHERE companies.id = $1
+    companies
+    LEFT JOIN organizations ON organizations.id = companies.organization_id
+    LEFT JOIN counties ON counties.id = companies.county_id
+WHERE
+    companies.id = $1
 `
 
 type GetCompanyRow struct {
@@ -217,11 +231,7 @@ func (q *Queries) GetCompany(ctx context.Context, id int32) (GetCompanyRow, erro
 }
 
 const getDuplicateCompanies = `-- name: GetDuplicateCompanies :many
-select id, name, country_id, company_type, organization_id, region, location, administrative_level_1_location, lat, lng, is_active, created_at
-from companies
-where
-    lower(name) = $1
-    and organization_id = $2
+select id, name, country_id, company_type, organization_id, region, location, administrative_level_1_location, lat, lng, is_active, created_at from companies where lower(name) = $1 and organization_id = $2
 `
 
 type GetDuplicateCompaniesParams struct {
@@ -269,7 +279,7 @@ const getDuplicateCompaniesWithoutID = `-- name: GetDuplicateCompaniesWithoutID 
 select id, name, country_id, company_type, organization_id, region, location, administrative_level_1_location, lat, lng, is_active, created_at
 from companies
 where
-    id = $1
+    id != $1
     and lower(name) = $2
     and organization_id = $3
 `
@@ -318,19 +328,12 @@ func (q *Queries) GetDuplicateCompaniesWithoutID(ctx context.Context, arg GetDup
 
 const insertCompany = `-- name: InsertCompany :one
 insert into
-    companies(
-        country_id,
-        region,
-        name,
-        administrative_level_1_location,
-        company_type,
-        organization_id,
-        location,
-        is_active,
-        lat,
-        lng
+    companies (
+        country_id, region, name, administrative_level_1_location, company_type, organization_id, location, is_active, lat, lng
     )
-values ($1, $2, $3, $4, $5, $6, $7, $8,$9,$10) returning id, name, country_id, company_type, organization_id, region, location, administrative_level_1_location, lat, lng, is_active, created_at
+values (
+        $1, $2, $3, $4, $5, $6, $7, $8, $9, $10
+    ) returning id, name, country_id, company_type, organization_id, region, location, administrative_level_1_location, lat, lng, is_active, created_at
 `
 
 type InsertCompanyParams struct {
@@ -387,10 +390,11 @@ set
     region = $5,
     location = $6,
     is_active = $7,
-    lat=$8,
-    lng=$9,
-    administrative_level_1_location=$10
-where id = $11
+    lat = $8,
+    lng = $9,
+    administrative_level_1_location = $10
+where
+    id = $11
 `
 
 type UpdateCompanyParams struct {
