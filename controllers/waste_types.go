@@ -102,6 +102,7 @@ func (wasteGroupsController WasteTypesController) GetAllWasteTypes(context *gin.
 		for _, v := range wasteTypes {
 			result := Result{}
 			result.Name = v.Name
+			result.ID=v.ID
 			result.IsActive = v.IsActive
 			result.ParentID = v.ParentID
 			result.CreatedAt = v.CreatedAt
@@ -112,6 +113,7 @@ func (wasteGroupsController WasteTypesController) GetAllWasteTypes(context *gin.
 				one, err := gen.REPO.GetOneWasteType(context, v.ParentID.Int32)
 				if err == nil {
 					result_ := Parent{}
+					result_.ID=one.ID
 					result_.Name = one.Name
 					result_.IsActive = one.IsActive
 					result_.ParentID = one.ParentID
