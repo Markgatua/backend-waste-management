@@ -48,6 +48,7 @@ FROM
     LEFT JOIN counties ON counties.id = companies.county_id
 WHERE
     companies.id = $1;
+   
 
 -- name: UpdateCompanyStatus :exec
 update companies set is_active = $2 where id = $1;

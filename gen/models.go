@@ -12,10 +12,10 @@ import (
 )
 
 type ChampionAggregatorAssignment struct {
-	ID          int32         `json:"id"`
-	ChampionID  sql.NullInt32 `json:"champion_id"`
-	CollectorID sql.NullInt32 `json:"collector_id"`
-	CreatedAt   time.Time     `json:"created_at"`
+	ID          int32     `json:"id"`
+	ChampionID  int32     `json:"champion_id"`
+	CollectorID int32     `json:"collector_id"`
+	CreatedAt   time.Time `json:"created_at"`
 }
 
 type Company struct {

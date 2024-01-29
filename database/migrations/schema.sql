@@ -172,9 +172,9 @@ CREATE TABLE email_verification_token (
 -- Create "champion_assigned_aggregator" table
 CREATE TABLE champion_aggregator_assignments (
   id SERIAL PRIMARY KEY,
-  champion_id INTEGER,
+  champion_id INTEGER NOT NULL,
   FOREIGN Key (champion_id) REFERENCES companies(id),
-  collector_id INTEGER,
+  collector_id INTEGER NOT NULL,
   FOREIGN Key (collector_id) REFERENCES companies(id),
   created_at TIMESTAMP NOT NULL DEFAULT NOW()
 );

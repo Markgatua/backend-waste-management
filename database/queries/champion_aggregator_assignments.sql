@@ -52,3 +52,9 @@ delete from champion_aggregator_assignments where id=$1;
 
 -- name: GetAssignedCollectorsToGreenChampion :many
 select * from champion_aggregator_assignments where champion_id=$1;
+
+-- name: RemoveAggrigatorsAssignedFromGreenChampions :exec
+delete from champion_aggregator_assignments where champion_id =$1;
+
+-- name: AssignCollectorsToGreenChampion :exec
+insert into champion_aggregator_assignments(champion_id,collector_id) VALUES($1,$2);

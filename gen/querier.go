@@ -12,6 +12,7 @@ import (
 type Querier interface {
 	ActivateRole(ctx context.Context, roleID int32) error
 	AssignChampionToCollector(ctx context.Context, arg AssignChampionToCollectorParams) (ChampionAggregatorAssignment, error)
+	AssignCollectorsToGreenChampion(ctx context.Context, arg AssignCollectorsToGreenChampionParams) error
 	AssignPermission(ctx context.Context, arg AssignPermissionParams) error
 	AssignPermissionToRole(ctx context.Context, arg AssignPermissionToRoleParams) error
 	CheckSubCountiesDuplicate(ctx context.Context, name string) (int64, error)
@@ -31,7 +32,7 @@ type Querier interface {
 	GetAllAggregators(ctx context.Context) ([]GetAllAggregatorsRow, error)
 	// champion_aggregator_assignments.sql
 	GetAllChampionCollectorsAssignments(ctx context.Context) ([]GetAllChampionCollectorsAssignmentsRow, error)
-	GetAllChampionsForACollector(ctx context.Context, collectorID sql.NullInt32) ([]GetAllChampionsForACollectorRow, error)
+	GetAllChampionsForACollector(ctx context.Context, collectorID int32) ([]GetAllChampionsForACollectorRow, error)
 	GetAllCountries(ctx context.Context) ([]Country, error)
 	GetAllGreenChampions(ctx context.Context) ([]GetAllGreenChampionsRow, error)
 	GetAllMainOrganizationUsers(ctx context.Context) ([]GetAllMainOrganizationUsersRow, error)
@@ -42,7 +43,7 @@ type Querier interface {
 	GetAllUsers(ctx context.Context) ([]GetAllUsersRow, error)
 	// waste_types.sql
 	GetAllWasteTypes(ctx context.Context) ([]GetAllWasteTypesRow, error)
-	GetAssignedCollectorsToGreenChampion(ctx context.Context, championID sql.NullInt32) ([]ChampionAggregatorAssignment, error)
+	GetAssignedCollectorsToGreenChampion(ctx context.Context, championID int32) ([]ChampionAggregatorAssignment, error)
 	GetChildrenWasteTypes(ctx context.Context, parentID sql.NullInt32) ([]GetChildrenWasteTypesRow, error)
 	GetCompany(ctx context.Context, id int32) (GetCompanyRow, error)
 	GetCountryBeCountryCode(ctx context.Context, countryCode string) ([]Country, error)
@@ -64,7 +65,7 @@ type Querier interface {
 	GetRolePermissions(ctx context.Context, roleID int32) ([]RoleHasPermission, error)
 	GetRoles(ctx context.Context) ([]Role, error)
 	GetSubCountiesForACounty(ctx context.Context, countyID int32) ([]SubCounty, error)
-	GetTheCollectorForAChampion(ctx context.Context, championID sql.NullInt32) (GetTheCollectorForAChampionRow, error)
+	GetTheCollectorForAChampion(ctx context.Context, championID int32) (GetTheCollectorForAChampionRow, error)
 	GetUserWithEmailWithoutID(ctx context.Context, arg GetUserWithEmailWithoutIDParams) ([]User, error)
 	GetUsersWasteType(ctx context.Context) ([]WasteType, error)
 	GetUsersWithRole(ctx context.Context) ([]GetUsersWithRoleRow, error)
@@ -76,6 +77,7 @@ type Querier interface {
 	// sub_counties.sql
 	InsertSubcounties(ctx context.Context, arg InsertSubcountiesParams) error
 	InsertWasteType(ctx context.Context, arg InsertWasteTypeParams) (WasteType, error)
+	RemoveAggrigatorsAssignedFromGreenChampions(ctx context.Context, championID int32) error
 	RemovePermissionsFromRole(ctx context.Context, arg RemovePermissionsFromRoleParams) error
 	RemoveRolePermissions(ctx context.Context, roleID int32) error
 	RevokePermission(ctx context.Context, arg RevokePermissionParams) error

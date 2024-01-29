@@ -16,8 +16,8 @@ insert into champion_aggregator_assignments( champion_id,collector_id ) values (
 `
 
 type AssignChampionToCollectorParams struct {
-	ChampionID  sql.NullInt32 `json:"champion_id"`
-	CollectorID sql.NullInt32 `json:"collector_id"`
+	ChampionID  int32 `json:"champion_id"`
+	CollectorID int32 `json:"collector_id"`
 }
 
 func (q *Queries) AssignChampionToCollector(ctx context.Context, arg AssignChampionToCollectorParams) (ChampionAggregatorAssignment, error) {
@@ -30,6 +30,20 @@ func (q *Queries) AssignChampionToCollector(ctx context.Context, arg AssignChamp
 		&i.CreatedAt,
 	)
 	return i, err
+}
+
+const assignCollectorsToGreenChampion = `-- name: AssignCollectorsToGreenChampion :exec
+insert into champion_aggregator_assignments(champion_id,collector_id) VALUES($1,$2)
+`
+
+type AssignCollectorsToGreenChampionParams struct {
+	ChampionID  int32 `json:"champion_id"`
+	CollectorID int32 `json:"collector_id"`
+}
+
+func (q *Queries) AssignCollectorsToGreenChampion(ctx context.Context, arg AssignCollectorsToGreenChampionParams) error {
+	_, err := q.db.ExecContext(ctx, assignCollectorsToGreenChampion, arg.ChampionID, arg.CollectorID)
+	return err
 }
 
 const deleteChampionCollector = `-- name: DeleteChampionCollector :exec
@@ -57,8 +71,8 @@ LEFT JOIN
 
 type GetAllChampionCollectorsAssignmentsRow struct {
 	ID             int32          `json:"id"`
-	ChampionID     sql.NullInt32  `json:"champion_id"`
-	CollectorID    sql.NullInt32  `json:"collector_id"`
+	ChampionID     int32          `json:"champion_id"`
+	CollectorID    int32          `json:"collector_id"`
 	CreatedAt      time.Time      `json:"created_at"`
 	AggregatorName sql.NullString `json:"aggregator_name"`
 	ChampionName   sql.NullString `json:"champion_name"`
@@ -111,14 +125,14 @@ WHERE collector_id = $1
 
 type GetAllChampionsForACollectorRow struct {
 	ID            int32          `json:"id"`
-	ChampionID    sql.NullInt32  `json:"champion_id"`
-	CollectorID   sql.NullInt32  `json:"collector_id"`
+	ChampionID    int32          `json:"champion_id"`
+	CollectorID   int32          `json:"collector_id"`
 	CreatedAt     time.Time      `json:"created_at"`
 	ChampionName  sql.NullString `json:"champion_name"`
 	CollectorName sql.NullString `json:"collector_name"`
 }
 
-func (q *Queries) GetAllChampionsForACollector(ctx context.Context, collectorID sql.NullInt32) ([]GetAllChampionsForACollectorRow, error) {
+func (q *Queries) GetAllChampionsForACollector(ctx context.Context, collectorID int32) ([]GetAllChampionsForACollectorRow, error) {
 	rows, err := q.db.QueryContext(ctx, getAllChampionsForACollector, collectorID)
 	if err != nil {
 		return nil, err
@@ -152,7 +166,7 @@ const getAssignedCollectorsToGreenChampion = `-- name: GetAssignedCollectorsToGr
 select id, champion_id, collector_id, created_at from champion_aggregator_assignments where champion_id=$1
 `
 
-func (q *Queries) GetAssignedCollectorsToGreenChampion(ctx context.Context, championID sql.NullInt32) ([]ChampionAggregatorAssignment, error) {
+func (q *Queries) GetAssignedCollectorsToGreenChampion(ctx context.Context, championID int32) ([]ChampionAggregatorAssignment, error) {
 	rows, err := q.db.QueryContext(ctx, getAssignedCollectorsToGreenChampion, championID)
 	if err != nil {
 		return nil, err
@@ -196,14 +210,14 @@ WHERE champion_id = $1
 
 type GetTheCollectorForAChampionRow struct {
 	ID            int32          `json:"id"`
-	ChampionID    sql.NullInt32  `json:"champion_id"`
-	CollectorID   sql.NullInt32  `json:"collector_id"`
+	ChampionID    int32          `json:"champion_id"`
+	CollectorID   int32          `json:"collector_id"`
 	CreatedAt     time.Time      `json:"created_at"`
 	ChampionName  sql.NullString `json:"champion_name"`
 	CollectorName sql.NullString `json:"collector_name"`
 }
 
-func (q *Queries) GetTheCollectorForAChampion(ctx context.Context, championID sql.NullInt32) (GetTheCollectorForAChampionRow, error) {
+func (q *Queries) GetTheCollectorForAChampion(ctx context.Context, championID int32) (GetTheCollectorForAChampionRow, error) {
 	row := q.db.QueryRowContext(ctx, getTheCollectorForAChampion, championID)
 	var i GetTheCollectorForAChampionRow
 	err := row.Scan(
@@ -217,6 +231,15 @@ func (q *Queries) GetTheCollectorForAChampion(ctx context.Context, championID sq
 	return i, err
 }
 
+const removeAggrigatorsAssignedFromGreenChampions = `-- name: RemoveAggrigatorsAssignedFromGreenChampions :exec
+delete from champion_aggregator_assignments where champion_id =$1
+`
+
+func (q *Queries) RemoveAggrigatorsAssignedFromGreenChampions(ctx context.Context, championID int32) error {
+	_, err := q.db.ExecContext(ctx, removeAggrigatorsAssignedFromGreenChampions, championID)
+	return err
+}
+
 const updateChampionCollector = `-- name: UpdateChampionCollector :exec
 update champion_aggregator_assignments
 set
@@ -225,8 +248,8 @@ where id = $2
 `
 
 type UpdateChampionCollectorParams struct {
-	CollectorID sql.NullInt32 `json:"collector_id"`
-	ID          int32         `json:"id"`
+	CollectorID int32 `json:"collector_id"`
+	ID          int32 `json:"id"`
 }
 
 func (q *Queries) UpdateChampionCollector(ctx context.Context, arg UpdateChampionCollectorParams) error {
