@@ -69,6 +69,14 @@ func (wasteGroupsController WasteTypesController) GetAllWasteTypes(context *gin.
 	parentWasteTypeFilter := context.Query("p")
 	parentWasteTypeFilter_, _ := strconv.ParseUint(parentWasteTypeFilter, 10, 32)
 
+	type Parent struct {
+		ID        int32          `json:"id"`
+		Name      string         `json:"name"`
+		IsActive  bool           `json:"is_active"`
+		ParentID  sql.NullInt32  `json:"parent_id"`
+		CreatedAt time.Time      `json:"created_at"`
+		FilePath  sql.NullString `json:"file_path"`
+	}
 	type Result struct {
 		ID        int32          `json:"id"`
 		Name      string         `json:"name"`
@@ -76,11 +84,12 @@ func (wasteGroupsController WasteTypesController) GetAllWasteTypes(context *gin.
 		ParentID  sql.NullInt32  `json:"parent_id"`
 		CreatedAt time.Time      `json:"created_at"`
 		FilePath  sql.NullString `json:"file_path"`
-		Children  []Result       `json:"children"`
+		Parent    *Parent        `json:"parent"`
 	}
 
 	//results := []Result{}
-	if parentWasteTypeFilter != "" {
+	if parentWasteTypeFilter == "" {
+		results := []Result{}
 		wasteTypes, err := gen.REPO.GetAllWasteTypes(context)
 		if err != nil {
 			context.JSON(http.StatusUnprocessableEntity, gin.H{
@@ -89,9 +98,36 @@ func (wasteGroupsController WasteTypesController) GetAllWasteTypes(context *gin.
 			})
 			return
 		}
+		fmt.Println(wasteTypes)
+		for _, v := range wasteTypes {
+			result := Result{}
+			result.Name = v.Name
+			result.IsActive = v.IsActive
+			result.ParentID = v.ParentID
+			result.CreatedAt = v.CreatedAt
+			result.FilePath = v.FilePath
+
+			fmt.Print(v.ParentID)
+			if v.ParentID.Valid {
+				one, err := gen.REPO.GetOneWasteType(context, v.ParentID.Int32)
+				if err == nil {
+					result_ := Parent{}
+					result_.Name = one.Name
+					result_.IsActive = one.IsActive
+					result_.ParentID = one.ParentID
+					result_.CreatedAt = one.CreatedAt
+					result_.FilePath = one.FilePath
+
+					result.Parent = &result_
+				}
+			} else {
+				result.Parent = nil
+			}
+			results = append(results, result)
+		}
 		context.JSON(http.StatusOK, gin.H{
 			"error":       false,
-			"waste_types": wasteTypes,
+			"waste_types": results,
 		})
 	} else {
 		wasteTypes, err := gen.REPO.GetChildrenWasteTypes(context, sql.NullInt32{Int32: int32(parentWasteTypeFilter_), Valid: true})

@@ -11,51 +11,6 @@ import (
 	"time"
 )
 
-const filterWasteTypesByParent = `-- name: FilterWasteTypesByParent :many
-select waste_types.id, waste_types.name, waste_types.is_active, waste_types.parent_id, waste_types.created_at,uploads.path as file_path
-from waste_types 
-left join uploads on uploads.item_id=waste_types.id and uploads.related_table='waste_types' where waste_types.parent_id=$1
-`
-
-type FilterWasteTypesByParentRow struct {
-	ID        int32          `json:"id"`
-	Name      string         `json:"name"`
-	IsActive  bool           `json:"is_active"`
-	ParentID  sql.NullInt32  `json:"parent_id"`
-	CreatedAt time.Time      `json:"created_at"`
-	FilePath  sql.NullString `json:"file_path"`
-}
-
-func (q *Queries) FilterWasteTypesByParent(ctx context.Context, parentID sql.NullInt32) ([]FilterWasteTypesByParentRow, error) {
-	rows, err := q.db.QueryContext(ctx, filterWasteTypesByParent, parentID)
-	if err != nil {
-		return nil, err
-	}
-	defer rows.Close()
-	items := []FilterWasteTypesByParentRow{}
-	for rows.Next() {
-		var i FilterWasteTypesByParentRow
-		if err := rows.Scan(
-			&i.ID,
-			&i.Name,
-			&i.IsActive,
-			&i.ParentID,
-			&i.CreatedAt,
-			&i.FilePath,
-		); err != nil {
-			return nil, err
-		}
-		items = append(items, i)
-	}
-	if err := rows.Close(); err != nil {
-		return nil, err
-	}
-	if err := rows.Err(); err != nil {
-		return nil, err
-	}
-	return items, nil
-}
-
 const getAllWasteTypes = `-- name: GetAllWasteTypes :many
 
 select waste_types.id, waste_types.name, waste_types.is_active, waste_types.parent_id, waste_types.created_at,uploads.path as file_path
@@ -190,18 +145,30 @@ func (q *Queries) GetMainWasteTypes(ctx context.Context) ([]GetMainWasteTypesRow
 }
 
 const getOneWasteType = `-- name: GetOneWasteType :one
-select id, name, is_active, parent_id, created_at from waste_types where id=$1
+select waste_types.id, waste_types.name, waste_types.is_active, waste_types.parent_id, waste_types.created_at,uploads.path as file_path
+from waste_types 
+left join uploads on uploads.item_id=waste_types.id and uploads.related_table='waste_types' where waste_types.id=$1
 `
 
-func (q *Queries) GetOneWasteType(ctx context.Context, id int32) (WasteType, error) {
+type GetOneWasteTypeRow struct {
+	ID        int32          `json:"id"`
+	Name      string         `json:"name"`
+	IsActive  bool           `json:"is_active"`
+	ParentID  sql.NullInt32  `json:"parent_id"`
+	CreatedAt time.Time      `json:"created_at"`
+	FilePath  sql.NullString `json:"file_path"`
+}
+
+func (q *Queries) GetOneWasteType(ctx context.Context, id int32) (GetOneWasteTypeRow, error) {
 	row := q.db.QueryRowContext(ctx, getOneWasteType, id)
-	var i WasteType
+	var i GetOneWasteTypeRow
 	err := row.Scan(
 		&i.ID,
 		&i.Name,
 		&i.IsActive,
 		&i.ParentID,
 		&i.CreatedAt,
+		&i.FilePath,
 	)
 	return i, err
 }
