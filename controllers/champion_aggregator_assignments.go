@@ -1,6 +1,7 @@
 package controllers
 
 import (
+	"database/sql"
 	"net/http"
 	"strconv"
 	"ttnmwastemanagementsystem/gen"
@@ -36,7 +37,7 @@ func (championCollectorController ChampionCollectorController) AssignAggregators
 		return
 	}
 	greenChampion, err := gen.REPO.GetCompany(context, params.GreenChampionID)
-	if err != nil {
+	if err != nil && err != sql.ErrNoRows {
 		context.JSON(http.StatusUnprocessableEntity, gin.H{
 			"error":   true,
 			"message": err.Error(),
@@ -50,12 +51,10 @@ func (championCollectorController ChampionCollectorController) AssignAggregators
 		})
 		return
 	}
-
 	var error_ string = ""
-
 	for _, v := range params.AggregatorIDs {
 		company, err := gen.REPO.GetCompany(context, v)
-		if err != nil {
+		if err != nil && err != sql.ErrNoRows {
 			error_ = "Error getting aggregator"
 		} else {
 			if company.CompanyType != 2 {
@@ -70,7 +69,6 @@ func (championCollectorController ChampionCollectorController) AssignAggregators
 		})
 		return
 	}
-
 	err = gen.REPO.RemoveAggrigatorsAssignedFromGreenChampions(context, params.GreenChampionID)
 	if err != nil {
 		context.JSON(http.StatusUnprocessableEntity, gin.H{
@@ -79,14 +77,12 @@ func (championCollectorController ChampionCollectorController) AssignAggregators
 		})
 		return
 	}
-
 	for _, v := range params.AggregatorIDs {
 		gen.REPO.AssignCollectorsToGreenChampion(context, gen.AssignCollectorsToGreenChampionParams{
 			ChampionID:  params.GreenChampionID,
 			CollectorID: v,
 		})
 	}
-
 	context.JSON(http.StatusUnprocessableEntity, gin.H{
 		"error":   false,
 		"message": "Successfully assigned collectors to aggregator",

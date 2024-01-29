@@ -195,11 +195,11 @@ func (q *Queries) GetAllGreenChampions(ctx context.Context) ([]GetAllGreenChampi
 }
 
 const getCompany = `-- name: GetCompany :one
-SELECT companies.id, companies.name, companies.country_id, companies.company_type, companies.organization_id, companies.region, companies.location, companies.administrative_level_1_location, companies.lat, companies.lng, companies.is_active, companies.created_at, organizations.name AS organization_name, counties.name AS county
+SELECT companies.id, companies.name, companies.country_id, companies.company_type, companies.organization_id, companies.region, companies.location, companies.administrative_level_1_location, companies.lat, companies.lng, companies.is_active, companies.created_at, organizations.name AS organization_name --, counties.name AS county
 FROM
     companies
     LEFT JOIN organizations ON organizations.id = companies.organization_id
-    LEFT JOIN counties ON counties.id = companies.county_id
+    --LEFT JOIN counties ON counties.id = companies.county_id
 WHERE
     companies.id = $1
 `
@@ -218,7 +218,6 @@ type GetCompanyRow struct {
 	IsActive                     bool            `json:"is_active"`
 	CreatedAt                    time.Time       `json:"created_at"`
 	OrganizationName             sql.NullString  `json:"organization_name"`
-	County                       sql.NullString  `json:"county"`
 }
 
 func (q *Queries) GetCompany(ctx context.Context, id int32) (GetCompanyRow, error) {
@@ -238,7 +237,6 @@ func (q *Queries) GetCompany(ctx context.Context, id int32) (GetCompanyRow, erro
 		&i.IsActive,
 		&i.CreatedAt,
 		&i.OrganizationName,
-		&i.County,
 	)
 	return i, err
 }

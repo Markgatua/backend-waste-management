@@ -41,11 +41,11 @@ WHERE
     companies.company_type = 1;
 
 -- name: GetCompany :one
-SELECT companies.*, organizations.name AS organization_name, counties.name AS county
+SELECT companies.*, organizations.name AS organization_name --, counties.name AS county
 FROM
     companies
     LEFT JOIN organizations ON organizations.id = companies.organization_id
-    LEFT JOIN counties ON counties.id = companies.county_id
+    --LEFT JOIN counties ON counties.id = companies.county_id
 WHERE
     companies.id = $1;
    
