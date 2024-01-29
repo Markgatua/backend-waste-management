@@ -1,7 +1,10 @@
 -- waste_types.sql
 
 -- name: GetAllWasteTypes :many
-select waste_types.*,uploads.path as file_path from waste_types left join uploads on uploads.item_id=waste_types.id and uploads.related_table='waste_types';
+select waste_types.*,uploads.path as file_path
+from waste_types 
+left join uploads on uploads.item_id=waste_types.id and uploads.related_table='waste_types';
+
 
 -- name: GetMainWasteTypes :many
 select waste_types.*,uploads.path as file_path from waste_types left join uploads on uploads.item_id=waste_types.id and uploads.related_table='waste_types' where waste_types.parent_id is null;

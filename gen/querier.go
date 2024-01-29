@@ -28,6 +28,7 @@ type Querier interface {
 	DeletePermissionByIds(ctx context.Context, permissionIds []int32) error
 	DeleteRole(ctx context.Context, id int32) error
 	DuplicateCounties(ctx context.Context, name string) (int64, error)
+	FilterWasteTypesByParent(ctx context.Context, parentID sql.NullInt32) ([]FilterWasteTypesByParentRow, error)
 	// companies.sql
 	GetAllAggregators(ctx context.Context) ([]GetAllAggregatorsRow, error)
 	// champion_aggregator_assignments.sql

@@ -66,6 +66,9 @@ func (wasteGroupsController WasteTypesController) InsertWasteGroup(context *gin.
 }
 
 func (wasteGroupsController WasteTypesController) GetAllWasteTypes(context *gin.Context) {
+	parentWasteTypeFilter := context.Query("p")
+	parentWasteTypeFilter_, _ := strconv.ParseUint(parentWasteTypeFilter, 10, 32)
+
 	type Result struct {
 		ID        int32          `json:"id"`
 		Name      string         `json:"name"`
@@ -76,48 +79,67 @@ func (wasteGroupsController WasteTypesController) GetAllWasteTypes(context *gin.
 		Children  []Result       `json:"children"`
 	}
 
-	results := []Result{}
-
-	mainWasteTypes, err := gen.REPO.GetMainWasteTypes(context)
-	if err != nil {
-		context.JSON(http.StatusUnprocessableEntity, gin.H{
-			"error":   true,
-			"message": err.Error(),
-		})
-		return
-	}
-
-	for _, v := range mainWasteTypes {
-		result := Result{}
-		result.ID = v.ID
-		result.Name = v.Name
-		result.IsActive = v.IsActive
-		result.ParentID = v.ParentID
-		result.CreatedAt = v.CreatedAt
-		result.FilePath = v.FilePath
-
-		children := []Result{}
-		fmt.Println(v.ParentID.Int32)
-		childrenWasteTypes, _ := gen.REPO.GetChildrenWasteTypes(context, sql.NullInt32{Int32: v.ID, Valid: true})
-		for _, x := range childrenWasteTypes {
-			child := Result{}
-			child.ID = x.ID
-			child.Name = x.Name
-			child.IsActive = x.IsActive
-			child.ParentID = x.ParentID
-			child.CreatedAt = x.CreatedAt
-			child.FilePath = x.FilePath
-
-			children = append(children, child)
+	//results := []Result{}
+	if parentWasteTypeFilter != "" {
+		wasteTypes, err := gen.REPO.GetAllWasteTypes(context)
+		if err != nil {
+			context.JSON(http.StatusUnprocessableEntity, gin.H{
+				"error":   true,
+				"message": err.Error(),
+			})
+			return
 		}
-		result.Children = children
-		results = append(results, result)
+		context.JSON(http.StatusOK, gin.H{
+			"error":       false,
+			"waste_types": wasteTypes,
+		})
+	} else {
+		wasteTypes, err := gen.REPO.GetChildrenWasteTypes(context, sql.NullInt32{Int32: int32(parentWasteTypeFilter_), Valid: true})
+		if err != nil {
+			context.JSON(http.StatusUnprocessableEntity, gin.H{
+				"error":   true,
+				"message": err.Error(),
+			})
+			return
+		}
+		context.JSON(http.StatusOK, gin.H{
+			"error":       false,
+			"waste_types": wasteTypes,
+		})
+
 	}
 
-	context.JSON(http.StatusOK, gin.H{
-		"error":       false,
-		"waste_types": results,
-	})
+	// for _, v := range mainWasteTypes {
+	// 	result := Result{}
+	// 	result.ID = v.ID
+	// 	result.Name = v.Name
+	// 	result.IsActive = v.IsActive
+	// 	result.ParentID = v.ParentID
+	// 	result.CreatedAt = v.CreatedAt
+	// 	result.FilePath = v.FilePath
+
+	// 	children := []Result{}
+	// 	fmt.Println(v.ParentID.Int32)
+	// 	childrenWasteTypes, _ := gen.REPO.GetChildrenWasteTypes(context, sql.NullInt32{Int32: v.ID, Valid: true})
+	// 	for _, x := range childrenWasteTypes {
+	// 		child := Result{}
+	// 		child.ID = x.ID
+	// 		child.Name = x.Name
+	// 		child.IsActive = x.IsActive
+	// 		child.ParentID = x.ParentID
+	// 		child.CreatedAt = x.CreatedAt
+	// 		child.FilePath = x.FilePath
+
+	// 		children = append(children, child)
+	// 	}
+	// 	result.Children = children
+	// 	results = append(results, result)
+	// }
+
+	// context.JSON(http.StatusOK, gin.H{
+	// 	"error":       false,
+	// 	"waste_types": results,
+	// })
 }
 
 func (wasteGroupsController WasteTypesController) GetUsersWasteGroups(context *gin.Context) {
