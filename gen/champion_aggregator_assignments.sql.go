@@ -12,7 +12,7 @@ import (
 )
 
 const assignChampionToCollector = `-- name: AssignChampionToCollector :one
-insert into champion_aggregator_assignments( champion_id,collector_id ) values ($1, $2) returning id, champion_id, collector_id, created_at
+insert into champion_aggregator_assignments( champion_id,collector_id ) values ($1, $2) returning id, champion_id, collector_id, pickup_day, pickup_time, created_at
 `
 
 type AssignChampionToCollectorParams struct {
@@ -27,22 +27,31 @@ func (q *Queries) AssignChampionToCollector(ctx context.Context, arg AssignChamp
 		&i.ID,
 		&i.ChampionID,
 		&i.CollectorID,
+		&i.PickupDay,
+		&i.PickupTime,
 		&i.CreatedAt,
 	)
 	return i, err
 }
 
 const assignCollectorsToGreenChampion = `-- name: AssignCollectorsToGreenChampion :exec
-insert into champion_aggregator_assignments(champion_id,collector_id) VALUES($1,$2)
+insert into champion_aggregator_assignments(champion_id,collector_id,pickup_day,pickup_time) VALUES($1,$2,$3,$4)
 `
 
 type AssignCollectorsToGreenChampionParams struct {
-	ChampionID  int32 `json:"champion_id"`
-	CollectorID int32 `json:"collector_id"`
+	ChampionID  int32          `json:"champion_id"`
+	CollectorID int32          `json:"collector_id"`
+	PickupDay   sql.NullString `json:"pickup_day"`
+	PickupTime  sql.NullString `json:"pickup_time"`
 }
 
 func (q *Queries) AssignCollectorsToGreenChampion(ctx context.Context, arg AssignCollectorsToGreenChampionParams) error {
-	_, err := q.db.ExecContext(ctx, assignCollectorsToGreenChampion, arg.ChampionID, arg.CollectorID)
+	_, err := q.db.ExecContext(ctx, assignCollectorsToGreenChampion,
+		arg.ChampionID,
+		arg.CollectorID,
+		arg.PickupDay,
+		arg.PickupTime,
+	)
 	return err
 }
 
@@ -58,7 +67,7 @@ func (q *Queries) DeleteChampionCollector(ctx context.Context, id int32) error {
 const getAllChampionCollectorsAssignments = `-- name: GetAllChampionCollectorsAssignments :many
 
 SELECT 
-    champion_aggregator_assignments.id, champion_aggregator_assignments.champion_id, champion_aggregator_assignments.collector_id, champion_aggregator_assignments.created_at,
+    champion_aggregator_assignments.id, champion_aggregator_assignments.champion_id, champion_aggregator_assignments.collector_id, champion_aggregator_assignments.pickup_day, champion_aggregator_assignments.pickup_time, champion_aggregator_assignments.created_at,
     champion.name AS aggregator_name,
     collector.name AS champion_name
 FROM 
@@ -73,6 +82,8 @@ type GetAllChampionCollectorsAssignmentsRow struct {
 	ID             int32          `json:"id"`
 	ChampionID     int32          `json:"champion_id"`
 	CollectorID    int32          `json:"collector_id"`
+	PickupDay      sql.NullString `json:"pickup_day"`
+	PickupTime     sql.NullString `json:"pickup_time"`
 	CreatedAt      time.Time      `json:"created_at"`
 	AggregatorName sql.NullString `json:"aggregator_name"`
 	ChampionName   sql.NullString `json:"champion_name"`
@@ -92,6 +103,8 @@ func (q *Queries) GetAllChampionCollectorsAssignments(ctx context.Context) ([]Ge
 			&i.ID,
 			&i.ChampionID,
 			&i.CollectorID,
+			&i.PickupDay,
+			&i.PickupTime,
 			&i.CreatedAt,
 			&i.AggregatorName,
 			&i.ChampionName,
@@ -111,7 +124,7 @@ func (q *Queries) GetAllChampionCollectorsAssignments(ctx context.Context) ([]Ge
 
 const getAllChampionsForACollector = `-- name: GetAllChampionsForACollector :many
 SELECT 
-    champion_aggregator_assignments.id, champion_aggregator_assignments.champion_id, champion_aggregator_assignments.collector_id, champion_aggregator_assignments.created_at,
+    champion_aggregator_assignments.id, champion_aggregator_assignments.champion_id, champion_aggregator_assignments.collector_id, champion_aggregator_assignments.pickup_day, champion_aggregator_assignments.pickup_time, champion_aggregator_assignments.created_at,
     champion.name AS champion_name,
     collector.name AS collector_name
 FROM 
@@ -127,6 +140,8 @@ type GetAllChampionsForACollectorRow struct {
 	ID            int32          `json:"id"`
 	ChampionID    int32          `json:"champion_id"`
 	CollectorID   int32          `json:"collector_id"`
+	PickupDay     sql.NullString `json:"pickup_day"`
+	PickupTime    sql.NullString `json:"pickup_time"`
 	CreatedAt     time.Time      `json:"created_at"`
 	ChampionName  sql.NullString `json:"champion_name"`
 	CollectorName sql.NullString `json:"collector_name"`
@@ -145,6 +160,8 @@ func (q *Queries) GetAllChampionsForACollector(ctx context.Context, collectorID 
 			&i.ID,
 			&i.ChampionID,
 			&i.CollectorID,
+			&i.PickupDay,
+			&i.PickupTime,
 			&i.CreatedAt,
 			&i.ChampionName,
 			&i.CollectorName,
@@ -163,7 +180,7 @@ func (q *Queries) GetAllChampionsForACollector(ctx context.Context, collectorID 
 }
 
 const getAssignedCollectorsToGreenChampion = `-- name: GetAssignedCollectorsToGreenChampion :many
-select id, champion_id, collector_id, created_at from champion_aggregator_assignments where champion_id=$1
+select id, champion_id, collector_id, pickup_day, pickup_time, created_at from champion_aggregator_assignments where champion_id=$1
 `
 
 func (q *Queries) GetAssignedCollectorsToGreenChampion(ctx context.Context, championID int32) ([]ChampionAggregatorAssignment, error) {
@@ -179,6 +196,8 @@ func (q *Queries) GetAssignedCollectorsToGreenChampion(ctx context.Context, cham
 			&i.ID,
 			&i.ChampionID,
 			&i.CollectorID,
+			&i.PickupDay,
+			&i.PickupTime,
 			&i.CreatedAt,
 		); err != nil {
 			return nil, err
@@ -196,7 +215,7 @@ func (q *Queries) GetAssignedCollectorsToGreenChampion(ctx context.Context, cham
 
 const getCollectorsForGreenChampion = `-- name: GetCollectorsForGreenChampion :many
 SELECT 
-    champion_aggregator_assignments.id, champion_aggregator_assignments.champion_id, champion_aggregator_assignments.collector_id, champion_aggregator_assignments.created_at,
+    champion_aggregator_assignments.id, champion_aggregator_assignments.champion_id, champion_aggregator_assignments.collector_id, champion_aggregator_assignments.pickup_day, champion_aggregator_assignments.pickup_time, champion_aggregator_assignments.created_at,
     champion.name AS champion_name,
     collector.name AS collector_name
 FROM 
@@ -212,6 +231,8 @@ type GetCollectorsForGreenChampionRow struct {
 	ID            int32          `json:"id"`
 	ChampionID    int32          `json:"champion_id"`
 	CollectorID   int32          `json:"collector_id"`
+	PickupDay     sql.NullString `json:"pickup_day"`
+	PickupTime    sql.NullString `json:"pickup_time"`
 	CreatedAt     time.Time      `json:"created_at"`
 	ChampionName  sql.NullString `json:"champion_name"`
 	CollectorName sql.NullString `json:"collector_name"`
@@ -230,6 +251,8 @@ func (q *Queries) GetCollectorsForGreenChampion(ctx context.Context, championID 
 			&i.ID,
 			&i.ChampionID,
 			&i.CollectorID,
+			&i.PickupDay,
+			&i.PickupTime,
 			&i.CreatedAt,
 			&i.ChampionName,
 			&i.CollectorName,

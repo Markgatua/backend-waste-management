@@ -7,6 +7,7 @@ import (
 	"ttnmwastemanagementsystem/gen"
 
 	"github.com/gin-gonic/gin"
+	"gopkg.in/guregu/null.v3"
 )
 
 type ChampionCollectorController struct{}
@@ -17,8 +18,14 @@ type AssignChampionToCollectorParams struct {
 }
 
 type AssignAggregatorsToGreenChampionsParams struct {
-	AggregatorIDs   []int32 `json:"aggregator_ids" binding:"required"`
-	GreenChampionID int32   `json:"green_champion_id" binding:"required"`
+	Aggregators     []Aggregator `json:"aggregators" binding:"required"`
+	GreenChampionID int32        `json:"green_champion_id" binding:"required"`
+}
+
+type Aggregator struct {
+	ID         int64  `json:"id"`
+	PickupTime string `json:"pickup_time"`
+	PickupDay  string `json:"pickup_day"`
 }
 
 type UpdateChampionCollectorParams struct {
@@ -51,9 +58,10 @@ func (championCollectorController ChampionCollectorController) AssignAggregators
 		})
 		return
 	}
+
 	var error_ string = ""
-	for _, v := range params.AggregatorIDs {
-		company, err := gen.REPO.GetCompany(context, v)
+	for _, v := range params.Aggregators {
+		company, err := gen.REPO.GetCompany(context, int32(v.ID))
 		if err != nil && err != sql.ErrNoRows {
 			error_ = "Error getting aggregator"
 		} else {
@@ -77,13 +85,15 @@ func (championCollectorController ChampionCollectorController) AssignAggregators
 		})
 		return
 	}
-	for _, v := range params.AggregatorIDs {
+	for _, v := range params.Aggregators {
 		gen.REPO.AssignCollectorsToGreenChampion(context, gen.AssignCollectorsToGreenChampionParams{
 			ChampionID:  params.GreenChampionID,
-			CollectorID: v,
+			CollectorID: int32(v.ID),
+			PickupDay:   null.StringFrom(v.PickupDay).NullString,
+			PickupTime:  null.StringFrom(v.PickupTime).NullString,
 		})
 	}
-	context.JSON(http.StatusUnprocessableEntity, gin.H{
+	context.JSON(http.StatusOK, gin.H{
 		"error":   false,
 		"message": "Successfully assigned collectors to aggregator",
 	})
@@ -204,7 +214,7 @@ func (championCollectorController ChampionCollectorController) GetAllChampionsFo
 	}
 
 	context.JSON(http.StatusOK, gin.H{
-		"error":  false,
+		"error":   false,
 		"content": Champions,
 	})
 }

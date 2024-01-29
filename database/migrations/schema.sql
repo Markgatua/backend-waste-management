@@ -176,8 +176,11 @@ CREATE TABLE champion_aggregator_assignments (
   FOREIGN Key (champion_id) REFERENCES companies(id),
   collector_id INTEGER NOT NULL,
   FOREIGN Key (collector_id) REFERENCES companies(id),
+  pickup_day VARCHAR NULL,
+  pickup_time VARCHAR NULL,
   created_at TIMESTAMP NOT NULL DEFAULT NOW()
 );
+ALTER TABLE champion_aggregator_assignments ADD CONSTRAINT check_pickup_day CHECK (pickup_day IN ('Monday','Tuesday','Wednesday','Thursday','Friday','Saturday','Sunday')); 
 
 CREATE TABLE waste_types (
   id SERIAL PRIMARY KEY,
