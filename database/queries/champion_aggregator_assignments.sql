@@ -28,7 +28,7 @@ LEFT JOIN
     companies AS collector ON collector.id = champion_aggregator_assignments.collector_id
 WHERE collector_id = $1;
 
--- name: GetTheCollectorForAChampion :one
+-- name: GetCollectorsForGreenChampion :many
 SELECT 
     champion_aggregator_assignments.*,
     champion.name AS champion_name,

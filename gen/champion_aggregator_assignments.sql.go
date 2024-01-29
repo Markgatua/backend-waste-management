@@ -194,7 +194,7 @@ func (q *Queries) GetAssignedCollectorsToGreenChampion(ctx context.Context, cham
 	return items, nil
 }
 
-const getTheCollectorForAChampion = `-- name: GetTheCollectorForAChampion :one
+const getCollectorsForGreenChampion = `-- name: GetCollectorsForGreenChampion :many
 SELECT 
     champion_aggregator_assignments.id, champion_aggregator_assignments.champion_id, champion_aggregator_assignments.collector_id, champion_aggregator_assignments.created_at,
     champion.name AS champion_name,
@@ -208,7 +208,7 @@ LEFT JOIN
 WHERE champion_id = $1
 `
 
-type GetTheCollectorForAChampionRow struct {
+type GetCollectorsForGreenChampionRow struct {
 	ID            int32          `json:"id"`
 	ChampionID    int32          `json:"champion_id"`
 	CollectorID   int32          `json:"collector_id"`
@@ -217,18 +217,34 @@ type GetTheCollectorForAChampionRow struct {
 	CollectorName sql.NullString `json:"collector_name"`
 }
 
-func (q *Queries) GetTheCollectorForAChampion(ctx context.Context, championID int32) (GetTheCollectorForAChampionRow, error) {
-	row := q.db.QueryRowContext(ctx, getTheCollectorForAChampion, championID)
-	var i GetTheCollectorForAChampionRow
-	err := row.Scan(
-		&i.ID,
-		&i.ChampionID,
-		&i.CollectorID,
-		&i.CreatedAt,
-		&i.ChampionName,
-		&i.CollectorName,
-	)
-	return i, err
+func (q *Queries) GetCollectorsForGreenChampion(ctx context.Context, championID int32) ([]GetCollectorsForGreenChampionRow, error) {
+	rows, err := q.db.QueryContext(ctx, getCollectorsForGreenChampion, championID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	items := []GetCollectorsForGreenChampionRow{}
+	for rows.Next() {
+		var i GetCollectorsForGreenChampionRow
+		if err := rows.Scan(
+			&i.ID,
+			&i.ChampionID,
+			&i.CollectorID,
+			&i.CreatedAt,
+			&i.ChampionName,
+			&i.CollectorName,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
 }
 
 const removeAggrigatorsAssignedFromGreenChampions = `-- name: RemoveAggrigatorsAssignedFromGreenChampions :exec

@@ -131,7 +131,7 @@ func (championCollectorController ChampionCollectorController) AssignChampionToC
 
 }
 
-func (championCollectorController ChampionCollectorController) GetTheCollectorForAChampion(context *gin.Context) {
+func (championCollectorController ChampionCollectorController) GetCollectorsForGreenChampion(context *gin.Context) {
 	// Retrieve champion ID from the URL parameter
 	championIDParam := context.Param("id")
 
@@ -148,8 +148,15 @@ func (championCollectorController ChampionCollectorController) GetTheCollectorFo
 	// Create a sql.NullInt32 instance for Championid
 
 	// Call the repository method with the champion ID
-	ChampionCollector, err := gen.REPO.GetTheCollectorForAChampion(context, int32(championID))
+	ChampionCollector, err := gen.REPO.GetCollectorsForGreenChampion(context, int32(championID))
 	if err != nil {
+		if err == sql.ErrNoRows {
+			context.JSON(http.StatusUnprocessableEntity, gin.H{
+				"error":   false,
+				"content": []any{},
+			})
+			return
+		}
 		context.JSON(http.StatusUnprocessableEntity, gin.H{
 			"error":   true,
 			"message": err.Error(),
@@ -158,8 +165,8 @@ func (championCollectorController ChampionCollectorController) GetTheCollectorFo
 	}
 
 	context.JSON(http.StatusOK, gin.H{
-		"error":  false,
-		"result": ChampionCollector,
+		"error":   false,
+		"content": ChampionCollector,
 	})
 }
 
@@ -182,6 +189,13 @@ func (championCollectorController ChampionCollectorController) GetAllChampionsFo
 	// Call the repository method with the champion ID
 	Champions, err := gen.REPO.GetAllChampionsForACollector(context, int32(collectorID))
 	if err != nil {
+		if err == sql.ErrNoRows {
+			context.JSON(http.StatusUnprocessableEntity, gin.H{
+				"error":   false,
+				"content": []any{},
+			})
+			return
+		}
 		context.JSON(http.StatusUnprocessableEntity, gin.H{
 			"error":   true,
 			"message": err.Error(),
@@ -191,7 +205,7 @@ func (championCollectorController ChampionCollectorController) GetAllChampionsFo
 
 	context.JSON(http.StatusOK, gin.H{
 		"error":  false,
-		"result": Champions,
+		"content": Champions,
 	})
 }
 
