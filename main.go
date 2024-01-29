@@ -57,6 +57,8 @@ func runProgram() {
 	// rolesController := controllers.RolesController{}
 	// rolespermissions := controllers.RoleAndPermissionsController{}
 	ttnmOrganizationController := controllers.TtnmOrganizationController{}
+	requestCollectionController := controllers.RequestCollectionController{}
+	wasteItemsController := controllers.WasteItemsController{}
 
 	router.LoadHTMLGlob("templates/**/*")
 
@@ -110,7 +112,7 @@ func runProgram() {
 	//------------------------------------------------------------------|
 
 	router.Use(middlewares.JwtAuthMiddleware())
-	router.Use(middlewares.PermissionMiddleware())
+	// router.Use(middlewares.PermissionMiddleware())
 
 	//---------------------------    Files ------------------------------------------------------
 	router.MaxMultipartMemory = 8 << 20 // 8 MiB
@@ -128,6 +130,9 @@ func runProgram() {
 	// router.GET("/users/roles",usersController.GetUsersWithRole)
 	router.GET("/user/:id/main_organization", middlewares.PermissionBlockerMiddleware("view_user"), usersController.GetMainOrganizationUser)
 	router.GET("/user/:id", middlewares.PermissionBlockerMiddleware("view_user"), usersController.GetUser)
+
+	router.GET("/company/users/:id", usersController.GetCompanyUsers)
+
 
 	//---------------------------countries-------------------------------------------------------
 	//router.GET("countries", geoController.GetAllCountries)
@@ -208,6 +213,23 @@ func runProgram() {
 	// apiGroup.POST("settings/wastegroups/update", wasteGroupController.UpdateWasteGroup)
 	// apiGroup.GET("settings/wastegroups/all", wasteGroupController.GetAllWasteGroups)
 	// apiGroup.GET("settings/wastegroups/wastegroup/:id", wasteGroupController.GetOneWasteGroup)
+	//--------------------------------------------------------------------------------------------
+
+	//--------------------------- Request Collections -----------------------------------------------------
+	router.POST("request_collection", requestCollectionController.InsertNewCollectionRequestParams)
+	router.POST("confirm_collection_request", requestCollectionController.ConfirmCollectionRequest)
+	router.POST("cancel_collection_request", requestCollectionController.CancelCollectionRequest)
+	router.POST("update_collection_request", requestCollectionController.UpdateCollectionRequest)
+	router.GET("collections_weight_totals/:id", requestCollectionController.CollectionWeightTotals)
+	//--------------------------------------------------------------------------------------------
+
+	//--------------------------- Request Collections -----------------------------------------------------
+	router.POST("collection_request_data", wasteItemsController.InsertWasteItem)
+	router.GET("collection_request_latest/:id", requestCollectionController.GetLatestCollection)
+	router.GET("collections_producer_waste_data/:id", requestCollectionController.GetWasteItemsProducerData)
+	router.GET("collections_producer_stats/:id", requestCollectionController.GetCollectionStats)
+	router.GET("collections_producer_complete/:id", requestCollectionController.GetAllProducerCompletedCollectionRequests)
+	router.GET("collections_producer_pending/:id", requestCollectionController.GetAllProducerPendingCollectionRequests)
 	//--------------------------------------------------------------------------------------------
 
 	router.Run()
