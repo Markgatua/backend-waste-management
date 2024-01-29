@@ -1,13 +1,12 @@
 package controllers
 
 import (
+	"github.com/gin-gonic/gin"
 	"net/http"
 	"ttnmwastemanagementsystem/gen"
-	"github.com/gin-gonic/gin"
 )
 
 type GeoController struct{}
-
 
 func (c GeoController) GetAllCountries(context *gin.Context) {
 	countries, _ := gen.REPO.GetAllCountries(context)

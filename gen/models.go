@@ -19,17 +19,18 @@ type ChampionAggregatorAssignment struct {
 }
 
 type Company struct {
-	ID               int32          `json:"id"`
-	Name             string         `json:"name"`
-	CompanyType      int32          `json:"company_type"`
-	OrganizationID   int32          `json:"organization_id"`
-	CountyID         int32          `json:"county_id"`
-	SubCountyID      int32          `json:"sub_county_id"`
-	PhysicalPosition string         `json:"physical_position"`
-	Region           sql.NullString `json:"region"`
-	Location         sql.NullString `json:"location"`
-	IsActive         bool           `json:"is_active"`
-	CreatedAt        time.Time      `json:"created_at"`
+	ID                           int32           `json:"id"`
+	Name                         string          `json:"name"`
+	CountryID                    int32           `json:"country_id"`
+	CompanyType                  int32           `json:"company_type"`
+	OrganizationID               sql.NullInt32   `json:"organization_id"`
+	Region                       sql.NullString  `json:"region"`
+	Location                     sql.NullString  `json:"location"`
+	AdministrativeLevel1Location sql.NullString  `json:"administrative_level_1_location"`
+	Lat                          sql.NullFloat64 `json:"lat"`
+	Lng                          sql.NullFloat64 `json:"lng"`
+	IsActive                     bool            `json:"is_active"`
+	CreatedAt                    time.Time       `json:"created_at"`
 }
 
 type Country struct {
@@ -84,9 +85,11 @@ type MainOrganization struct {
 }
 
 type Organization struct {
-	ID        int32  `json:"id"`
-	Name      string `json:"name"`
-	CountryID int32  `json:"country_id"`
+	ID               int32  `json:"id"`
+	Name             string `json:"name"`
+	CountryID        int32  `json:"country_id"`
+	IsActive         bool   `json:"is_active"`
+	OrganizationType int32  `json:"organization_type"`
 }
 
 type PaymentMethod struct {
@@ -144,29 +147,32 @@ type Upload struct {
 }
 
 type User struct {
-	ID                     int32          `json:"id"`
-	FirstName              sql.NullString `json:"first_name"`
-	LastName               sql.NullString `json:"last_name"`
-	Provider               sql.NullString `json:"provider"`
-	RoleID                 sql.NullInt32  `json:"role_id"`
-	UserCompanyID          sql.NullInt32  `json:"user_company_id"`
-	IsMainOrganizationUser bool           `json:"is_main_organization_user"`
-	Email                  sql.NullString `json:"email"`
-	Password               sql.NullString `json:"password"`
-	AvatarUrl              sql.NullString `json:"avatar_url"`
-	UserType               sql.NullInt16  `json:"user_type"`
-	IsActive               sql.NullBool   `json:"is_active"`
-	CallingCode            sql.NullString `json:"calling_code"`
-	Phone                  sql.NullString `json:"phone"`
-	PhoneConfirmedAt       sql.NullTime   `json:"phone_confirmed_at"`
-	ConfirmedAt            sql.NullTime   `json:"confirmed_at"`
-	ConfirmationToken      sql.NullString `json:"confirmation_token"`
-	ConfirmationSentAt     sql.NullTime   `json:"confirmation_sent_at"`
-	RecoveryToken          sql.NullString `json:"recovery_token"`
-	RecoverySentAt         sql.NullTime   `json:"recovery_sent_at"`
-	LastLogin              sql.NullTime   `json:"last_login"`
-	CreatedAt              time.Time      `json:"created_at"`
-	UpdatedAt              time.Time      `json:"updated_at"`
+	ID                       int32          `json:"id"`
+	FirstName                sql.NullString `json:"first_name"`
+	LastName                 sql.NullString `json:"last_name"`
+	Provider                 sql.NullString `json:"provider"`
+	RoleID                   sql.NullInt32  `json:"role_id"`
+	UserCompanyID            sql.NullInt32  `json:"user_company_id"`
+	UserOrganizationID       sql.NullInt32  `json:"user_organization_id"`
+	IsMainOrganizationUser   bool           `json:"is_main_organization_user"`
+	IsOrganizationSuperAdmin bool           `json:"is_organization_super_admin"`
+	IsCompanySuperAdmin      bool           `json:"is_company_super_admin"`
+	Email                    sql.NullString `json:"email"`
+	Password                 sql.NullString `json:"password"`
+	AvatarUrl                sql.NullString `json:"avatar_url"`
+	UserType                 sql.NullInt16  `json:"user_type"`
+	IsActive                 sql.NullBool   `json:"is_active"`
+	CallingCode              sql.NullString `json:"calling_code"`
+	Phone                    sql.NullString `json:"phone"`
+	PhoneConfirmedAt         sql.NullTime   `json:"phone_confirmed_at"`
+	ConfirmedAt              sql.NullTime   `json:"confirmed_at"`
+	ConfirmationToken        sql.NullString `json:"confirmation_token"`
+	ConfirmationSentAt       sql.NullTime   `json:"confirmation_sent_at"`
+	RecoveryToken            sql.NullString `json:"recovery_token"`
+	RecoverySentAt           sql.NullTime   `json:"recovery_sent_at"`
+	LastLogin                sql.NullTime   `json:"last_login"`
+	CreatedAt                time.Time      `json:"created_at"`
+	UpdatedAt                time.Time      `json:"updated_at"`
 }
 
 type WasteBuyer struct {
@@ -211,9 +217,9 @@ type WasteTransaction struct {
 }
 
 type WasteType struct {
-	ID        int32     `json:"id"`
-	Name      string    `json:"name"`
-	IsActive  bool      `json:"is_active"`
-	Category  string    `json:"category"`
-	CreatedAt time.Time `json:"created_at"`
+	ID        int32         `json:"id"`
+	Name      string        `json:"name"`
+	IsActive  bool          `json:"is_active"`
+	ParentID  sql.NullInt32 `json:"parent_id"`
+	CreatedAt time.Time     `json:"created_at"`
 }

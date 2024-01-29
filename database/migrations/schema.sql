@@ -10,7 +10,7 @@ CREATE TABLE roles (
 
 CREATE TABLE uploads(
     id SERIAL PRIMARY KEY,
-    item_id INTEGER, 
+    item_id INTEGER,
     type VARCHAR(100),
     path TEXT,
     related_table VARCHAR(150),
@@ -73,8 +73,13 @@ CREATE TABLE organizations(
   id SERIAL PRIMARY KEY,
   name VARCHAR(255) NOT NULL,
   country_id INTEGER NOT NULL,
-  FOREIGN Key (country_id) REFERENCES countries(id) on delete set null
+  is_active BOOLEAN NOT NULL DEFAULT TRUE,
+  organization_type INTEGER NOT NULL, --1 aggrigators, 2 -green champion
+  FOREIGN Key (country_id) REFERENCES countries(id)
 );
+
+ALTER TABLE organizations ADD CONSTRAINT check_organizations_type CHECK (organization_type IN (1,2)); -- make sure organization type is either 1 or 2
+
 
 CREATE TABLE main_organization(
   id SERIAL PRIMARY KEY,
@@ -97,18 +102,18 @@ CREATE TABLE main_organization(
 CREATE TABLE companies (
   id SERIAL PRIMARY KEY,
   name VARCHAR(255) NOT NULL,
+  country_id INTEGER NOT NULL,
   company_type INTEGER NOT NULL,  -- 1 FOR GREEN CORPORATES/CHAMPIONS || 2 FOR AGGREGATOR COMPANIES
-  organization_id INTEGER NOT NULL,
-  county_id INTEGER NOT NULL,
-  sub_county_id INTEGER NOT NULL,
-  physical_position VARCHAR(255) NOT NULL,
-  region VARCHAR(255) NULL,
-  location VARCHAR(255),
+  organization_id INTEGER NULL,
+  region VARCHAR NULL, --Specific region this company is in
+  location VARCHAR(255) NULL, -- the location of this company ie citadel muthithi road
+  administrative_level_1_location VARCHAR(255) NULL, -- in kenya, this will be county, in uganda it will be a different value , ie Nairobi county
+  lat float NULL,
+  lng float NULL,
   is_active BOOLEAN NOT NULL DEFAULT TRUE,
   created_at TIMESTAMP NOT NULL DEFAULT NOW(),
   FOREIGN Key (organization_id) REFERENCES organizations(id),
-  FOREIGN Key (county_id) REFERENCES counties(id),
-  FOREIGN Key (sub_county_id) REFERENCES sub_counties(id)
+  FOREIGN Key (country_id) REFERENCES countries(id)
 );
 
 ALTER TABLE companies ADD CONSTRAINT check_company_type CHECK (company_type IN (1,2)); -- make sure company type is either 1 or 2
@@ -122,12 +127,17 @@ CREATE TABLE users(
     role_id INTEGER,
     FOREIGN Key (role_id) REFERENCES roles(id),
     user_company_id INTEGER NULL,
+    user_organization_id INTEGER NULL,
     FOREIGN Key (user_company_id) REFERENCES companies(id),
+    FOREIGN Key (user_organization_id) REFERENCES organizations(id),
     is_main_organization_user BOOLEAN DEFAULT false not null,
+    is_organization_super_admin BOOLEAN DEFAULT false not null,
+    is_company_super_admin BOOLEAN DEFAULT false not null,
+
     email VARCHAR(255) DEFAULT NULL UNIQUE,
     password TEXT DEFAULT NULL,
     avatar_url TEXT NULL,
-    user_type SMALLINT, -- 1 for TTNM ADMINS || 2 AGG GLOBAL ADMINS || 3 AGG ADMINS || 4 AGG USERS || 5 AGG COLLECTORS || 6 EXTERNAL COLLECTORS || 7 GREEN CHAMPIONS 
+    user_type SMALLINT, -- 1 for TTNM ADMINS || 2 AGG GLOBAL ADMINS || 3 AGG ADMINS || 4 AGG USERS || 5 AGG COLLECTORS || 6 EXTERNAL COLLECTORS || 7 GREEN CHAMPIONS 8|| Green chamption global admin, || 9 Global aggregator admins, ||10 green chamption super admin
     is_active BOOLEAN DEFAULT TRUE,
     calling_code VARCHAR(6) NULL,
     phone VARCHAR(15) NULL DEFAULT NULL,
@@ -173,10 +183,12 @@ CREATE TABLE waste_types (
   id SERIAL PRIMARY KEY,
   name VARCHAR(255) NOT NULL,
   is_active BOOLEAN not null DEFAULT true,
-  category VARCHAR(255) NOT NULL,
+  parent_id INTEGER NULL,
+  FOREIGN Key (parent_id) REFERENCES waste_types(id),
   created_at TIMESTAMP NOT NULL DEFAULT NOW()
 );
-CREATE UNIQUE INDEX waste_types_unique_name_idx on waste_types (LOWER(name));  
+
+CREATE UNIQUE INDEX waste_types_unique_name_idx on waste_types (LOWER(name));
 
 
 CREATE TABLE waste_collections (

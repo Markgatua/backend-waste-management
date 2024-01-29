@@ -146,33 +146,72 @@
                 "name": "Delete Organization",
                 "sub_module": "Organizations",
                 "action": "delete_organization"
-            },
-            {
-                "permission_id": 103,
-                "name": "Delete Company",
-                "sub_module": "Companies",
-                "action": "delete_company"
-            },
-            {
-                "permission_id": 103,
-                "name": "View Companies",
-                "sub_module": "Companies",
-                "action": "view_companies"
-            },
-            {
-                "permission_id": 103,
-                "name": "Add Company",
-                "sub_module": "Companies",
-                "action": "add_company"
-            },
-            {
-                "permission_id": 103,
-                "name": "Edit Company",
-                "sub_module": "Companies",
-                "action": "edit_company"
             }
         ]
     },
+    {
+        "module": "Aggregator",
+        "key": "aggregator",
+        "permissions": [
+            {
+                "permission_id": 103,
+                "name": "Delete Aggregator",
+                "sub_module": "Aggregator",
+                "action": "delete_aggregator"
+            },
+            {
+                "permission_id": 103,
+                "name": "View Aggregators",
+                "sub_module": "Aggregator",
+                "action": "view_aggregator"
+            },
+            {
+                "permission_id": 103,
+                "name": "Add Aggregator",
+                "sub_module": "Aggregator",
+                "action": "add_aggregator"
+            },
+            {
+                "permission_id": 103,
+                "name": "Edit Aggregator",
+                "sub_module": "Aggregator",
+                "action": "edit_aggregator"
+            }
+        ]
+    },
+
+
+    {
+        "module": "Green Champion",
+        "key": "green_champion",
+        "permissions": [
+            {
+                "permission_id": 103,
+                "name": "Delete Green Champion",
+                "sub_module": "Green Champion",
+                "action": "delete_green_champion"
+            },
+            {
+                "permission_id": 103,
+                "name": "View Green Champion",
+                "sub_module": "Green Champion",
+                "action": "view_green_champion"
+            },
+            {
+                "permission_id": 103,
+                "name": "Add Green Champion",
+                "sub_module": "Green Champion",
+                "action": "add_green_champion"
+            },
+            {
+                "permission_id": 103,
+                "name": "Edit Green Champion",
+                "sub_module": "Green Champion",
+                "action": "edit_green_champion"
+            }
+        ]
+    },
+
     {
         "module": "Files",
         "key": "files",

@@ -27,12 +27,13 @@ type Querier interface {
 	DeletePermissionByIds(ctx context.Context, permissionIds []int32) error
 	DeleteRole(ctx context.Context, id int32) error
 	DuplicateCounties(ctx context.Context, name string) (int64, error)
+	// companies.sql
+	GetAllAggregators(ctx context.Context) ([]GetAllAggregatorsRow, error)
 	// champion_aggregator_assignments.sql
 	GetAllChampionCollectorsAssignments(ctx context.Context) ([]GetAllChampionCollectorsAssignmentsRow, error)
 	GetAllChampionsForACollector(ctx context.Context, collectorID sql.NullInt32) ([]GetAllChampionsForACollectorRow, error)
-	// companies.sql
-	GetAllCompanies(ctx context.Context) ([]GetAllCompaniesRow, error)
 	GetAllCountries(ctx context.Context) ([]Country, error)
+	GetAllGreenChampions(ctx context.Context) ([]GetAllGreenChampionsRow, error)
 	GetAllMainOrganizationUsers(ctx context.Context) ([]GetAllMainOrganizationUsersRow, error)
 	// regions.sql
 	GetAllOrganizations(ctx context.Context) ([]GetAllOrganizationsRow, error)
@@ -42,8 +43,10 @@ type Querier interface {
 	// waste_types.sql
 	GetAllWasteTypes(ctx context.Context) ([]GetAllWasteTypesRow, error)
 	GetAssignedCollectorsToGreenChampion(ctx context.Context, championID sql.NullInt32) ([]ChampionAggregatorAssignment, error)
+	GetChildrenWasteTypes(ctx context.Context, parentID sql.NullInt32) ([]GetChildrenWasteTypesRow, error)
 	GetCompany(ctx context.Context, id int32) (GetCompanyRow, error)
 	GetCountryBeCountryCode(ctx context.Context, countryCode string) ([]Country, error)
+	GetCountryByName(ctx context.Context, country string) (Country, error)
 	GetDuplicateCompanies(ctx context.Context, arg GetDuplicateCompaniesParams) ([]Company, error)
 	GetDuplicateCompaniesWithoutID(ctx context.Context, arg GetDuplicateCompaniesWithoutIDParams) ([]Company, error)
 	GetDuplicateOrganization(ctx context.Context, arg GetDuplicateOrganizationParams) ([]Organization, error)
@@ -51,6 +54,7 @@ type Querier interface {
 	GetMainOrganization(ctx context.Context, organizationID string) ([]MainOrganization, error)
 	GetMainOrganizationUser(ctx context.Context, id int32) (User, error)
 	GetMainOrganizationUserByEmail(ctx context.Context, email sql.NullString) (User, error)
+	GetMainWasteTypes(ctx context.Context) ([]GetMainWasteTypesRow, error)
 	GetOneWasteType(ctx context.Context, id int32) (WasteType, error)
 	GetOrganization(ctx context.Context, id int32) (GetOrganizationRow, error)
 	GetOrganizationCountWithNameAndCountry(ctx context.Context, arg GetOrganizationCountWithNameAndCountryParams) ([]Organization, error)
@@ -61,6 +65,7 @@ type Querier interface {
 	GetRoles(ctx context.Context) ([]Role, error)
 	GetSubCountiesForACounty(ctx context.Context, countyID int32) ([]SubCounty, error)
 	GetTheCollectorForAChampion(ctx context.Context, championID sql.NullInt32) (GetTheCollectorForAChampionRow, error)
+	GetUserWithEmailWithoutID(ctx context.Context, arg GetUserWithEmailWithoutIDParams) ([]User, error)
 	GetUsersWasteType(ctx context.Context) ([]WasteType, error)
 	GetUsersWithRole(ctx context.Context) ([]GetUsersWithRoleRow, error)
 	InsertCompany(ctx context.Context, arg InsertCompanyParams) (Company, error)
@@ -82,7 +87,10 @@ type Querier interface {
 	UpdateMainOrganizationProfile(ctx context.Context, arg UpdateMainOrganizationProfileParams) error
 	UpdateMainOrganizationUser(ctx context.Context, arg UpdateMainOrganizationUserParams) error
 	UpdateOrganization(ctx context.Context, arg UpdateOrganizationParams) error
+	UpdateOrganizationIsActive(ctx context.Context, arg UpdateOrganizationIsActiveParams) error
 	UpdateRole(ctx context.Context, arg UpdateRoleParams) error
+	UpdateUserFirstNameLastNameEmailRoleAndUserType(ctx context.Context, arg UpdateUserFirstNameLastNameEmailRoleAndUserTypeParams) error
+	UpdateUserFirstNameLastNameEmailRoleUserTypeAndPassword(ctx context.Context, arg UpdateUserFirstNameLastNameEmailRoleUserTypeAndPasswordParams) error
 	UpdateUserIsActive(ctx context.Context, arg UpdateUserIsActiveParams) error
 	UpdateWasteType(ctx context.Context, arg UpdateWasteTypeParams) error
 	ViewCounties(ctx context.Context) ([]County, error)
