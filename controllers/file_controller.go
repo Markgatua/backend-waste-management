@@ -55,6 +55,24 @@ func (controller FileController) GetFile(context *gin.Context) {
 	context.File(completePath)
 }
 
+func (controller FileController) GetFlag(context *gin.Context) {
+	file, _ := context.Params.Get("file")
+	basePath, _ := os.Getwd()
+
+	completePath := basePath + "/assets/flags/" + file
+
+	_, err := os.Stat(completePath)
+	if err != nil {
+		context.JSON(http.StatusNotFound, gin.H{
+			"error":   true,
+			"message": "File not found",
+		})
+		return
+	}
+	context.File(completePath)
+}
+
+
 func DeleteFile(filePath string) {
 
 }

@@ -13,14 +13,14 @@ import (
 
 const getAllWasteTypes = `-- name: GetAllWasteTypes :many
 
-select waste_types.id, waste_types.name, waste_types.is_active, waste_types.category, waste_types.created_at,uploads.path as file_path from waste_types left join uploads on uploads.item_id=waste_types.id and uploads.related_table='waste_types'
+select waste_types.id, waste_types.name, waste_types.is_active, waste_types.parent_id, waste_types.created_at,uploads.path as file_path from waste_types left join uploads on uploads.item_id=waste_types.id and uploads.related_table='waste_types'
 `
 
 type GetAllWasteTypesRow struct {
 	ID        int32          `json:"id"`
 	Name      string         `json:"name"`
 	IsActive  bool           `json:"is_active"`
-	Category  string         `json:"category"`
+	ParentID  sql.NullInt32  `json:"parent_id"`
 	CreatedAt time.Time      `json:"created_at"`
 	FilePath  sql.NullString `json:"file_path"`
 }
@@ -39,7 +39,93 @@ func (q *Queries) GetAllWasteTypes(ctx context.Context) ([]GetAllWasteTypesRow, 
 			&i.ID,
 			&i.Name,
 			&i.IsActive,
-			&i.Category,
+			&i.ParentID,
+			&i.CreatedAt,
+			&i.FilePath,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const getChildrenWasteTypes = `-- name: GetChildrenWasteTypes :many
+select waste_types.id, waste_types.name, waste_types.is_active, waste_types.parent_id, waste_types.created_at,uploads.path as file_path from waste_types left join uploads on uploads.item_id=waste_types.id and uploads.related_table='waste_types' where waste_types.parent_id =$1
+`
+
+type GetChildrenWasteTypesRow struct {
+	ID        int32          `json:"id"`
+	Name      string         `json:"name"`
+	IsActive  bool           `json:"is_active"`
+	ParentID  sql.NullInt32  `json:"parent_id"`
+	CreatedAt time.Time      `json:"created_at"`
+	FilePath  sql.NullString `json:"file_path"`
+}
+
+func (q *Queries) GetChildrenWasteTypes(ctx context.Context, parentID sql.NullInt32) ([]GetChildrenWasteTypesRow, error) {
+	rows, err := q.db.QueryContext(ctx, getChildrenWasteTypes, parentID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	items := []GetChildrenWasteTypesRow{}
+	for rows.Next() {
+		var i GetChildrenWasteTypesRow
+		if err := rows.Scan(
+			&i.ID,
+			&i.Name,
+			&i.IsActive,
+			&i.ParentID,
+			&i.CreatedAt,
+			&i.FilePath,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const getMainWasteTypes = `-- name: GetMainWasteTypes :many
+select waste_types.id, waste_types.name, waste_types.is_active, waste_types.parent_id, waste_types.created_at,uploads.path as file_path from waste_types left join uploads on uploads.item_id=waste_types.id and uploads.related_table='waste_types' where waste_types.parent_id is null
+`
+
+type GetMainWasteTypesRow struct {
+	ID        int32          `json:"id"`
+	Name      string         `json:"name"`
+	IsActive  bool           `json:"is_active"`
+	ParentID  sql.NullInt32  `json:"parent_id"`
+	CreatedAt time.Time      `json:"created_at"`
+	FilePath  sql.NullString `json:"file_path"`
+}
+
+func (q *Queries) GetMainWasteTypes(ctx context.Context) ([]GetMainWasteTypesRow, error) {
+	rows, err := q.db.QueryContext(ctx, getMainWasteTypes)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	items := []GetMainWasteTypesRow{}
+	for rows.Next() {
+		var i GetMainWasteTypesRow
+		if err := rows.Scan(
+			&i.ID,
+			&i.Name,
+			&i.IsActive,
+			&i.ParentID,
 			&i.CreatedAt,
 			&i.FilePath,
 		); err != nil {
@@ -57,7 +143,7 @@ func (q *Queries) GetAllWasteTypes(ctx context.Context) ([]GetAllWasteTypesRow, 
 }
 
 const getOneWasteType = `-- name: GetOneWasteType :one
-select id, name, is_active, category, created_at from waste_types where id=$1
+select id, name, is_active, parent_id, created_at from waste_types where id=$1
 `
 
 func (q *Queries) GetOneWasteType(ctx context.Context, id int32) (WasteType, error) {
@@ -67,14 +153,14 @@ func (q *Queries) GetOneWasteType(ctx context.Context, id int32) (WasteType, err
 		&i.ID,
 		&i.Name,
 		&i.IsActive,
-		&i.Category,
+		&i.ParentID,
 		&i.CreatedAt,
 	)
 	return i, err
 }
 
 const getUsersWasteType = `-- name: GetUsersWasteType :many
-select id, name, is_active, category, created_at from waste_types where deleted_at is NULL
+select id, name, is_active, parent_id, created_at from waste_types where deleted_at is NULL
 `
 
 func (q *Queries) GetUsersWasteType(ctx context.Context) ([]WasteType, error) {
@@ -90,7 +176,7 @@ func (q *Queries) GetUsersWasteType(ctx context.Context) ([]WasteType, error) {
 			&i.ID,
 			&i.Name,
 			&i.IsActive,
-			&i.Category,
+			&i.ParentID,
 			&i.CreatedAt,
 		); err != nil {
 			return nil, err
@@ -107,43 +193,43 @@ func (q *Queries) GetUsersWasteType(ctx context.Context) ([]WasteType, error) {
 }
 
 const insertWasteType = `-- name: InsertWasteType :one
-INSERT INTO waste_types (name,category) VALUES ($1,$2) RETURNING id, name, is_active, category, created_at
+INSERT INTO waste_types (name,parent_id) VALUES ($1,$2) RETURNING id, name, is_active, parent_id, created_at
 `
 
 type InsertWasteTypeParams struct {
-	Name     string `json:"name"`
-	Category string `json:"category"`
+	Name     string        `json:"name"`
+	ParentID sql.NullInt32 `json:"parent_id"`
 }
 
 func (q *Queries) InsertWasteType(ctx context.Context, arg InsertWasteTypeParams) (WasteType, error) {
-	row := q.db.QueryRowContext(ctx, insertWasteType, arg.Name, arg.Category)
+	row := q.db.QueryRowContext(ctx, insertWasteType, arg.Name, arg.ParentID)
 	var i WasteType
 	err := row.Scan(
 		&i.ID,
 		&i.Name,
 		&i.IsActive,
-		&i.Category,
+		&i.ParentID,
 		&i.CreatedAt,
 	)
 	return i, err
 }
 
 const updateWasteType = `-- name: UpdateWasteType :exec
-update waste_types set name=$1, category=$2,is_active=$3 where id=$4
+update waste_types set name=$1,is_active=$2,parent_id=$3 where id=$4
 `
 
 type UpdateWasteTypeParams struct {
-	Name     string `json:"name"`
-	Category string `json:"category"`
-	IsActive bool   `json:"is_active"`
-	ID       int32  `json:"id"`
+	Name     string        `json:"name"`
+	IsActive bool          `json:"is_active"`
+	ParentID sql.NullInt32 `json:"parent_id"`
+	ID       int32         `json:"id"`
 }
 
 func (q *Queries) UpdateWasteType(ctx context.Context, arg UpdateWasteTypeParams) error {
 	_, err := q.db.ExecContext(ctx, updateWasteType,
 		arg.Name,
-		arg.Category,
 		arg.IsActive,
+		arg.ParentID,
 		arg.ID,
 	)
 	return err
