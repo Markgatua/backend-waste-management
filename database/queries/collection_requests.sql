@@ -1,7 +1,7 @@
 -- collection_requests.sql
 
 -- name: InsertNewCollectionRequest :exec
-insert into collection_requests( producer_id,collector_id,request_date ) values ($1, $2, $3) returning *;
+insert into collection_requests( producer_id,collector_id,request_date,location,lat,lng,administrative_level_1_location,first_contact_person ) values ($1, $2, $3, $4, $5, $6, $7, $8) returning *;
 
 -- name: UpdateCollectionRequest :exec
 update collection_requests

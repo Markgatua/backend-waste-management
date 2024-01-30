@@ -2,6 +2,7 @@ package controllers
 
 import (
 	"database/sql"
+	_"encoding/json"
 	"fmt"
 	_ "fmt"
 	"net/http"
@@ -10,9 +11,11 @@ import (
 	"ttnmwastemanagementsystem/helpers"
 	_ "ttnmwastemanagementsystem/helpers"
 	"ttnmwastemanagementsystem/logger"
+	"ttnmwastemanagementsystem/models"
 
 	"github.com/gin-gonic/gin"
 	_ "github.com/golang-module/carbon"
+	"github.com/guregu/null"
 	_ "gopkg.in/guregu/null.v3"
 )
 
@@ -21,6 +24,8 @@ type RequestCollectionController struct{}
 type InsertNewCollectionRequestParams struct {
 	ProducerID     int32 `json:"producer_id"  binding:"required"`
 	RequestDate    time.Time `json:"request_date"  binding:"required"`
+	Location       models.Location `json:"location" binding:"required"`
+	ContactPerson  string `json:"contact_person"  binding:"required"`
 }
 
 type InsertNewNotificationRequestParams struct {
@@ -68,8 +73,14 @@ func (requestCollectionController RequestCollectionController) InsertNewCollecti
 		ProducerID: params.ProducerID,
 		CollectorID: championCID,
 		RequestDate: params.RequestDate,
+		Location: null.StringFrom(params.Location.Location).NullString,
+		AdministrativeLevel1Location: null.StringFrom(params.Location.AdministrativeAreaLevel1).NullString,
+		Lat: null.FloatFrom(params.Location.LatLng.Lat).NullFloat64,
+		Lng: null.FloatFrom(params.Location.LatLng.Lng).NullFloat64,
+		FirstContactPerson: params.ContactPerson,
 	})
 
+	fmt.Println(insertError);
 
 	if insertError != nil {
 		context.JSON(http.StatusUnprocessableEntity, gin.H{
@@ -457,4 +468,86 @@ func (requestCollectionController RequestCollectionController) GetAllProducerPen
 		"message": "Successfully Updated the Collection Request",
 		"count": count,
 	})
+}
+
+
+
+func (requestCollectionController RequestCollectionController) GetTheCollectorForAChampion(context *gin.Context) {
+	id, _ := context.Params.Get("id")
+	var id32 int32
+	fmt.Sscan(id, &id32)
+
+	fmt.Println("********************")
+	fmt.Println(id32)
+
+	data, insertError := gen.REPO.GetTheCollectorForAChampion(context, id32)
+
+	if insertError != nil {
+		logger.Log("RequestCollectionController", insertError.Error(), logger.LOG_LEVEL_ERROR)
+
+		context.JSON(http.StatusUnprocessableEntity, gin.H{
+			"error":   true,
+			"message": "Failed to Fetch my next collection Date",
+		})
+		return
+	} else {
+		//logger.Log("RequestCollectionController",insertError.Error(),logger.LOG_LEVEL_ERROR)
+	}
+
+	type ChampionAggregatorAssignment struct {
+		PickupDay   sql.NullString `json:"pickup_day"`
+		PickupTime  sql.NullString `json:"pickup_time"`
+		NextDate string `json:"next_date"`
+	}
+
+	
+
+	fmt.Println(data)
+
+	pickupDay := data.PickupDay.String
+	valid := data.PickupDay.Valid
+
+	if !valid {
+		fmt.Println("Error accessing pickup_day.String field in data.")
+		context.JSON(http.StatusInternalServerError, gin.H{
+			"error":   true,
+			"message": "Internal Server Error",
+		})
+		return
+	}
+
+
+	// Get the current day
+	currentDay := time.Now().Weekday().String()
+
+	if currentDay == pickupDay {
+		data2:= ChampionAggregatorAssignment{}
+		data2.PickupTime=data.PickupTime
+		data2.PickupDay=data.PickupDay
+		data2.NextDate="Today"
+
+		context.JSON(http.StatusOK, gin.H{
+			"error":   false,
+			"message": "Collection day is today!",
+			"data":    data2,
+		})
+	} else {
+		// Calculate days until next Monday
+		daysUntilNextMonday := (int(time.Monday) - int(time.Now().Weekday()) + 7) % 7
+
+		// Calculate the next Monday date
+		nextMonday := time.Now().AddDate(0, 0, daysUntilNextMonday)
+
+		data2:= ChampionAggregatorAssignment{}
+		data2.PickupTime=data.PickupTime
+		data2.PickupDay=data.PickupDay
+		data2.NextDate=nextMonday.Format("02-01-2006")
+
+
+		context.JSON(http.StatusOK, gin.H{
+			"error":   false,
+			"message": "Next collection day is on " + nextMonday.Format("02-01-2006"),
+			"data":    data2,
+		})
+	}
 }
