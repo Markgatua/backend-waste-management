@@ -58,3 +58,7 @@ delete from champion_aggregator_assignments where champion_id =$1;
 
 -- name: AssignCollectorsToGreenChampion :exec
 insert into champion_aggregator_assignments(champion_id,collector_id,pickup_day,pickup_time) VALUES($1,$2,$3,$4);
+
+
+-- name: GetTheCollectorForAChampion :one
+select * from champion_aggregator_assignments where champion_id=$1;

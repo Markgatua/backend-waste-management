@@ -56,7 +56,7 @@ func (requestCollectionController RequestCollectionController) InsertNewCollecti
 		return
 	}
 
-	championIDNullable := sql.NullInt32{Int32: int32(params.ProducerID), Valid: true}
+	championIDNullable := int32(params.ProducerID)
 
 	ChampionCollector, err := gen.REPO.GetTheCollectorForAChampion(context, championIDNullable)
 
@@ -66,7 +66,7 @@ func (requestCollectionController RequestCollectionController) InsertNewCollecti
 
 	 insertError := gen.REPO.InsertNewCollectionRequest(context, gen.InsertNewCollectionRequestParams{
 		ProducerID: params.ProducerID,
-		CollectorID: championCID.Int32,
+		CollectorID: championCID,
 		RequestDate: params.RequestDate,
 	})
 
@@ -79,7 +79,7 @@ func (requestCollectionController RequestCollectionController) InsertNewCollecti
 		return
 	}
 
-	notificationUsers, _ := gen.REPO.GetCompanyUsers(context, sql.NullInt32{Int32: championCID.Int32,Valid: true})
+	notificationUsers, _ := gen.REPO.GetCompanyUsers(context, sql.NullInt32{Int32: championCID,Valid: true})
 
 	producerData, _ := gen.REPO.GetCompany(context, params.ProducerID)
 	var subject = producerData.Name +" "+ producerData.Location.String;
