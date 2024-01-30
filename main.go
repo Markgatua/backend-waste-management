@@ -206,13 +206,10 @@ func runProgram() {
 	//--------------------------------------------------------------------------------------------
 
 	//--------------------------- Assign collectors to champions-----------------------------------------------------
-	router.POST("assign_collectors_to_champions/assign", middlewares.PermissionBlockerMiddleware("assign_collector_to_champion"), championCollectorController.AssignChampionToCollector)
-	router.GET("assign_collectors_to_champions/get_champion_collector/:id", middlewares.PermissionBlockerMiddleware("view_champion_collector"), championCollectorController.GetTheCollectorForAChampion)
-	router.GET("assign_collectors_to_champions/get_champions_for_a_collector/:id", middlewares.PermissionBlockerMiddleware("view_champion_collector"), championCollectorController.GetAllChampionsForACollector)
-	router.POST("assign_collectors_to_champions/update", middlewares.PermissionBlockerMiddleware("assign_collector_to_champion"), championCollectorController.UpdateChampionCollector) //not in use
-	// apiGroup.POST("settings/wastegroups/update", wasteGroupController.UpdateWasteGroup)
-	// apiGroup.GET("settings/wastegroups/all", wasteGroupController.GetAllWasteGroups)
-	// apiGroup.GET("settings/wastegroups/wastegroup/:id", wasteGroupController.GetOneWasteGroup)
+	router.POST("assign_collectors_to_champions/assign", middlewares.PermissionBlockerMiddleware("assign_collector_to_champion"), championCollectorController.AssignAggregatorsToGreenChampionsParam)
+	
+	router.GET("get_collectors_for_green_champion/:id", middlewares.PermissionBlockerMiddleware("view_champion_collector"), championCollectorController.GetCollectorsForGreenChampion)
+	router.GET("get_green_champions_for_collector/:id", middlewares.PermissionBlockerMiddleware("view_champion_collector"), championCollectorController.GetAllChampionsForACollector)
 	//--------------------------------------------------------------------------------------------
 
 	//--------------------------- Request Collections -----------------------------------------------------

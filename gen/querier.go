@@ -12,6 +12,7 @@ import (
 type Querier interface {
 	ActivateRole(ctx context.Context, roleID int32) error
 	AssignChampionToCollector(ctx context.Context, arg AssignChampionToCollectorParams) (ChampionAggregatorAssignment, error)
+	AssignCollectorsToGreenChampion(ctx context.Context, arg AssignCollectorsToGreenChampionParams) error
 	AssignPermission(ctx context.Context, arg AssignPermissionParams) error
 	AssignPermissionToRole(ctx context.Context, arg AssignPermissionToRoleParams) error
 	CancelCollectionRequest(ctx context.Context, arg CancelCollectionRequestParams) error
@@ -35,6 +36,7 @@ type Querier interface {
 	GetAllCancelledCollectionRequests(ctx context.Context, cancelled sql.NullBool) ([]GetAllCancelledCollectionRequestsRow, error)
 	// champion_aggregator_assignments.sql
 	GetAllChampionCollectorsAssignments(ctx context.Context) ([]GetAllChampionCollectorsAssignmentsRow, error)
+	GetAllChampionsForACollector(ctx context.Context, collectorID int32) ([]GetAllChampionsForACollectorRow, error)
 	GetAllChampionsForACollector(ctx context.Context, collectorID sql.NullInt32) ([]GetAllChampionsForACollectorRow, error)
 	GetAllCollectionRequests(ctx context.Context) ([]GetAllCollectionRequestsRow, error)
 	GetAllCollectionRequestsForACollector(ctx context.Context, collectorID int32) ([]GetAllCollectionRequestsForACollectorRow, error)
@@ -53,6 +55,9 @@ type Querier interface {
 	GetAllUsers(ctx context.Context) ([]GetAllUsersRow, error)
 	// waste_types.sql
 	GetAllWasteTypes(ctx context.Context) ([]GetAllWasteTypesRow, error)
+	GetAssignedCollectorsToGreenChampion(ctx context.Context, championID int32) ([]ChampionAggregatorAssignment, error)
+	GetChildrenWasteTypes(ctx context.Context, parentID sql.NullInt32) ([]GetChildrenWasteTypesRow, error)
+	GetCollectorsForGreenChampion(ctx context.Context, championID int32) ([]GetCollectorsForGreenChampionRow, error)
 	GetAssignedCollectorsToGreenChampion(ctx context.Context, championID sql.NullInt32) ([]ChampionAggregatorAssignment, error)
 	GetChildrenWasteTypes(ctx context.Context, parentID sql.NullInt32) ([]GetChildrenWasteTypesRow, error)
 	GetCollectionStats(ctx context.Context, producerID int32) ([]GetCollectionStatsRow, error)
@@ -70,7 +75,7 @@ type Querier interface {
 	GetMainOrganizationUserByEmail(ctx context.Context, email sql.NullString) (User, error)
 	GetMainWasteTypes(ctx context.Context) ([]GetMainWasteTypesRow, error)
 	GetMyNotifications(ctx context.Context, userID int32) ([]Notification, error)
-	GetOneWasteType(ctx context.Context, id int32) (WasteType, error)
+	GetOneWasteType(ctx context.Context, id int32) (GetOneWasteTypeRow, error)
 	GetOrganization(ctx context.Context, id int32) (GetOrganizationRow, error)
 	GetOrganizationCountWithNameAndCountry(ctx context.Context, arg GetOrganizationCountWithNameAndCountryParams) ([]Organization, error)
 	GetPermissionsForRoleID(ctx context.Context, roleID int32) ([]GetPermissionsForRoleIDRow, error)
@@ -80,7 +85,6 @@ type Querier interface {
 	GetRolePermissions(ctx context.Context, roleID int32) ([]RoleHasPermission, error)
 	GetRoles(ctx context.Context) ([]Role, error)
 	GetSubCountiesForACounty(ctx context.Context, countyID int32) ([]SubCounty, error)
-	GetTheCollectorForAChampion(ctx context.Context, championID sql.NullInt32) (GetTheCollectorForAChampionRow, error)
 	GetUserWithEmailWithoutID(ctx context.Context, arg GetUserWithEmailWithoutIDParams) ([]User, error)
 	GetUsersWasteType(ctx context.Context) ([]GetUsersWasteTypeRow, error)
 	GetUsersWithRole(ctx context.Context) ([]GetUsersWithRoleRow, error)
@@ -99,6 +103,7 @@ type Querier interface {
 	// waste_items.sql
 	InsertWasteItem(ctx context.Context, arg InsertWasteItemParams) (WasteItem, error)
 	InsertWasteType(ctx context.Context, arg InsertWasteTypeParams) (WasteType, error)
+	RemoveAggrigatorsAssignedFromGreenChampions(ctx context.Context, championID int32) error
 	RemovePermissionsFromRole(ctx context.Context, arg RemovePermissionsFromRoleParams) error
 	RemoveRolePermissions(ctx context.Context, roleID int32) error
 	RevokePermission(ctx context.Context, arg RevokePermissionParams) error

@@ -28,7 +28,7 @@ LEFT JOIN
     companies AS collector ON collector.id = champion_aggregator_assignments.collector_id
 WHERE collector_id = $1;
 
--- name: GetTheCollectorForAChampion :one
+-- name: GetCollectorsForGreenChampion :many
 SELECT 
     champion_aggregator_assignments.*,
     champion.name AS champion_name,
@@ -52,3 +52,9 @@ delete from champion_aggregator_assignments where id=$1;
 
 -- name: GetAssignedCollectorsToGreenChampion :many
 select * from champion_aggregator_assignments where champion_id=$1;
+
+-- name: RemoveAggrigatorsAssignedFromGreenChampions :exec
+delete from champion_aggregator_assignments where champion_id =$1;
+
+-- name: AssignCollectorsToGreenChampion :exec
+insert into champion_aggregator_assignments(champion_id,collector_id,pickup_day,pickup_time) VALUES($1,$2,$3,$4);

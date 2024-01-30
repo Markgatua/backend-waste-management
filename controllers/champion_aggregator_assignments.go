@@ -7,21 +7,97 @@ import (
 	"ttnmwastemanagementsystem/gen"
 
 	"github.com/gin-gonic/gin"
+	"gopkg.in/guregu/null.v3"
 )
-
 
 type ChampionCollectorController struct{}
 
 type AssignChampionToCollectorParams struct {
-	ChampionID int32  `json:"champion_id"  binding:"required"`
-	CollectorID int32  `json:"collector_id"  binding:"required"`
+	ChampionID  int32 `json:"champion_id"  binding:"required"`
+	CollectorID int32 `json:"collector_id"  binding:"required"`
+}
+
+type AssignAggregatorsToGreenChampionsParams struct {
+	Aggregators     []Aggregator `json:"aggregators" binding:"required"`
+	GreenChampionID int32        `json:"green_champion_id" binding:"required"`
+}
+
+type Aggregator struct {
+	ID         int64  `json:"id"`
+	PickupTime string `json:"pickup_time"`
+	PickupDay  string `json:"pickup_day"`
 }
 
 type UpdateChampionCollectorParams struct {
 	CollectorID int32 `json:"collector_id" binding:"required"`
-	ID          int32         `json:"id" binding:"required"`
+	ID          int32 `json:"id" binding:"required"`
 }
 
+func (championCollectorController ChampionCollectorController) AssignAggregatorsToGreenChampionsParam(context *gin.Context) {
+	var params AssignAggregatorsToGreenChampionsParams
+	err := context.ShouldBindJSON(&params)
+	if err != nil {
+		context.JSON(http.StatusUnprocessableEntity, gin.H{
+			"error":   true,
+			"message": err.Error(),
+		})
+		return
+	}
+	greenChampion, err := gen.REPO.GetCompany(context, params.GreenChampionID)
+	if err != nil && err != sql.ErrNoRows {
+		context.JSON(http.StatusUnprocessableEntity, gin.H{
+			"error":   true,
+			"message": err.Error(),
+		})
+		return
+	}
+	if greenChampion.CompanyType != 1 {
+		context.JSON(http.StatusUnprocessableEntity, gin.H{
+			"error":   true,
+			"message": "The selected green champion is not a green champion",
+		})
+		return
+	}
+
+	var error_ string = ""
+	for _, v := range params.Aggregators {
+		company, err := gen.REPO.GetCompany(context, int32(v.ID))
+		if err != nil && err != sql.ErrNoRows {
+			error_ = "Error getting aggregator"
+		} else {
+			if company.CompanyType != 2 {
+				error_ = "One of the aggregators is not an aggregator"
+			}
+		}
+	}
+	if error_ != "" {
+		context.JSON(http.StatusUnprocessableEntity, gin.H{
+			"error":   true,
+			"message": error_,
+		})
+		return
+	}
+	err = gen.REPO.RemoveAggrigatorsAssignedFromGreenChampions(context, params.GreenChampionID)
+	if err != nil {
+		context.JSON(http.StatusUnprocessableEntity, gin.H{
+			"error":   true,
+			"message": err.Error(),
+		})
+		return
+	}
+	for _, v := range params.Aggregators {
+		gen.REPO.AssignCollectorsToGreenChampion(context, gen.AssignCollectorsToGreenChampionParams{
+			ChampionID:  params.GreenChampionID,
+			CollectorID: int32(v.ID),
+			PickupDay:   null.StringFrom(v.PickupDay).NullString,
+			PickupTime:  null.StringFrom(v.PickupTime).NullString,
+		})
+	}
+	context.JSON(http.StatusOK, gin.H{
+		"error":   false,
+		"message": "Successfully assigned collectors to aggregator",
+	})
+}
 
 func (championCollectorController ChampionCollectorController) AssignChampionToCollector(context *gin.Context) {
 	var params AssignChampionToCollectorParams
@@ -34,7 +110,7 @@ func (championCollectorController ChampionCollectorController) AssignChampionToC
 		return
 	}
 	count, err := gen.REPO.GetAssignedCollectorsToGreenChampion(
-	context,sql.NullInt32{Int32: params.ChampionID, Valid: true});
+		context, params.ChampionID)
 	if len(count) > 0 {
 		context.JSON(http.StatusUnprocessableEntity, gin.H{
 			"error":   true,
@@ -44,8 +120,8 @@ func (championCollectorController ChampionCollectorController) AssignChampionToC
 	}
 
 	ChampionCollector, insertError := gen.REPO.AssignChampionToCollector(context, gen.AssignChampionToCollectorParams{
-		ChampionID:		sql.NullInt32{Int32: params.ChampionID, Valid: true},
-		CollectorID:    sql.NullInt32{Int32: params.CollectorID, Valid: true},
+		ChampionID:  params.ChampionID,
+		CollectorID: params.CollectorID,
 	})
 
 	if insertError != nil {
@@ -58,15 +134,14 @@ func (championCollectorController ChampionCollectorController) AssignChampionToC
 
 	// If you want to return the created company as part of the response
 	context.JSON(http.StatusOK, gin.H{
-		"error":   false,
-		"message": "Successfully Assigned Collector to Champion",
+		"error":    false,
+		"message":  "Successfully Assigned Collector to Champion",
 		"Assigned": ChampionCollector, // Include the company details in the response
 	})
 
 }
 
-
-func (championCollectorController ChampionCollectorController) GetTheCollectorForAChampion(context *gin.Context) {
+func (championCollectorController ChampionCollectorController) GetCollectorsForGreenChampion(context *gin.Context) {
 	// Retrieve champion ID from the URL parameter
 	championIDParam := context.Param("id")
 
@@ -81,11 +156,17 @@ func (championCollectorController ChampionCollectorController) GetTheCollectorFo
 	}
 
 	// Create a sql.NullInt32 instance for Championid
-	championIDNullable := sql.NullInt32{Int32: int32(championID), Valid: true}
 
 	// Call the repository method with the champion ID
-	ChampionCollector, err := gen.REPO.GetTheCollectorForAChampion(context, championIDNullable)
+	ChampionCollector, err := gen.REPO.GetCollectorsForGreenChampion(context, int32(championID))
 	if err != nil {
+		if err == sql.ErrNoRows {
+			context.JSON(http.StatusUnprocessableEntity, gin.H{
+				"error":   false,
+				"content": []any{},
+			})
+			return
+		}
 		context.JSON(http.StatusUnprocessableEntity, gin.H{
 			"error":   true,
 			"message": err.Error(),
@@ -94,8 +175,8 @@ func (championCollectorController ChampionCollectorController) GetTheCollectorFo
 	}
 
 	context.JSON(http.StatusOK, gin.H{
-		"error":        false,
-		"result": ChampionCollector,
+		"error":   false,
+		"content": ChampionCollector,
 	})
 }
 
@@ -114,11 +195,17 @@ func (championCollectorController ChampionCollectorController) GetAllChampionsFo
 	}
 
 	// Create a sql.NullInt32 instance for Championid
-	collectorIDNullable := sql.NullInt32{Int32: int32(collectorID), Valid: true}
 
 	// Call the repository method with the champion ID
-	Champions, err := gen.REPO.GetAllChampionsForACollector(context, collectorIDNullable)
+	Champions, err := gen.REPO.GetAllChampionsForACollector(context, int32(collectorID))
 	if err != nil {
+		if err == sql.ErrNoRows {
+			context.JSON(http.StatusUnprocessableEntity, gin.H{
+				"error":   false,
+				"content": []any{},
+			})
+			return
+		}
 		context.JSON(http.StatusUnprocessableEntity, gin.H{
 			"error":   true,
 			"message": err.Error(),
@@ -127,11 +214,10 @@ func (championCollectorController ChampionCollectorController) GetAllChampionsFo
 	}
 
 	context.JSON(http.StatusOK, gin.H{
-		"error":        false,
-		"result": Champions,
+		"error":   false,
+		"content": Champions,
 	})
 }
-
 
 func (championCollectorController ChampionCollectorController) UpdateChampionCollector(context *gin.Context) {
 	var params UpdateChampionCollectorParams
@@ -144,10 +230,9 @@ func (championCollectorController ChampionCollectorController) UpdateChampionCol
 		return
 	}
 
-
 	insertError := gen.REPO.UpdateChampionCollector(context, gen.UpdateChampionCollectorParams{
-		ID:				params.ID,
-		CollectorID:    sql.NullInt32{Int32: params.CollectorID, Valid: true},
+		ID:          params.ID,
+		CollectorID: params.CollectorID,
 	})
 
 	if insertError != nil {
