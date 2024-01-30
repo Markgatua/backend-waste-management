@@ -198,10 +198,10 @@ func runProgram() {
 	//-------------------------------------------------------------------------------------------
 
 	//--------------------------- wastegroups-----------------------------------------------------
-	router.POST("settings/wastetypes/create", middlewares.PermissionBlockerMiddleware("create_waste_type"), wasteTypesController.InsertWasteGroup)
+	router.POST("settings/wastetypes/create", wasteTypesController.InsertWasteGroup)
 	router.PUT("settings/wastetypes/update", middlewares.PermissionBlockerMiddleware("update_waste_type"), wasteTypesController.UpdateWasteType)
-	router.GET("settings/wastetypes/all", middlewares.PermissionBlockerMiddleware("view_waste_type"), wasteTypesController.GetAllWasteTypes)
-	router.GET("settings/wastetypes/user", middlewares.PermissionBlockerMiddleware("view_waste_type"), wasteTypesController.GetUsersWasteGroups)
+	router.GET("settings/wastetypes/all", wasteTypesController.GetAllWasteTypes)
+	router.GET("settings/wastetypes/user", wasteTypesController.GetUsersWasteGroups)
 	router.GET("settings/wastetypes/wastegroup/:id", middlewares.PermissionBlockerMiddleware("view_waste_type"), wasteTypesController.GetOneWasteGroup)
 	//--------------------------------------------------------------------------------------------
 

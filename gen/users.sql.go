@@ -179,38 +179,41 @@ func (q *Queries) GetAllUsers(ctx context.Context) ([]GetAllUsersRow, error) {
 }
 
 const getCompanyUsers = `-- name: GetCompanyUsers :many
-select users.id, users.first_name, users.last_name, users.provider, users.role_id, users.user_company_id, users.is_main_organization_user, users.email, users.password, users.avatar_url, users.user_type, users.is_active, users.calling_code, users.phone, users.phone_confirmed_at, users.confirmed_at, users.confirmation_token, users.confirmation_sent_at, users.recovery_token, users.recovery_sent_at, users.last_login, users.created_at, users.updated_at,companies.name as company,companies.location as companyLocation FROM users
+select users.id, users.first_name, users.last_name, users.provider, users.role_id, users.user_company_id, users.user_organization_id, users.is_main_organization_user, users.is_organization_super_admin, users.is_company_super_admin, users.email, users.password, users.avatar_url, users.user_type, users.is_active, users.calling_code, users.phone, users.phone_confirmed_at, users.confirmed_at, users.confirmation_token, users.confirmation_sent_at, users.recovery_token, users.recovery_sent_at, users.last_login, users.created_at, users.updated_at,companies.name as company,companies.location as companyLocation FROM users
 LEFT JOIN
   companies ON companies.id = users.user_company_id
  where user_company_id = $1
 `
 
 type GetCompanyUsersRow struct {
-	ID                     int32          `json:"id"`
-	FirstName              sql.NullString `json:"first_name"`
-	LastName               sql.NullString `json:"last_name"`
-	Provider               sql.NullString `json:"provider"`
-	RoleID                 sql.NullInt32  `json:"role_id"`
-	UserCompanyID          sql.NullInt32  `json:"user_company_id"`
-	IsMainOrganizationUser bool           `json:"is_main_organization_user"`
-	Email                  sql.NullString `json:"email"`
-	Password               sql.NullString `json:"password"`
-	AvatarUrl              sql.NullString `json:"avatar_url"`
-	UserType               sql.NullInt16  `json:"user_type"`
-	IsActive               sql.NullBool   `json:"is_active"`
-	CallingCode            sql.NullString `json:"calling_code"`
-	Phone                  sql.NullString `json:"phone"`
-	PhoneConfirmedAt       sql.NullTime   `json:"phone_confirmed_at"`
-	ConfirmedAt            sql.NullTime   `json:"confirmed_at"`
-	ConfirmationToken      sql.NullString `json:"confirmation_token"`
-	ConfirmationSentAt     sql.NullTime   `json:"confirmation_sent_at"`
-	RecoveryToken          sql.NullString `json:"recovery_token"`
-	RecoverySentAt         sql.NullTime   `json:"recovery_sent_at"`
-	LastLogin              sql.NullTime   `json:"last_login"`
-	CreatedAt              time.Time      `json:"created_at"`
-	UpdatedAt              time.Time      `json:"updated_at"`
-	Company                sql.NullString `json:"company"`
-	Companylocation        sql.NullString `json:"companylocation"`
+	ID                       int32          `json:"id"`
+	FirstName                sql.NullString `json:"first_name"`
+	LastName                 sql.NullString `json:"last_name"`
+	Provider                 sql.NullString `json:"provider"`
+	RoleID                   sql.NullInt32  `json:"role_id"`
+	UserCompanyID            sql.NullInt32  `json:"user_company_id"`
+	UserOrganizationID       sql.NullInt32  `json:"user_organization_id"`
+	IsMainOrganizationUser   bool           `json:"is_main_organization_user"`
+	IsOrganizationSuperAdmin bool           `json:"is_organization_super_admin"`
+	IsCompanySuperAdmin      bool           `json:"is_company_super_admin"`
+	Email                    sql.NullString `json:"email"`
+	Password                 sql.NullString `json:"password"`
+	AvatarUrl                sql.NullString `json:"avatar_url"`
+	UserType                 sql.NullInt16  `json:"user_type"`
+	IsActive                 sql.NullBool   `json:"is_active"`
+	CallingCode              sql.NullString `json:"calling_code"`
+	Phone                    sql.NullString `json:"phone"`
+	PhoneConfirmedAt         sql.NullTime   `json:"phone_confirmed_at"`
+	ConfirmedAt              sql.NullTime   `json:"confirmed_at"`
+	ConfirmationToken        sql.NullString `json:"confirmation_token"`
+	ConfirmationSentAt       sql.NullTime   `json:"confirmation_sent_at"`
+	RecoveryToken            sql.NullString `json:"recovery_token"`
+	RecoverySentAt           sql.NullTime   `json:"recovery_sent_at"`
+	LastLogin                sql.NullTime   `json:"last_login"`
+	CreatedAt                time.Time      `json:"created_at"`
+	UpdatedAt                time.Time      `json:"updated_at"`
+	Company                  sql.NullString `json:"company"`
+	Companylocation          sql.NullString `json:"companylocation"`
 }
 
 func (q *Queries) GetCompanyUsers(ctx context.Context, userCompanyID sql.NullInt32) ([]GetCompanyUsersRow, error) {
@@ -229,7 +232,10 @@ func (q *Queries) GetCompanyUsers(ctx context.Context, userCompanyID sql.NullInt
 			&i.Provider,
 			&i.RoleID,
 			&i.UserCompanyID,
+			&i.UserOrganizationID,
 			&i.IsMainOrganizationUser,
+			&i.IsOrganizationSuperAdmin,
+			&i.IsCompanySuperAdmin,
 			&i.Email,
 			&i.Password,
 			&i.AvatarUrl,

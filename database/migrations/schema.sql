@@ -169,6 +169,7 @@ CREATE TABLE email_verification_token (
   created_at TIMESTAMP NOT NULL DEFAULT NOW()
 );
 
+
 -- Create "champion_assigned_aggregator" table
 CREATE TABLE champion_aggregator_assignments (
   id SERIAL PRIMARY KEY,

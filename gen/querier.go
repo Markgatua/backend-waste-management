@@ -30,20 +30,15 @@ type Querier interface {
 	DeletePermissionByIds(ctx context.Context, permissionIds []int32) error
 	DeleteRole(ctx context.Context, id int32) error
 	DuplicateCounties(ctx context.Context, name string) (int64, error)
-
+	// companies.sql
+	GetAllAggregators(ctx context.Context) ([]GetAllAggregatorsRow, error)
 	GetAllCancelledCollectionRequests(ctx context.Context, cancelled sql.NullBool) ([]GetAllCancelledCollectionRequestsRow, error)
 	// champion_aggregator_assignments.sql
 	GetAllChampionCollectorsAssignments(ctx context.Context) ([]GetAllChampionCollectorsAssignmentsRow, error)
 	GetAllChampionsForACollector(ctx context.Context, collectorID sql.NullInt32) ([]GetAllChampionsForACollectorRow, error)
 	GetAllCollectionRequests(ctx context.Context) ([]GetAllCollectionRequestsRow, error)
 	GetAllCollectionRequestsForACollector(ctx context.Context, collectorID int32) ([]GetAllCollectionRequestsForACollectorRow, error)
-	// companies.sql
-	GetAllCompanies(ctx context.Context) ([]GetAllCompaniesRow, error)
 	GetAllCompletedCollectionRequests(ctx context.Context, status sql.NullBool) ([]GetAllCompletedCollectionRequestsRow, error)
-
-	// companies.sql
-	GetAllAggregators(ctx context.Context) ([]GetAllAggregatorsRow, error)
-	// champion_aggregator_assignments.sql
 	GetAllCountries(ctx context.Context) ([]Country, error)
 	GetAllGreenChampions(ctx context.Context) ([]GetAllGreenChampionsRow, error)
 	GetAllMainOrganizationUsers(ctx context.Context) ([]GetAllMainOrganizationUsersRow, error)
@@ -59,11 +54,8 @@ type Querier interface {
 	// waste_types.sql
 	GetAllWasteTypes(ctx context.Context) ([]GetAllWasteTypesRow, error)
 	GetAssignedCollectorsToGreenChampion(ctx context.Context, championID sql.NullInt32) ([]ChampionAggregatorAssignment, error)
-
-	GetCollectionStats(ctx context.Context, producerID int32) ([]GetCollectionStatsRow, error)
-
 	GetChildrenWasteTypes(ctx context.Context, parentID sql.NullInt32) ([]GetChildrenWasteTypesRow, error)
-
+	GetCollectionStats(ctx context.Context, producerID int32) ([]GetCollectionStatsRow, error)
 	GetCompany(ctx context.Context, id int32) (GetCompanyRow, error)
 	GetCompanyUsers(ctx context.Context, userCompanyID sql.NullInt32) ([]GetCompanyUsersRow, error)
 	GetCountryBeCountryCode(ctx context.Context, countryCode string) ([]Country, error)
@@ -76,11 +68,8 @@ type Querier interface {
 	GetMainOrganization(ctx context.Context, organizationID string) ([]MainOrganization, error)
 	GetMainOrganizationUser(ctx context.Context, id int32) (User, error)
 	GetMainOrganizationUserByEmail(ctx context.Context, email sql.NullString) (User, error)
-
-	GetMyNotifications(ctx context.Context, userID int32) ([]Notification, error)
-
 	GetMainWasteTypes(ctx context.Context) ([]GetMainWasteTypesRow, error)
-
+	GetMyNotifications(ctx context.Context, userID int32) ([]Notification, error)
 	GetOneWasteType(ctx context.Context, id int32) (WasteType, error)
 	GetOrganization(ctx context.Context, id int32) (GetOrganizationRow, error)
 	GetOrganizationCountWithNameAndCountry(ctx context.Context, arg GetOrganizationCountWithNameAndCountryParams) ([]Organization, error)
@@ -93,9 +82,9 @@ type Querier interface {
 	GetSubCountiesForACounty(ctx context.Context, countyID int32) ([]SubCounty, error)
 	GetTheCollectorForAChampion(ctx context.Context, championID sql.NullInt32) (GetTheCollectorForAChampionRow, error)
 	GetUserWithEmailWithoutID(ctx context.Context, arg GetUserWithEmailWithoutIDParams) ([]User, error)
-	GetUsersWasteType(ctx context.Context) ([]WasteType, error)
+	GetUsersWasteType(ctx context.Context) ([]GetUsersWasteTypeRow, error)
 	GetUsersWithRole(ctx context.Context) ([]GetUsersWithRoleRow, error)
-	GetWasteItemsProducerData(ctx context.Context, producerID int32) (GetWasteItemsProducerDataRow, error)
+	GetWasteItemsProducerData(ctx context.Context, producerID int32) ([]GetWasteItemsProducerDataRow, error)
 	InsertCompany(ctx context.Context, arg InsertCompanyParams) (Company, error)
 	// counties.sql
 	InsertCounties(ctx context.Context, name string) error

@@ -733,34 +733,50 @@ func (q *Queries) GetProducerLatestCollectionId(ctx context.Context, producerID 
 	return i, err
 }
 
-const getWasteItemsProducerData = `-- name: GetWasteItemsProducerData :one
+const getWasteItemsProducerData = `-- name: GetWasteItemsProducerData :many
 SELECT
-    COALESCE(CAST(SUM(waste_items.weight) AS DECIMAL(10,2)), 0) AS total_weight,
+    CAST(SUM(waste_items.weight) AS DECIMAL(10,2)) AS total_weight,
     waste.name AS waste_name,
     collections.status AS collection_status
 FROM
     waste_items
-LEFT JOIN
+JOIN
     waste_types AS waste ON waste_items.waste_type_id = waste.id
 LEFT JOIN
     collection_requests AS collections ON collections.id = waste_items.collection_request_id
 WHERE
     collections.producer_id = $1
 GROUP BY
-    collections.id, waste.name, collections.status
+    collections.status, waste.name
 `
 
 type GetWasteItemsProducerDataRow struct {
-	TotalWeight      interface{}    `json:"total_weight"`
-	WasteName        sql.NullString `json:"waste_name"`
-	CollectionStatus sql.NullBool   `json:"collection_status"`
+	TotalWeight      string       `json:"total_weight"`
+	WasteName        string       `json:"waste_name"`
+	CollectionStatus sql.NullBool `json:"collection_status"`
 }
 
-func (q *Queries) GetWasteItemsProducerData(ctx context.Context, producerID int32) (GetWasteItemsProducerDataRow, error) {
-	row := q.db.QueryRowContext(ctx, getWasteItemsProducerData, producerID)
-	var i GetWasteItemsProducerDataRow
-	err := row.Scan(&i.TotalWeight, &i.WasteName, &i.CollectionStatus)
-	return i, err
+func (q *Queries) GetWasteItemsProducerData(ctx context.Context, producerID int32) ([]GetWasteItemsProducerDataRow, error) {
+	rows, err := q.db.QueryContext(ctx, getWasteItemsProducerData, producerID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	items := []GetWasteItemsProducerDataRow{}
+	for rows.Next() {
+		var i GetWasteItemsProducerDataRow
+		if err := rows.Scan(&i.TotalWeight, &i.WasteName, &i.CollectionStatus); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
 }
 
 const insertNewCollectionRequest = `-- name: InsertNewCollectionRequest :exec
