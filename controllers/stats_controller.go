@@ -10,13 +10,11 @@ import (
 
 type StatsController struct{}
 
-func (ttnmOrganizationController StatsController) GetTTNMOrganizations(context *gin.Context) {
+func (controller StatsController) GetTTNMOrganizations(context *gin.Context) {
 	id := context.Param("id")
-
 	id_, _ := strconv.ParseUint(id, 10, 32)
 	println("------------------------------", id_)
 	ttnm, err := gen.REPO.GetMainOrganization(context, id)
-
 	if err != nil {
 		context.JSON(http.StatusUnprocessableEntity, gin.H{
 			"error":   true,
@@ -24,9 +22,36 @@ func (ttnmOrganizationController StatsController) GetTTNMOrganizations(context *
 		})
 		return
 	}
-
 	context.JSON(http.StatusOK, gin.H{
 		"error":   false,
 		"Profile": ttnm,
 	})
+}
+
+func GetOrganizationCount(startDate string, endDate string) {
+
+}
+
+func GetBranchCount(startDate string, endDate string) {
+
+}
+
+func GetMainSystemUsersCount(startDate string, endDate string) {
+
+}
+
+func GetOrganizationUsersCount(startDate string, endDate string) {
+
+}
+
+func GetCollectionStats(startDate string, endDate string) {
+
+}
+
+func GetWasteTypeStats(startDate string, endDate string) {
+
+}
+
+func GetCollectionStartsByLocation(startDate string, endDate string) {
+
 }
