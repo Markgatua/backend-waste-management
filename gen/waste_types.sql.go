@@ -174,24 +174,34 @@ func (q *Queries) GetOneWasteType(ctx context.Context, id int32) (GetOneWasteTyp
 }
 
 const getUsersWasteType = `-- name: GetUsersWasteType :many
-select id, name, is_active, parent_id, created_at from waste_types where deleted_at is NULL
+select waste_types.id, waste_types.name, waste_types.is_active, waste_types.parent_id, waste_types.created_at,uploads.path as file_path from waste_types left join uploads on uploads.item_id=waste_types.id and uploads.related_table='waste_types' where waste_types.is_active = true
 `
 
-func (q *Queries) GetUsersWasteType(ctx context.Context) ([]WasteType, error) {
+type GetUsersWasteTypeRow struct {
+	ID        int32          `json:"id"`
+	Name      string         `json:"name"`
+	IsActive  bool           `json:"is_active"`
+	ParentID  sql.NullInt32  `json:"parent_id"`
+	CreatedAt time.Time      `json:"created_at"`
+	FilePath  sql.NullString `json:"file_path"`
+}
+
+func (q *Queries) GetUsersWasteType(ctx context.Context) ([]GetUsersWasteTypeRow, error) {
 	rows, err := q.db.QueryContext(ctx, getUsersWasteType)
 	if err != nil {
 		return nil, err
 	}
 	defer rows.Close()
-	items := []WasteType{}
+	items := []GetUsersWasteTypeRow{}
 	for rows.Next() {
-		var i WasteType
+		var i GetUsersWasteTypeRow
 		if err := rows.Scan(
 			&i.ID,
 			&i.Name,
 			&i.IsActive,
 			&i.ParentID,
 			&i.CreatedAt,
+			&i.FilePath,
 		); err != nil {
 			return nil, err
 		}

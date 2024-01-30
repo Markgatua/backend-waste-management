@@ -159,22 +159,22 @@ GROUP BY
     collection_requests.id;
 
 
--- name: GetWasteItemsProducerData :one
+-- name: GetWasteItemsProducerData :many
 SELECT
-    COALESCE(CAST(SUM(waste_items.weight) AS DECIMAL(10,2)), 0) AS total_weight,
+    CAST(SUM(waste_items.weight) AS DECIMAL(10,2)) AS total_weight,
     waste.name AS waste_name,
     collections.status AS collection_status
 FROM
     waste_items
-LEFT JOIN
+JOIN
     waste_types AS waste ON waste_items.waste_type_id = waste.id
 LEFT JOIN
     collection_requests AS collections ON collections.id = waste_items.collection_request_id
 WHERE
     collections.producer_id = $1
 GROUP BY
-    collections.id, waste.name, collections.status;
-
+    collections.status, waste.name;
+    
 -- name: GetAllProducerCompletedCollectionRequests :many
 SELECT
     collection_requests.*,
