@@ -191,8 +191,40 @@ CREATE TABLE waste_types (
   created_at TIMESTAMP NOT NULL DEFAULT NOW()
 );
 
-CREATE UNIQUE INDEX waste_types_unique_name_idx on waste_types (LOWER(name));
+CREATE TABLE collection_requests (
+  id SERIAL PRIMARY KEY,
+  producer_id INTEGER NOT NULL,
+  FOREIGN Key (producer_id) REFERENCES companies(id),
+  collector_id INTEGER NOT NULL,
+  FOREIGN Key (collector_id) REFERENCES companies(id),
+  request_date TIMESTAMP NOT NULL,
+  pickup_date TIMESTAMP NULL,
+  confirmed BOOLEAN DEFAULT FALSE,
+  cancelled BOOLEAN DEFAULT FALSE,
+  status BOOLEAN DEFAULT FALSE,
+  created_at TIMESTAMP NOT NULL DEFAULT NOW()
+);
 
+CREATE TABLE waste_items (
+  id SERIAL PRIMARY KEY,
+  collection_request_id INTEGER NOT NULL,
+  FOREIGN Key (collection_request_id) REFERENCES collection_requests(id),
+  waste_type_id INTEGER NOT NULL,
+  FOREIGN Key (waste_type_id) REFERENCES waste_types(id),
+  weight DECIMAL NOT NULL
+);
+
+CREATE TABLE notifications (
+  id SERIAL PRIMARY KEY,
+  user_id INTEGER NOT NULL,
+  FOREIGN Key (user_id) REFERENCES users(id),
+  subject VARCHAR(255) NOT NULL,
+  message VARCHAR(255) NOT NULL,
+  status BOOLEAN DEFAULT FALSE,
+  created_at TIMESTAMP NOT NULL DEFAULT NOW()
+);
+
+CREATE UNIQUE INDEX waste_types_unique_name_idx on waste_types (LOWER(name));  
 
 CREATE TABLE waste_collections (
   id SERIAL PRIMARY KEY,

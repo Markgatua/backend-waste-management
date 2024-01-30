@@ -85,3 +85,10 @@ insert into
 VALUES (
         $1, $2, $3, $4, $5, $6, $7, $8
     );
+    
+-- name: GetCompanyUsers :many
+select users.*,companies.name as company,companies.location as companyLocation FROM users
+LEFT JOIN
+  companies ON companies.id = users.user_company_id
+ where user_company_id = $1;
+

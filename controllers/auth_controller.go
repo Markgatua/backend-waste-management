@@ -86,6 +86,20 @@ type EditUserEmailParam struct {
 	RoleId    int32  `json:"role_id" binding:"required"`
 	UserID    int32  `json:"user_id" binding:"required"`
 }
+
+type ResetPasswordApiParams struct {
+	Email     string `json:"email" binding:"required"`
+	Token     string `json:"token" binding:"required"`
+	Password  string `json:"password" binding:"required"`
+}
+
+type ResetPasswordPhoneApiParams struct {
+	Phone     string `json:"phone" binding:"required"`
+	CallingCode     string `json:"calling_code" binding:"required"`
+	OTPCode     string `json:"otp_code" binding:"required"`
+	Password  string `json:"password" binding:"required"`
+}
+
 type LoginUserEmailParam struct {
 	Email    string `json:"email" binding:"required"`
 	Password string `json:"password" binding:"required"`
@@ -512,7 +526,7 @@ func (auth AuthController) ForgotPinSendOTPPhone(context *gin.Context) {
 
 	phone := forgotPinSendOTPPhoneParam.CallingCode + forgotPinSendOTPPhoneParam.Phone
 	sms := helpers.SMS{}
-	err = sms.SendSMS([]string{phone}, fmt.Sprint("Welcome to cashlite, your pin reset code: ", otpCode))
+	err = sms.SendSMS([]string{phone}, fmt.Sprint("Welcome to TakaTaka Ni Mali, your pin reset code: ", otpCode))
 	if err != nil {
 		context.JSON(http.StatusUnprocessableEntity, gin.H{
 			"error":   true,
@@ -677,7 +691,7 @@ func (auth AuthController) RegisterPhoneSendOTPCode(context *gin.Context) {
 	}
 
 	sms := helpers.SMS{}
-	err = sms.SendSMS([]string{phone}, fmt.Sprint("Welcome to cashlite, enter the OTP code : ", otpCode))
+	err = sms.SendSMS([]string{phone}, fmt.Sprint("Welcome to TakaTaka Ni Mali, enter the OTP code : ", otpCode))
 	if err != nil {
 		context.JSON(http.StatusUnprocessableEntity, gin.H{
 			"error":   true,
@@ -966,6 +980,42 @@ func (auth AuthController) ResetPassword(context *gin.Context) {
 
 }
 
+func (auth AuthController) ResetPasswordApi(context *gin.Context) {
+	var emailResetPasswordParam EmailResetPasswordParam
+	err := context.ShouldBindJSON(&emailResetPasswordParam)
+	if err != nil {
+		context.JSON(http.StatusUnprocessableEntity, gin.H{
+			"error":   true,
+			"message": err.Error(),
+		})
+		return
+	}
+
+	user, err := GetEmailUser(emailResetPasswordParam.Email)
+	if user == nil {
+		context.JSON(http.StatusUnprocessableEntity, gin.H{
+			"error":   true,
+			"message": "User with the given email address not found",
+		})
+		return
+	}
+
+	mail := helpers.Mail{}
+	sent := mail.SendPasswordResetApiMail(user.Email.String, fmt.Sprint(user.FirstName.String, " ", user.LastName.String))
+	if sent {
+		context.JSON(http.StatusOK, gin.H{
+			"error":   false,
+			"message": "Password reset link sent to your email",
+		})
+	} else {
+		context.JSON(http.StatusExpectationFailed, gin.H{
+			"error":   true,
+			"message": "Error sending password reset email",
+		})
+	}
+
+}
+
 func (auth AuthController) EnterNewPassword(context *gin.Context) {
 	token := context.DefaultQuery("token", "-")
 	valid, err := IsRecoveryTokenValid(token)
@@ -1065,6 +1115,103 @@ func (auth AuthController) SubmitNewPassword(context *gin.Context) {
 		context.JSON(http.StatusOK, gin.H{
 			"error":   false,
 			"message": "Password reset successful",
+		})
+	}
+}
+
+func (auth AuthController) SubmitNewPasswordApi(context *gin.Context) {
+	// ResetPasswordApiParams
+
+	var resetPasswordApiParams ResetPasswordApiParams
+	err := context.ShouldBindJSON(&resetPasswordApiParams)
+	if err != nil {
+		context.JSON(http.StatusUnprocessableEntity, gin.H{
+			"error":   true,
+			"message": err.Error(),
+		})
+		return
+	}
+	user, err := GetEmailUser(resetPasswordApiParams.Email)
+	if user == nil {
+		context.JSON(http.StatusUnprocessableEntity, gin.H{
+			"error":   true,
+			"message": "User with the given email address does not exists",
+		})
+		return
+	}
+
+	if len(resetPasswordApiParams.Password) < 6 {
+		context.JSON(http.StatusUnprocessableEntity, gin.H{
+			"error":   true,
+			"message": "Password length should be greater than or equal to 6",
+		})
+		return
+	}
+
+	valid, err := IsRecoveryTokenValid(resetPasswordApiParams.Token)
+	if err != nil {
+		context.JSON(http.StatusUnprocessableEntity, gin.H{
+			"error":   true,
+			"message": "Error occured",
+		})
+		return
+	}
+	if !valid {
+		context.JSON(http.StatusUnprocessableEntity, gin.H{
+			"error":   true,
+			"message": "Invalid token/token expired",
+		})
+		return
+	}
+	
+	user_ := models.User{}
+	gen.REPO.DB.Get(&user_, gen.REPO.DB.Rebind("select id from users where recovery_token=?"), resetPasswordApiParams.Token)
+
+	_, err = gen.REPO.DB.NamedExec(`UPDATE users SET password=:password where id=:id`, map[string]interface{}{
+		"password": helpers.Functions{}.HashPassword(resetPasswordApiParams.Password),
+		"id":       user.ID,
+	})
+
+	if err != nil {
+		logger.Log(TAG, fmt.Sprint("Query error:", err), logger.LOG_LEVEL_ERROR)
+		return
+	} else {
+		context.JSON(http.StatusOK, gin.H{
+			"error":   false,
+			"message": "Password reset successful",
+		})
+	}
+}
+
+func (auth AuthController) PasswordResetAndVerifyOTPPhone(context *gin.Context) {
+	var resetPasswordPhoneApiParams ResetPasswordPhoneApiParams
+	err := context.ShouldBindJSON(&resetPasswordPhoneApiParams)
+	if err != nil {
+		context.JSON(http.StatusUnprocessableEntity, gin.H{
+			"error":   true,
+			"message": err.Error(),
+		})
+		return
+	}
+	user, err := GetUserFromRecoveryTokenWithValidationVerification(resetPasswordPhoneApiParams.OTPCode, resetPasswordPhoneApiParams.CallingCode, resetPasswordPhoneApiParams.Phone)
+	if user == nil {
+		context.JSON(http.StatusUnprocessableEntity, gin.H{
+			"error":   true,
+			"message": err.Error(),
+		})
+		return
+	}
+	_, err = gen.REPO.DB.NamedExec(`UPDATE users SET password=:password where id=:id`, map[string]interface{}{
+		"password": helpers.Functions{}.HashPassword(resetPasswordPhoneApiParams.Password),
+		"id":       user.ID,
+	})
+	if err != nil {
+		logger.Log(TAG, fmt.Sprint("Query error:", err), logger.LOG_LEVEL_ERROR)
+		return
+	} else {
+		context.JSON(http.StatusOK, gin.H{
+			"error":   false,
+			"message": "Pin reset success",
 		})
 	}
 }

@@ -57,6 +57,8 @@ func runProgram() {
 	// rolesController := controllers.RolesController{}
 	// rolespermissions := controllers.RoleAndPermissionsController{}
 	ttnmOrganizationController := controllers.TtnmOrganizationController{}
+	requestCollectionController := controllers.RequestCollectionController{}
+	wasteItemsController := controllers.WasteItemsController{}
 
 	router.LoadHTMLGlob("templates/**/*")
 
@@ -95,6 +97,10 @@ func runProgram() {
 		auth.POST("/challenge/forgot_pin/verify_otp_phone", authController.ForgotPinVerifyOTPPhone)
 		auth.POST("/challenge/forgot_pin/enter_new_pin", authController.ForgotPinEnterNewPin)
 
+		auth.POST("/reset_password/email/mobile", authController.ResetPasswordApi)
+		auth.POST("/reset_password/email/mobile/reset", authController.SubmitNewPasswordApi)
+		auth.POST("/reset_password/phone/mobile/reset", authController.PasswordResetAndVerifyOTPPhone)
+
 	}
 
 	// apiGroup := router.Group("/api:BVaDN9hl")
@@ -106,7 +112,7 @@ func runProgram() {
 	//------------------------------------------------------------------|
 
 	router.Use(middlewares.JwtAuthMiddleware())
-	router.Use(middlewares.PermissionMiddleware())
+	// router.Use(middlewares.PermissionMiddleware())
 
 	//---------------------------    Files ------------------------------------------------------
 	router.MaxMultipartMemory = 8 << 20 // 8 MiB
@@ -124,6 +130,9 @@ func runProgram() {
 	// router.GET("/users/roles",usersController.GetUsersWithRole)
 	router.GET("/user/:id/main_organization", middlewares.PermissionBlockerMiddleware("view_user"), usersController.GetMainOrganizationUser)
 	router.GET("/user/:id", middlewares.PermissionBlockerMiddleware("view_user"), usersController.GetUser)
+
+	router.GET("/company/users/:id", usersController.GetCompanyUsers)
+
 
 	//---------------------------countries-------------------------------------------------------
 	//router.GET("countries", geoController.GetAllCountries)
@@ -201,6 +210,23 @@ func runProgram() {
 	
 	router.GET("get_collectors_for_green_champion/:id", middlewares.PermissionBlockerMiddleware("view_champion_collector"), championCollectorController.GetCollectorsForGreenChampion)
 	router.GET("get_green_champions_for_collector/:id", middlewares.PermissionBlockerMiddleware("view_champion_collector"), championCollectorController.GetAllChampionsForACollector)
+	//--------------------------------------------------------------------------------------------
+
+	//--------------------------- Request Collections -----------------------------------------------------
+	router.POST("request_collection", requestCollectionController.InsertNewCollectionRequestParams)
+	router.POST("confirm_collection_request", requestCollectionController.ConfirmCollectionRequest)
+	router.POST("cancel_collection_request", requestCollectionController.CancelCollectionRequest)
+	router.POST("update_collection_request", requestCollectionController.UpdateCollectionRequest)
+	router.GET("collections_weight_totals/:id", requestCollectionController.CollectionWeightTotals)
+	//--------------------------------------------------------------------------------------------
+
+	//--------------------------- Request Collections -----------------------------------------------------
+	router.POST("collection_request_data", wasteItemsController.InsertWasteItem)
+	router.GET("collection_request_latest/:id", requestCollectionController.GetLatestCollection)
+	router.GET("collections_producer_waste_data/:id", requestCollectionController.GetWasteItemsProducerData)
+	router.GET("collections_producer_stats/:id", requestCollectionController.GetCollectionStats)
+	router.GET("collections_producer_complete/:id", requestCollectionController.GetAllProducerCompletedCollectionRequests)
+	router.GET("collections_producer_pending/:id", requestCollectionController.GetAllProducerPendingCollectionRequests)
 	//--------------------------------------------------------------------------------------------
 
 	router.Run()
