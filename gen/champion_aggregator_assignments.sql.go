@@ -270,6 +270,24 @@ func (q *Queries) GetCollectorsForGreenChampion(ctx context.Context, championID 
 	return items, nil
 }
 
+const getTheCollectorForAChampion = `-- name: GetTheCollectorForAChampion :one
+select id, champion_id, collector_id, pickup_day, pickup_time, created_at from champion_aggregator_assignments where champion_id=$1
+`
+
+func (q *Queries) GetTheCollectorForAChampion(ctx context.Context, championID int32) (ChampionAggregatorAssignment, error) {
+	row := q.db.QueryRowContext(ctx, getTheCollectorForAChampion, championID)
+	var i ChampionAggregatorAssignment
+	err := row.Scan(
+		&i.ID,
+		&i.ChampionID,
+		&i.CollectorID,
+		&i.PickupDay,
+		&i.PickupTime,
+		&i.CreatedAt,
+	)
+	return i, err
+}
+
 const removeAggrigatorsAssignedFromGreenChampions = `-- name: RemoveAggrigatorsAssignedFromGreenChampions :exec
 delete from champion_aggregator_assignments where champion_id =$1
 `

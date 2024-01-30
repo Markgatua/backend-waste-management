@@ -13,8 +13,7 @@ import (
 
 const getAllWasteTypes = `-- name: GetAllWasteTypes :many
 
-select waste_types.id, waste_types.name, waste_types.is_active, waste_types.parent_id, waste_types.created_at,uploads.path as file_path
-from waste_types 
+select waste_types.id, waste_types.name, waste_types.is_active, waste_types.parent_id, waste_types.created_at,uploads.path as file_path from waste_types 
 left join uploads on uploads.item_id=waste_types.id and uploads.related_table='waste_types'
 `
 
