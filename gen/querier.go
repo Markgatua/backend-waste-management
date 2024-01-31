@@ -82,7 +82,7 @@ type Querier interface {
 	GetRolePermissions(ctx context.Context, roleID int32) ([]RoleHasPermission, error)
 	GetRoles(ctx context.Context) ([]Role, error)
 	GetSubCountiesForACounty(ctx context.Context, countyID int32) ([]SubCounty, error)
-	GetTheCollectorForAChampion(ctx context.Context, championID int32) (ChampionAggregatorAssignment, error)
+	GetTheCollectorForAChampion(ctx context.Context, championID int32) (GetTheCollectorForAChampionRow, error)
 	GetUserWithEmailWithoutID(ctx context.Context, arg GetUserWithEmailWithoutIDParams) ([]User, error)
 	GetUsersWasteType(ctx context.Context) ([]GetUsersWasteTypeRow, error)
 	GetUsersWithRole(ctx context.Context) ([]GetUsersWithRoleRow, error)

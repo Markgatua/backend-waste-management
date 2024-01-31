@@ -21,15 +21,21 @@ type ChampionAggregatorAssignment struct {
 }
 
 type CollectionRequest struct {
-	ID          int32        `json:"id"`
-	ProducerID  int32        `json:"producer_id"`
-	CollectorID int32        `json:"collector_id"`
-	RequestDate time.Time    `json:"request_date"`
-	PickupDate  sql.NullTime `json:"pickup_date"`
-	Confirmed   sql.NullBool `json:"confirmed"`
-	Cancelled   sql.NullBool `json:"cancelled"`
-	Status      sql.NullBool `json:"status"`
-	CreatedAt   time.Time    `json:"created_at"`
+	ID                           int32           `json:"id"`
+	ProducerID                   int32           `json:"producer_id"`
+	CollectorID                  int32           `json:"collector_id"`
+	RequestDate                  time.Time       `json:"request_date"`
+	Location                     sql.NullString  `json:"location"`
+	AdministrativeLevel1Location sql.NullString  `json:"administrative_level_1_location"`
+	Lat                          sql.NullFloat64 `json:"lat"`
+	Lng                          sql.NullFloat64 `json:"lng"`
+	PickupDate                   sql.NullTime    `json:"pickup_date"`
+	FirstContactPerson           string          `json:"first_contact_person"`
+	SecondContactPerson          sql.NullString  `json:"second_contact_person"`
+	Confirmed                    sql.NullBool    `json:"confirmed"`
+	Cancelled                    sql.NullBool    `json:"cancelled"`
+	Status                       sql.NullBool    `json:"status"`
+	CreatedAt                    time.Time       `json:"created_at"`
 }
 
 type Company struct {

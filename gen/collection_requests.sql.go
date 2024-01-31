@@ -60,7 +60,7 @@ func (q *Queries) ConfirmCollectionRequest(ctx context.Context, arg ConfirmColle
 
 const getAllCancelledCollectionRequests = `-- name: GetAllCancelledCollectionRequests :many
 SELECT 
-    collection_requests.id, collection_requests.producer_id, collection_requests.collector_id, collection_requests.request_date, collection_requests.pickup_date, collection_requests.confirmed, collection_requests.cancelled, collection_requests.status, collection_requests.created_at,
+    collection_requests.id, collection_requests.producer_id, collection_requests.collector_id, collection_requests.request_date, collection_requests.location, collection_requests.administrative_level_1_location, collection_requests.lat, collection_requests.lng, collection_requests.pickup_date, collection_requests.first_contact_person, collection_requests.second_contact_person, collection_requests.confirmed, collection_requests.cancelled, collection_requests.status, collection_requests.created_at,
     champion.name AS aggregator_name,
     collector.name AS champion_name,
     secondcollector.name as second_collector_name
@@ -76,18 +76,24 @@ WHERE collection_requests.cancelled=$1
 `
 
 type GetAllCancelledCollectionRequestsRow struct {
-	ID                  int32          `json:"id"`
-	ProducerID          int32          `json:"producer_id"`
-	CollectorID         int32          `json:"collector_id"`
-	RequestDate         time.Time      `json:"request_date"`
-	PickupDate          sql.NullTime   `json:"pickup_date"`
-	Confirmed           sql.NullBool   `json:"confirmed"`
-	Cancelled           sql.NullBool   `json:"cancelled"`
-	Status              sql.NullBool   `json:"status"`
-	CreatedAt           time.Time      `json:"created_at"`
-	AggregatorName      sql.NullString `json:"aggregator_name"`
-	ChampionName        sql.NullString `json:"champion_name"`
-	SecondCollectorName sql.NullString `json:"second_collector_name"`
+	ID                           int32           `json:"id"`
+	ProducerID                   int32           `json:"producer_id"`
+	CollectorID                  int32           `json:"collector_id"`
+	RequestDate                  time.Time       `json:"request_date"`
+	Location                     sql.NullString  `json:"location"`
+	AdministrativeLevel1Location sql.NullString  `json:"administrative_level_1_location"`
+	Lat                          sql.NullFloat64 `json:"lat"`
+	Lng                          sql.NullFloat64 `json:"lng"`
+	PickupDate                   sql.NullTime    `json:"pickup_date"`
+	FirstContactPerson           string          `json:"first_contact_person"`
+	SecondContactPerson          sql.NullString  `json:"second_contact_person"`
+	Confirmed                    sql.NullBool    `json:"confirmed"`
+	Cancelled                    sql.NullBool    `json:"cancelled"`
+	Status                       sql.NullBool    `json:"status"`
+	CreatedAt                    time.Time       `json:"created_at"`
+	AggregatorName               sql.NullString  `json:"aggregator_name"`
+	ChampionName                 sql.NullString  `json:"champion_name"`
+	SecondCollectorName          sql.NullString  `json:"second_collector_name"`
 }
 
 func (q *Queries) GetAllCancelledCollectionRequests(ctx context.Context, cancelled sql.NullBool) ([]GetAllCancelledCollectionRequestsRow, error) {
@@ -104,7 +110,13 @@ func (q *Queries) GetAllCancelledCollectionRequests(ctx context.Context, cancell
 			&i.ProducerID,
 			&i.CollectorID,
 			&i.RequestDate,
+			&i.Location,
+			&i.AdministrativeLevel1Location,
+			&i.Lat,
+			&i.Lng,
 			&i.PickupDate,
+			&i.FirstContactPerson,
+			&i.SecondContactPerson,
 			&i.Confirmed,
 			&i.Cancelled,
 			&i.Status,
@@ -128,7 +140,7 @@ func (q *Queries) GetAllCancelledCollectionRequests(ctx context.Context, cancell
 
 const getAllCollectionRequests = `-- name: GetAllCollectionRequests :many
 SELECT 
-    collection_requests.id, collection_requests.producer_id, collection_requests.collector_id, collection_requests.request_date, collection_requests.pickup_date, collection_requests.confirmed, collection_requests.cancelled, collection_requests.status, collection_requests.created_at,
+    collection_requests.id, collection_requests.producer_id, collection_requests.collector_id, collection_requests.request_date, collection_requests.location, collection_requests.administrative_level_1_location, collection_requests.lat, collection_requests.lng, collection_requests.pickup_date, collection_requests.first_contact_person, collection_requests.second_contact_person, collection_requests.confirmed, collection_requests.cancelled, collection_requests.status, collection_requests.created_at,
     champion.name AS aggregator_name,
     collector.name AS champion_name,
     secondcollector.name as second_collector_name
@@ -143,18 +155,24 @@ LEFT JOIN
 `
 
 type GetAllCollectionRequestsRow struct {
-	ID                  int32          `json:"id"`
-	ProducerID          int32          `json:"producer_id"`
-	CollectorID         int32          `json:"collector_id"`
-	RequestDate         time.Time      `json:"request_date"`
-	PickupDate          sql.NullTime   `json:"pickup_date"`
-	Confirmed           sql.NullBool   `json:"confirmed"`
-	Cancelled           sql.NullBool   `json:"cancelled"`
-	Status              sql.NullBool   `json:"status"`
-	CreatedAt           time.Time      `json:"created_at"`
-	AggregatorName      sql.NullString `json:"aggregator_name"`
-	ChampionName        sql.NullString `json:"champion_name"`
-	SecondCollectorName sql.NullString `json:"second_collector_name"`
+	ID                           int32           `json:"id"`
+	ProducerID                   int32           `json:"producer_id"`
+	CollectorID                  int32           `json:"collector_id"`
+	RequestDate                  time.Time       `json:"request_date"`
+	Location                     sql.NullString  `json:"location"`
+	AdministrativeLevel1Location sql.NullString  `json:"administrative_level_1_location"`
+	Lat                          sql.NullFloat64 `json:"lat"`
+	Lng                          sql.NullFloat64 `json:"lng"`
+	PickupDate                   sql.NullTime    `json:"pickup_date"`
+	FirstContactPerson           string          `json:"first_contact_person"`
+	SecondContactPerson          sql.NullString  `json:"second_contact_person"`
+	Confirmed                    sql.NullBool    `json:"confirmed"`
+	Cancelled                    sql.NullBool    `json:"cancelled"`
+	Status                       sql.NullBool    `json:"status"`
+	CreatedAt                    time.Time       `json:"created_at"`
+	AggregatorName               sql.NullString  `json:"aggregator_name"`
+	ChampionName                 sql.NullString  `json:"champion_name"`
+	SecondCollectorName          sql.NullString  `json:"second_collector_name"`
 }
 
 func (q *Queries) GetAllCollectionRequests(ctx context.Context) ([]GetAllCollectionRequestsRow, error) {
@@ -171,7 +189,13 @@ func (q *Queries) GetAllCollectionRequests(ctx context.Context) ([]GetAllCollect
 			&i.ProducerID,
 			&i.CollectorID,
 			&i.RequestDate,
+			&i.Location,
+			&i.AdministrativeLevel1Location,
+			&i.Lat,
+			&i.Lng,
 			&i.PickupDate,
+			&i.FirstContactPerson,
+			&i.SecondContactPerson,
 			&i.Confirmed,
 			&i.Cancelled,
 			&i.Status,
@@ -195,7 +219,7 @@ func (q *Queries) GetAllCollectionRequests(ctx context.Context) ([]GetAllCollect
 
 const getAllCollectionRequestsForACollector = `-- name: GetAllCollectionRequestsForACollector :many
 SELECT 
-    collection_requests.id, collection_requests.producer_id, collection_requests.collector_id, collection_requests.request_date, collection_requests.pickup_date, collection_requests.confirmed, collection_requests.cancelled, collection_requests.status, collection_requests.created_at,
+    collection_requests.id, collection_requests.producer_id, collection_requests.collector_id, collection_requests.request_date, collection_requests.location, collection_requests.administrative_level_1_location, collection_requests.lat, collection_requests.lng, collection_requests.pickup_date, collection_requests.first_contact_person, collection_requests.second_contact_person, collection_requests.confirmed, collection_requests.cancelled, collection_requests.status, collection_requests.created_at,
     champion.name AS aggregator_name,
     collector.name AS champion_name,
     secondcollector.name as second_collector_name
@@ -211,18 +235,24 @@ WHERE collection_requests.collector_id=$1
 `
 
 type GetAllCollectionRequestsForACollectorRow struct {
-	ID                  int32          `json:"id"`
-	ProducerID          int32          `json:"producer_id"`
-	CollectorID         int32          `json:"collector_id"`
-	RequestDate         time.Time      `json:"request_date"`
-	PickupDate          sql.NullTime   `json:"pickup_date"`
-	Confirmed           sql.NullBool   `json:"confirmed"`
-	Cancelled           sql.NullBool   `json:"cancelled"`
-	Status              sql.NullBool   `json:"status"`
-	CreatedAt           time.Time      `json:"created_at"`
-	AggregatorName      sql.NullString `json:"aggregator_name"`
-	ChampionName        sql.NullString `json:"champion_name"`
-	SecondCollectorName sql.NullString `json:"second_collector_name"`
+	ID                           int32           `json:"id"`
+	ProducerID                   int32           `json:"producer_id"`
+	CollectorID                  int32           `json:"collector_id"`
+	RequestDate                  time.Time       `json:"request_date"`
+	Location                     sql.NullString  `json:"location"`
+	AdministrativeLevel1Location sql.NullString  `json:"administrative_level_1_location"`
+	Lat                          sql.NullFloat64 `json:"lat"`
+	Lng                          sql.NullFloat64 `json:"lng"`
+	PickupDate                   sql.NullTime    `json:"pickup_date"`
+	FirstContactPerson           string          `json:"first_contact_person"`
+	SecondContactPerson          sql.NullString  `json:"second_contact_person"`
+	Confirmed                    sql.NullBool    `json:"confirmed"`
+	Cancelled                    sql.NullBool    `json:"cancelled"`
+	Status                       sql.NullBool    `json:"status"`
+	CreatedAt                    time.Time       `json:"created_at"`
+	AggregatorName               sql.NullString  `json:"aggregator_name"`
+	ChampionName                 sql.NullString  `json:"champion_name"`
+	SecondCollectorName          sql.NullString  `json:"second_collector_name"`
 }
 
 func (q *Queries) GetAllCollectionRequestsForACollector(ctx context.Context, collectorID int32) ([]GetAllCollectionRequestsForACollectorRow, error) {
@@ -239,7 +269,13 @@ func (q *Queries) GetAllCollectionRequestsForACollector(ctx context.Context, col
 			&i.ProducerID,
 			&i.CollectorID,
 			&i.RequestDate,
+			&i.Location,
+			&i.AdministrativeLevel1Location,
+			&i.Lat,
+			&i.Lng,
 			&i.PickupDate,
+			&i.FirstContactPerson,
+			&i.SecondContactPerson,
 			&i.Confirmed,
 			&i.Cancelled,
 			&i.Status,
@@ -263,7 +299,7 @@ func (q *Queries) GetAllCollectionRequestsForACollector(ctx context.Context, col
 
 const getAllCompletedCollectionRequests = `-- name: GetAllCompletedCollectionRequests :many
 SELECT 
-    collection_requests.id, collection_requests.producer_id, collection_requests.collector_id, collection_requests.request_date, collection_requests.pickup_date, collection_requests.confirmed, collection_requests.cancelled, collection_requests.status, collection_requests.created_at,
+    collection_requests.id, collection_requests.producer_id, collection_requests.collector_id, collection_requests.request_date, collection_requests.location, collection_requests.administrative_level_1_location, collection_requests.lat, collection_requests.lng, collection_requests.pickup_date, collection_requests.first_contact_person, collection_requests.second_contact_person, collection_requests.confirmed, collection_requests.cancelled, collection_requests.status, collection_requests.created_at,
     champion.name AS aggregator_name,
     collector.name AS champion_name,
     secondcollector.name as second_collector_name
@@ -279,18 +315,24 @@ WHERE collection_requests.status=$1
 `
 
 type GetAllCompletedCollectionRequestsRow struct {
-	ID                  int32          `json:"id"`
-	ProducerID          int32          `json:"producer_id"`
-	CollectorID         int32          `json:"collector_id"`
-	RequestDate         time.Time      `json:"request_date"`
-	PickupDate          sql.NullTime   `json:"pickup_date"`
-	Confirmed           sql.NullBool   `json:"confirmed"`
-	Cancelled           sql.NullBool   `json:"cancelled"`
-	Status              sql.NullBool   `json:"status"`
-	CreatedAt           time.Time      `json:"created_at"`
-	AggregatorName      sql.NullString `json:"aggregator_name"`
-	ChampionName        sql.NullString `json:"champion_name"`
-	SecondCollectorName sql.NullString `json:"second_collector_name"`
+	ID                           int32           `json:"id"`
+	ProducerID                   int32           `json:"producer_id"`
+	CollectorID                  int32           `json:"collector_id"`
+	RequestDate                  time.Time       `json:"request_date"`
+	Location                     sql.NullString  `json:"location"`
+	AdministrativeLevel1Location sql.NullString  `json:"administrative_level_1_location"`
+	Lat                          sql.NullFloat64 `json:"lat"`
+	Lng                          sql.NullFloat64 `json:"lng"`
+	PickupDate                   sql.NullTime    `json:"pickup_date"`
+	FirstContactPerson           string          `json:"first_contact_person"`
+	SecondContactPerson          sql.NullString  `json:"second_contact_person"`
+	Confirmed                    sql.NullBool    `json:"confirmed"`
+	Cancelled                    sql.NullBool    `json:"cancelled"`
+	Status                       sql.NullBool    `json:"status"`
+	CreatedAt                    time.Time       `json:"created_at"`
+	AggregatorName               sql.NullString  `json:"aggregator_name"`
+	ChampionName                 sql.NullString  `json:"champion_name"`
+	SecondCollectorName          sql.NullString  `json:"second_collector_name"`
 }
 
 func (q *Queries) GetAllCompletedCollectionRequests(ctx context.Context, status sql.NullBool) ([]GetAllCompletedCollectionRequestsRow, error) {
@@ -307,7 +349,13 @@ func (q *Queries) GetAllCompletedCollectionRequests(ctx context.Context, status 
 			&i.ProducerID,
 			&i.CollectorID,
 			&i.RequestDate,
+			&i.Location,
+			&i.AdministrativeLevel1Location,
+			&i.Lat,
+			&i.Lng,
 			&i.PickupDate,
+			&i.FirstContactPerson,
+			&i.SecondContactPerson,
 			&i.Confirmed,
 			&i.Cancelled,
 			&i.Status,
@@ -331,7 +379,7 @@ func (q *Queries) GetAllCompletedCollectionRequests(ctx context.Context, status 
 
 const getAllPendingCollectionRequests = `-- name: GetAllPendingCollectionRequests :many
 SELECT 
-    collection_requests.id, collection_requests.producer_id, collection_requests.collector_id, collection_requests.request_date, collection_requests.pickup_date, collection_requests.confirmed, collection_requests.cancelled, collection_requests.status, collection_requests.created_at,
+    collection_requests.id, collection_requests.producer_id, collection_requests.collector_id, collection_requests.request_date, collection_requests.location, collection_requests.administrative_level_1_location, collection_requests.lat, collection_requests.lng, collection_requests.pickup_date, collection_requests.first_contact_person, collection_requests.second_contact_person, collection_requests.confirmed, collection_requests.cancelled, collection_requests.status, collection_requests.created_at,
     champion.name AS aggregator_name,
     collector.name AS champion_name,
     secondcollector.name as second_collector_name
@@ -347,18 +395,24 @@ WHERE collection_requests.confirmed=$1
 `
 
 type GetAllPendingCollectionRequestsRow struct {
-	ID                  int32          `json:"id"`
-	ProducerID          int32          `json:"producer_id"`
-	CollectorID         int32          `json:"collector_id"`
-	RequestDate         time.Time      `json:"request_date"`
-	PickupDate          sql.NullTime   `json:"pickup_date"`
-	Confirmed           sql.NullBool   `json:"confirmed"`
-	Cancelled           sql.NullBool   `json:"cancelled"`
-	Status              sql.NullBool   `json:"status"`
-	CreatedAt           time.Time      `json:"created_at"`
-	AggregatorName      sql.NullString `json:"aggregator_name"`
-	ChampionName        sql.NullString `json:"champion_name"`
-	SecondCollectorName sql.NullString `json:"second_collector_name"`
+	ID                           int32           `json:"id"`
+	ProducerID                   int32           `json:"producer_id"`
+	CollectorID                  int32           `json:"collector_id"`
+	RequestDate                  time.Time       `json:"request_date"`
+	Location                     sql.NullString  `json:"location"`
+	AdministrativeLevel1Location sql.NullString  `json:"administrative_level_1_location"`
+	Lat                          sql.NullFloat64 `json:"lat"`
+	Lng                          sql.NullFloat64 `json:"lng"`
+	PickupDate                   sql.NullTime    `json:"pickup_date"`
+	FirstContactPerson           string          `json:"first_contact_person"`
+	SecondContactPerson          sql.NullString  `json:"second_contact_person"`
+	Confirmed                    sql.NullBool    `json:"confirmed"`
+	Cancelled                    sql.NullBool    `json:"cancelled"`
+	Status                       sql.NullBool    `json:"status"`
+	CreatedAt                    time.Time       `json:"created_at"`
+	AggregatorName               sql.NullString  `json:"aggregator_name"`
+	ChampionName                 sql.NullString  `json:"champion_name"`
+	SecondCollectorName          sql.NullString  `json:"second_collector_name"`
 }
 
 func (q *Queries) GetAllPendingCollectionRequests(ctx context.Context, confirmed sql.NullBool) ([]GetAllPendingCollectionRequestsRow, error) {
@@ -375,7 +429,13 @@ func (q *Queries) GetAllPendingCollectionRequests(ctx context.Context, confirmed
 			&i.ProducerID,
 			&i.CollectorID,
 			&i.RequestDate,
+			&i.Location,
+			&i.AdministrativeLevel1Location,
+			&i.Lat,
+			&i.Lng,
 			&i.PickupDate,
+			&i.FirstContactPerson,
+			&i.SecondContactPerson,
 			&i.Confirmed,
 			&i.Cancelled,
 			&i.Status,
@@ -399,7 +459,7 @@ func (q *Queries) GetAllPendingCollectionRequests(ctx context.Context, confirmed
 
 const getAllPendingConfirmationCollectionRequests = `-- name: GetAllPendingConfirmationCollectionRequests :many
 SELECT 
-    collection_requests.id, collection_requests.producer_id, collection_requests.collector_id, collection_requests.request_date, collection_requests.pickup_date, collection_requests.confirmed, collection_requests.cancelled, collection_requests.status, collection_requests.created_at,
+    collection_requests.id, collection_requests.producer_id, collection_requests.collector_id, collection_requests.request_date, collection_requests.location, collection_requests.administrative_level_1_location, collection_requests.lat, collection_requests.lng, collection_requests.pickup_date, collection_requests.first_contact_person, collection_requests.second_contact_person, collection_requests.confirmed, collection_requests.cancelled, collection_requests.status, collection_requests.created_at,
     champion.name AS aggregator_name,
     collector.name AS champion_name,
     secondcollector.name as second_collector_name
@@ -415,18 +475,24 @@ WHERE collection_requests.confirmed=$1
 `
 
 type GetAllPendingConfirmationCollectionRequestsRow struct {
-	ID                  int32          `json:"id"`
-	ProducerID          int32          `json:"producer_id"`
-	CollectorID         int32          `json:"collector_id"`
-	RequestDate         time.Time      `json:"request_date"`
-	PickupDate          sql.NullTime   `json:"pickup_date"`
-	Confirmed           sql.NullBool   `json:"confirmed"`
-	Cancelled           sql.NullBool   `json:"cancelled"`
-	Status              sql.NullBool   `json:"status"`
-	CreatedAt           time.Time      `json:"created_at"`
-	AggregatorName      sql.NullString `json:"aggregator_name"`
-	ChampionName        sql.NullString `json:"champion_name"`
-	SecondCollectorName sql.NullString `json:"second_collector_name"`
+	ID                           int32           `json:"id"`
+	ProducerID                   int32           `json:"producer_id"`
+	CollectorID                  int32           `json:"collector_id"`
+	RequestDate                  time.Time       `json:"request_date"`
+	Location                     sql.NullString  `json:"location"`
+	AdministrativeLevel1Location sql.NullString  `json:"administrative_level_1_location"`
+	Lat                          sql.NullFloat64 `json:"lat"`
+	Lng                          sql.NullFloat64 `json:"lng"`
+	PickupDate                   sql.NullTime    `json:"pickup_date"`
+	FirstContactPerson           string          `json:"first_contact_person"`
+	SecondContactPerson          sql.NullString  `json:"second_contact_person"`
+	Confirmed                    sql.NullBool    `json:"confirmed"`
+	Cancelled                    sql.NullBool    `json:"cancelled"`
+	Status                       sql.NullBool    `json:"status"`
+	CreatedAt                    time.Time       `json:"created_at"`
+	AggregatorName               sql.NullString  `json:"aggregator_name"`
+	ChampionName                 sql.NullString  `json:"champion_name"`
+	SecondCollectorName          sql.NullString  `json:"second_collector_name"`
 }
 
 func (q *Queries) GetAllPendingConfirmationCollectionRequests(ctx context.Context, confirmed sql.NullBool) ([]GetAllPendingConfirmationCollectionRequestsRow, error) {
@@ -443,7 +509,13 @@ func (q *Queries) GetAllPendingConfirmationCollectionRequests(ctx context.Contex
 			&i.ProducerID,
 			&i.CollectorID,
 			&i.RequestDate,
+			&i.Location,
+			&i.AdministrativeLevel1Location,
+			&i.Lat,
+			&i.Lng,
 			&i.PickupDate,
+			&i.FirstContactPerson,
+			&i.SecondContactPerson,
 			&i.Confirmed,
 			&i.Cancelled,
 			&i.Status,
@@ -467,7 +539,7 @@ func (q *Queries) GetAllPendingConfirmationCollectionRequests(ctx context.Contex
 
 const getAllProducerCompletedCollectionRequests = `-- name: GetAllProducerCompletedCollectionRequests :many
 SELECT
-    collection_requests.id, collection_requests.producer_id, collection_requests.collector_id, collection_requests.request_date, collection_requests.pickup_date, collection_requests.confirmed, collection_requests.cancelled, collection_requests.status, collection_requests.created_at,
+    collection_requests.id, collection_requests.producer_id, collection_requests.collector_id, collection_requests.request_date, collection_requests.location, collection_requests.administrative_level_1_location, collection_requests.lat, collection_requests.lng, collection_requests.pickup_date, collection_requests.first_contact_person, collection_requests.second_contact_person, collection_requests.confirmed, collection_requests.cancelled, collection_requests.status, collection_requests.created_at,
     collector.name AS collector_name,
     CAST(SUM(totals.weight) AS DECIMAL(10,2)) AS total_weight
 FROM
@@ -483,17 +555,23 @@ GROUP BY
 `
 
 type GetAllProducerCompletedCollectionRequestsRow struct {
-	ID            int32          `json:"id"`
-	ProducerID    int32          `json:"producer_id"`
-	CollectorID   int32          `json:"collector_id"`
-	RequestDate   time.Time      `json:"request_date"`
-	PickupDate    sql.NullTime   `json:"pickup_date"`
-	Confirmed     sql.NullBool   `json:"confirmed"`
-	Cancelled     sql.NullBool   `json:"cancelled"`
-	Status        sql.NullBool   `json:"status"`
-	CreatedAt     time.Time      `json:"created_at"`
-	CollectorName sql.NullString `json:"collector_name"`
-	TotalWeight   string         `json:"total_weight"`
+	ID                           int32           `json:"id"`
+	ProducerID                   int32           `json:"producer_id"`
+	CollectorID                  int32           `json:"collector_id"`
+	RequestDate                  time.Time       `json:"request_date"`
+	Location                     sql.NullString  `json:"location"`
+	AdministrativeLevel1Location sql.NullString  `json:"administrative_level_1_location"`
+	Lat                          sql.NullFloat64 `json:"lat"`
+	Lng                          sql.NullFloat64 `json:"lng"`
+	PickupDate                   sql.NullTime    `json:"pickup_date"`
+	FirstContactPerson           string          `json:"first_contact_person"`
+	SecondContactPerson          sql.NullString  `json:"second_contact_person"`
+	Confirmed                    sql.NullBool    `json:"confirmed"`
+	Cancelled                    sql.NullBool    `json:"cancelled"`
+	Status                       sql.NullBool    `json:"status"`
+	CreatedAt                    time.Time       `json:"created_at"`
+	CollectorName                sql.NullString  `json:"collector_name"`
+	TotalWeight                  string          `json:"total_weight"`
 }
 
 func (q *Queries) GetAllProducerCompletedCollectionRequests(ctx context.Context, producerID int32) ([]GetAllProducerCompletedCollectionRequestsRow, error) {
@@ -510,7 +588,13 @@ func (q *Queries) GetAllProducerCompletedCollectionRequests(ctx context.Context,
 			&i.ProducerID,
 			&i.CollectorID,
 			&i.RequestDate,
+			&i.Location,
+			&i.AdministrativeLevel1Location,
+			&i.Lat,
+			&i.Lng,
 			&i.PickupDate,
+			&i.FirstContactPerson,
+			&i.SecondContactPerson,
 			&i.Confirmed,
 			&i.Cancelled,
 			&i.Status,
@@ -533,7 +617,7 @@ func (q *Queries) GetAllProducerCompletedCollectionRequests(ctx context.Context,
 
 const getAllProducerPendingCollectionRequests = `-- name: GetAllProducerPendingCollectionRequests :many
 SELECT
-    collection_requests.id, collection_requests.producer_id, collection_requests.collector_id, collection_requests.request_date, collection_requests.pickup_date, collection_requests.confirmed, collection_requests.cancelled, collection_requests.status, collection_requests.created_at,
+    collection_requests.id, collection_requests.producer_id, collection_requests.collector_id, collection_requests.request_date, collection_requests.location, collection_requests.administrative_level_1_location, collection_requests.lat, collection_requests.lng, collection_requests.pickup_date, collection_requests.first_contact_person, collection_requests.second_contact_person, collection_requests.confirmed, collection_requests.cancelled, collection_requests.status, collection_requests.created_at,
     collector.name AS collector_name,
     CAST(SUM(totals.weight) AS DECIMAL(10,2)) AS total_weight
 FROM
@@ -549,17 +633,23 @@ GROUP BY
 `
 
 type GetAllProducerPendingCollectionRequestsRow struct {
-	ID            int32          `json:"id"`
-	ProducerID    int32          `json:"producer_id"`
-	CollectorID   int32          `json:"collector_id"`
-	RequestDate   time.Time      `json:"request_date"`
-	PickupDate    sql.NullTime   `json:"pickup_date"`
-	Confirmed     sql.NullBool   `json:"confirmed"`
-	Cancelled     sql.NullBool   `json:"cancelled"`
-	Status        sql.NullBool   `json:"status"`
-	CreatedAt     time.Time      `json:"created_at"`
-	CollectorName sql.NullString `json:"collector_name"`
-	TotalWeight   string         `json:"total_weight"`
+	ID                           int32           `json:"id"`
+	ProducerID                   int32           `json:"producer_id"`
+	CollectorID                  int32           `json:"collector_id"`
+	RequestDate                  time.Time       `json:"request_date"`
+	Location                     sql.NullString  `json:"location"`
+	AdministrativeLevel1Location sql.NullString  `json:"administrative_level_1_location"`
+	Lat                          sql.NullFloat64 `json:"lat"`
+	Lng                          sql.NullFloat64 `json:"lng"`
+	PickupDate                   sql.NullTime    `json:"pickup_date"`
+	FirstContactPerson           string          `json:"first_contact_person"`
+	SecondContactPerson          sql.NullString  `json:"second_contact_person"`
+	Confirmed                    sql.NullBool    `json:"confirmed"`
+	Cancelled                    sql.NullBool    `json:"cancelled"`
+	Status                       sql.NullBool    `json:"status"`
+	CreatedAt                    time.Time       `json:"created_at"`
+	CollectorName                sql.NullString  `json:"collector_name"`
+	TotalWeight                  string          `json:"total_weight"`
 }
 
 func (q *Queries) GetAllProducerPendingCollectionRequests(ctx context.Context, producerID int32) ([]GetAllProducerPendingCollectionRequestsRow, error) {
@@ -576,7 +666,13 @@ func (q *Queries) GetAllProducerPendingCollectionRequests(ctx context.Context, p
 			&i.ProducerID,
 			&i.CollectorID,
 			&i.RequestDate,
+			&i.Location,
+			&i.AdministrativeLevel1Location,
+			&i.Lat,
+			&i.Lng,
 			&i.PickupDate,
+			&i.FirstContactPerson,
+			&i.SecondContactPerson,
 			&i.Confirmed,
 			&i.Cancelled,
 			&i.Status,
@@ -599,7 +695,7 @@ func (q *Queries) GetAllProducerPendingCollectionRequests(ctx context.Context, p
 
 const getCollectionStats = `-- name: GetCollectionStats :many
 SELECT
-    collection_requests.id, collection_requests.producer_id, collection_requests.collector_id, collection_requests.request_date, collection_requests.pickup_date, collection_requests.confirmed, collection_requests.cancelled, collection_requests.status, collection_requests.created_at,
+    collection_requests.id, collection_requests.producer_id, collection_requests.collector_id, collection_requests.request_date, collection_requests.location, collection_requests.administrative_level_1_location, collection_requests.lat, collection_requests.lng, collection_requests.pickup_date, collection_requests.first_contact_person, collection_requests.second_contact_person, collection_requests.confirmed, collection_requests.cancelled, collection_requests.status, collection_requests.created_at,
     CAST(SUM(totals.weight) AS DECIMAL(10,2)) AS total_weight
 FROM
     collection_requests
@@ -612,16 +708,22 @@ GROUP BY
 `
 
 type GetCollectionStatsRow struct {
-	ID          int32        `json:"id"`
-	ProducerID  int32        `json:"producer_id"`
-	CollectorID int32        `json:"collector_id"`
-	RequestDate time.Time    `json:"request_date"`
-	PickupDate  sql.NullTime `json:"pickup_date"`
-	Confirmed   sql.NullBool `json:"confirmed"`
-	Cancelled   sql.NullBool `json:"cancelled"`
-	Status      sql.NullBool `json:"status"`
-	CreatedAt   time.Time    `json:"created_at"`
-	TotalWeight string       `json:"total_weight"`
+	ID                           int32           `json:"id"`
+	ProducerID                   int32           `json:"producer_id"`
+	CollectorID                  int32           `json:"collector_id"`
+	RequestDate                  time.Time       `json:"request_date"`
+	Location                     sql.NullString  `json:"location"`
+	AdministrativeLevel1Location sql.NullString  `json:"administrative_level_1_location"`
+	Lat                          sql.NullFloat64 `json:"lat"`
+	Lng                          sql.NullFloat64 `json:"lng"`
+	PickupDate                   sql.NullTime    `json:"pickup_date"`
+	FirstContactPerson           string          `json:"first_contact_person"`
+	SecondContactPerson          sql.NullString  `json:"second_contact_person"`
+	Confirmed                    sql.NullBool    `json:"confirmed"`
+	Cancelled                    sql.NullBool    `json:"cancelled"`
+	Status                       sql.NullBool    `json:"status"`
+	CreatedAt                    time.Time       `json:"created_at"`
+	TotalWeight                  string          `json:"total_weight"`
 }
 
 func (q *Queries) GetCollectionStats(ctx context.Context, producerID int32) ([]GetCollectionStatsRow, error) {
@@ -638,7 +740,13 @@ func (q *Queries) GetCollectionStats(ctx context.Context, producerID int32) ([]G
 			&i.ProducerID,
 			&i.CollectorID,
 			&i.RequestDate,
+			&i.Location,
+			&i.AdministrativeLevel1Location,
+			&i.Lat,
+			&i.Lng,
 			&i.PickupDate,
+			&i.FirstContactPerson,
+			&i.SecondContactPerson,
 			&i.Confirmed,
 			&i.Cancelled,
 			&i.Status,
@@ -660,7 +768,7 @@ func (q *Queries) GetCollectionStats(ctx context.Context, producerID int32) ([]G
 
 const getLatestCollection = `-- name: GetLatestCollection :one
 SELECT
-    collection_requests.id, collection_requests.producer_id, collection_requests.collector_id, collection_requests.request_date, collection_requests.pickup_date, collection_requests.confirmed, collection_requests.cancelled, collection_requests.status, collection_requests.created_at,
+    collection_requests.id, collection_requests.producer_id, collection_requests.collector_id, collection_requests.request_date, collection_requests.location, collection_requests.administrative_level_1_location, collection_requests.lat, collection_requests.lng, collection_requests.pickup_date, collection_requests.first_contact_person, collection_requests.second_contact_person, collection_requests.confirmed, collection_requests.cancelled, collection_requests.status, collection_requests.created_at,
     collector.name AS collector_name,
     CAST(SUM(totals.weight) AS DECIMAL(10,2)) AS total_weight
 FROM
@@ -676,17 +784,23 @@ GROUP BY
 `
 
 type GetLatestCollectionRow struct {
-	ID            int32          `json:"id"`
-	ProducerID    int32          `json:"producer_id"`
-	CollectorID   int32          `json:"collector_id"`
-	RequestDate   time.Time      `json:"request_date"`
-	PickupDate    sql.NullTime   `json:"pickup_date"`
-	Confirmed     sql.NullBool   `json:"confirmed"`
-	Cancelled     sql.NullBool   `json:"cancelled"`
-	Status        sql.NullBool   `json:"status"`
-	CreatedAt     time.Time      `json:"created_at"`
-	CollectorName sql.NullString `json:"collector_name"`
-	TotalWeight   string         `json:"total_weight"`
+	ID                           int32           `json:"id"`
+	ProducerID                   int32           `json:"producer_id"`
+	CollectorID                  int32           `json:"collector_id"`
+	RequestDate                  time.Time       `json:"request_date"`
+	Location                     sql.NullString  `json:"location"`
+	AdministrativeLevel1Location sql.NullString  `json:"administrative_level_1_location"`
+	Lat                          sql.NullFloat64 `json:"lat"`
+	Lng                          sql.NullFloat64 `json:"lng"`
+	PickupDate                   sql.NullTime    `json:"pickup_date"`
+	FirstContactPerson           string          `json:"first_contact_person"`
+	SecondContactPerson          sql.NullString  `json:"second_contact_person"`
+	Confirmed                    sql.NullBool    `json:"confirmed"`
+	Cancelled                    sql.NullBool    `json:"cancelled"`
+	Status                       sql.NullBool    `json:"status"`
+	CreatedAt                    time.Time       `json:"created_at"`
+	CollectorName                sql.NullString  `json:"collector_name"`
+	TotalWeight                  string          `json:"total_weight"`
 }
 
 func (q *Queries) GetLatestCollection(ctx context.Context, id int32) (GetLatestCollectionRow, error) {
@@ -697,7 +811,13 @@ func (q *Queries) GetLatestCollection(ctx context.Context, id int32) (GetLatestC
 		&i.ProducerID,
 		&i.CollectorID,
 		&i.RequestDate,
+		&i.Location,
+		&i.AdministrativeLevel1Location,
+		&i.Lat,
+		&i.Lng,
 		&i.PickupDate,
+		&i.FirstContactPerson,
+		&i.SecondContactPerson,
 		&i.Confirmed,
 		&i.Cancelled,
 		&i.Status,
@@ -709,7 +829,7 @@ func (q *Queries) GetLatestCollection(ctx context.Context, id int32) (GetLatestC
 }
 
 const getProducerLatestCollectionId = `-- name: GetProducerLatestCollectionId :one
-SELECT id, producer_id, collector_id, request_date, pickup_date, confirmed, cancelled, status, created_at
+SELECT id, producer_id, collector_id, request_date, location, administrative_level_1_location, lat, lng, pickup_date, first_contact_person, second_contact_person, confirmed, cancelled, status, created_at
 FROM collection_requests
 WHERE producer_id = $1
 ORDER BY created_at DESC
@@ -724,7 +844,13 @@ func (q *Queries) GetProducerLatestCollectionId(ctx context.Context, producerID 
 		&i.ProducerID,
 		&i.CollectorID,
 		&i.RequestDate,
+		&i.Location,
+		&i.AdministrativeLevel1Location,
+		&i.Lat,
+		&i.Lng,
 		&i.PickupDate,
+		&i.FirstContactPerson,
+		&i.SecondContactPerson,
 		&i.Confirmed,
 		&i.Cancelled,
 		&i.Status,
@@ -781,18 +907,32 @@ func (q *Queries) GetWasteItemsProducerData(ctx context.Context, producerID int3
 
 const insertNewCollectionRequest = `-- name: InsertNewCollectionRequest :exec
 
-insert into collection_requests( producer_id,collector_id,request_date ) values ($1, $2, $3) returning id, producer_id, collector_id, request_date, pickup_date, confirmed, cancelled, status, created_at
+insert into collection_requests( producer_id,collector_id,request_date,location,lat,lng,administrative_level_1_location,first_contact_person ) values ($1, $2, $3, $4, $5, $6, $7, $8) returning id, producer_id, collector_id, request_date, location, administrative_level_1_location, lat, lng, pickup_date, first_contact_person, second_contact_person, confirmed, cancelled, status, created_at
 `
 
 type InsertNewCollectionRequestParams struct {
-	ProducerID  int32     `json:"producer_id"`
-	CollectorID int32     `json:"collector_id"`
-	RequestDate time.Time `json:"request_date"`
+	ProducerID                   int32           `json:"producer_id"`
+	CollectorID                  int32           `json:"collector_id"`
+	RequestDate                  time.Time       `json:"request_date"`
+	Location                     sql.NullString  `json:"location"`
+	Lat                          sql.NullFloat64 `json:"lat"`
+	Lng                          sql.NullFloat64 `json:"lng"`
+	AdministrativeLevel1Location sql.NullString  `json:"administrative_level_1_location"`
+	FirstContactPerson           string          `json:"first_contact_person"`
 }
 
 // collection_requests.sql
 func (q *Queries) InsertNewCollectionRequest(ctx context.Context, arg InsertNewCollectionRequestParams) error {
-	_, err := q.db.ExecContext(ctx, insertNewCollectionRequest, arg.ProducerID, arg.CollectorID, arg.RequestDate)
+	_, err := q.db.ExecContext(ctx, insertNewCollectionRequest,
+		arg.ProducerID,
+		arg.CollectorID,
+		arg.RequestDate,
+		arg.Location,
+		arg.Lat,
+		arg.Lng,
+		arg.AdministrativeLevel1Location,
+		arg.FirstContactPerson,
+	)
 	return err
 }
 
