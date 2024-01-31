@@ -218,6 +218,7 @@ func runProgram() {
 	router.POST("cancel_collection_request", requestCollectionController.CancelCollectionRequest)
 	router.POST("update_collection_request", requestCollectionController.UpdateCollectionRequest)
 	router.GET("collections_weight_totals/:id", requestCollectionController.CollectionWeightTotals)
+	router.GET("my_next_collection_date/:id",requestCollectionController.GetTheCollectorForAChampion)
 	//--------------------------------------------------------------------------------------------
 
 	//--------------------------- Request Collections -----------------------------------------------------
