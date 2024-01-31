@@ -498,6 +498,7 @@ func (requestCollectionController RequestCollectionController) GetTheCollectorFo
 		PickupDay   sql.NullString `json:"pickup_day"`
 		PickupTime  sql.NullString `json:"pickup_time"`
 		NextDate string `json:"next_date"`
+		Collector string `json:"collector"`
 	}
 
 	
@@ -525,6 +526,7 @@ func (requestCollectionController RequestCollectionController) GetTheCollectorFo
 		data2.PickupTime=data.PickupTime
 		data2.PickupDay=data.PickupDay
 		data2.NextDate="Today"
+		data2.Collector=data.CollectorName.String
 
 		context.JSON(http.StatusOK, gin.H{
 			"error":   false,
@@ -542,6 +544,7 @@ func (requestCollectionController RequestCollectionController) GetTheCollectorFo
 		data2.PickupTime=data.PickupTime
 		data2.PickupDay=data.PickupDay
 		data2.NextDate=nextMonday.Format("02-01-2006")
+		data2.Collector=data.CollectorName.String
 
 
 		context.JSON(http.StatusOK, gin.H{

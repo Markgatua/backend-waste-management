@@ -61,5 +61,8 @@ insert into champion_aggregator_assignments(champion_id,collector_id,pickup_day,
 
 
 -- name: GetTheCollectorForAChampion :one
-select * from champion_aggregator_assignments where champion_id=$1;
+select champion_aggregator_assignments.*, collector.name AS collector_name  from champion_aggregator_assignments
+LEFT JOIN 
+    companies AS collector ON collector.id = champion_aggregator_assignments.collector_id
+where champion_id=$1;
 
