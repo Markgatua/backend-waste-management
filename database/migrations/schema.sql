@@ -204,14 +204,13 @@ CREATE TABLE collection_requests (
   lat float NULL,
   lng float NULL,
   pickup_date TIMESTAMP NULL,
+  status INTEGER NOT NULL, --1 pending, 2 confirmed, 3 on the way, 4 cancelled, 5 completed  
   first_contact_person VARCHAR(255) NOT NULL,
   second_contact_person VARCHAR(255),
-
-  confirmed BOOLEAN DEFAULT FALSE,
-  cancelled BOOLEAN DEFAULT FALSE,
-  status BOOLEAN DEFAULT FALSE,
   created_at TIMESTAMP NOT NULL DEFAULT NOW()
 );
+
+ALTER TABLE collection_requests ADD CONSTRAINT collection_requests_status CHECK (status IN (1,2,3,4,5)); 
 
 CREATE TABLE waste_items (
   id SERIAL PRIMARY KEY,
@@ -233,18 +232,6 @@ CREATE TABLE notifications (
 );
 
 CREATE UNIQUE INDEX waste_types_unique_name_idx on waste_types (LOWER(name));  
-
-CREATE TABLE waste_collections (
-  id SERIAL PRIMARY KEY,
-  date TIMESTAMP NOT NULL,
-  champion_id INTEGER,
-  FOREIGN Key (champion_id) REFERENCES users(id),
-  collector_id INTEGER,
-  FOREIGN Key (collector_id) REFERENCES users(id),
-  waste JSON,
-  is_collected BOOLEAN DEFAULT FALSE,
-  created_at TIMESTAMP NOT NULL DEFAULT NOW()
-);
 
 CREATE TABLE waste_for_sale (
   id SERIAL PRIMARY KEY,
