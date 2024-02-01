@@ -195,6 +195,7 @@ func (requestCollectionController RequestCollectionController) CancelCollectionR
 }
 
 func (requestCollectionController RequestCollectionController) UpdateCollectionRequest(context *gin.Context) {
+	
 	var params UpdateCollectionRequestParams
 	err := context.ShouldBindJSON(&params)
 	if err != nil {
@@ -553,4 +554,35 @@ func (requestCollectionController RequestCollectionController) GetTheCollectorFo
 			"data":    data2,
 		})
 	}
+}
+
+func (requestCollectionController RequestCollectionController) GetAggregatorNewRequests(context *gin.Context){
+
+	id, _ := context.Params.Get("id")
+	var id32 int32
+	fmt.Sscan(id, &id32)
+
+	fmt.Println("********************");
+	fmt.Println(id32);
+
+	
+	data,insertError := gen.REPO.GetAggregatorNewRequests(context,id32)
+
+	if insertError != nil {
+		logger.Log("RequestCollectionController",insertError.Error(),logger.LOG_LEVEL_ERROR)
+
+		context.JSON(http.StatusUnprocessableEntity, gin.H{
+			"error":   true,
+			"message": "Failed to Fetch Aggregator New Requests",
+		})
+		return
+	}else{
+		//logger.Log("RequestCollectionController",insertError.Error(),logger.LOG_LEVEL_ERROR)
+	}
+
+	context.JSON(http.StatusOK, gin.H{
+		"error":   false,
+		"message": "Successfully Fetched Aggregators new Requests",
+		"data": data,
+	})
 }

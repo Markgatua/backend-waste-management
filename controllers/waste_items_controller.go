@@ -1,7 +1,7 @@
 package controllers
 
 import (
-	"fmt"
+	_"fmt"
 	"net/http"
 	"ttnmwastemanagementsystem/gen"
 
@@ -12,14 +12,17 @@ type WasteItemsController struct{}
 
 type InsertWasteItemParams struct {
 	CollectionRequestID int32 `json:"collection_request_id"`
-	WasteTypeID         int32 `json:"waste_type_id"`
-	Weight              string        `json:"weight"`
+	Waste []Waste `json:"waste"`
+}
+type Waste struct {
+	WasteTypeID int64  `json:"waste_type_id"`
+	Weight      string `json:"weight"`
 }
 
 func (wasteItemsController WasteItemsController) InsertWasteItem(context *gin.Context) {
 	var params InsertWasteItemParams
-	err := context.ShouldBindJSON(&params)
-	if err != nil {
+
+	if err := context.ShouldBindJSON(&params); err != nil {
 		context.JSON(http.StatusUnprocessableEntity, gin.H{
 			"error":   true,
 			"message": err.Error(),
@@ -27,26 +30,21 @@ func (wasteItemsController WasteItemsController) InsertWasteItem(context *gin.Co
 		return
 	}
 
-	wasteType, insertError := gen.REPO.InsertWasteItem(context, gen.InsertWasteItemParams{
-		CollectionRequestID: params.CollectionRequestID,
-		WasteTypeID: params.WasteTypeID,
-		Weight: params.Weight,
-	})
-
-	fmt.Println(insertError)
-
-	if insertError != nil {
-		context.JSON(http.StatusUnprocessableEntity, gin.H{
-			"error":   true,
-			"message": "Failed to add skuS",
+	// Iterate through waste items and insert each one
+	for _, wasteItem := range params.Waste {
+		collectedWaste,insertError := gen.REPO.InsertWasteItem(context, gen.InsertWasteItemParams{
+			CollectionRequestID: params.CollectionRequestID,
+			WasteTypeID:         int32(wasteItem.WasteTypeID),
+			Weight:              wasteItem.Weight,
 		})
-		return
+
+		if insertError != nil {
+			context.JSON(http.StatusUnprocessableEntity, gin.H{
+				"error":   true,
+				"message": "Failed to insert waste items",
+				"Collected Waste": collectedWaste,
+			})
+			return
+		}
 	}
-
-	context.JSON(http.StatusOK, gin.H{
-		"error":      false,
-		"message":    "Successfully Added Sku",
-		"waste_type": wasteType, 
-	})
-
 }

@@ -58,6 +58,82 @@ func (q *Queries) ConfirmCollectionRequest(ctx context.Context, arg ConfirmColle
 	return err
 }
 
+const getAggregatorNewRequests = `-- name: GetAggregatorNewRequests :many
+SELECT
+    collection_requests.id, collection_requests.producer_id, collection_requests.collector_id, collection_requests.request_date, collection_requests.location, collection_requests.administrative_level_1_location, collection_requests.lat, collection_requests.lng, collection_requests.pickup_date, collection_requests.first_contact_person, collection_requests.second_contact_person, collection_requests.confirmed, collection_requests.cancelled, collection_requests.status, collection_requests.created_at,
+    producer.name AS producer_name,
+    producer.location AS producer_location
+FROM
+    collection_requests
+LEFT JOIN
+    companies AS producer ON producer.id = collection_requests.producer_id
+WHERE
+    collection_requests.collector_id = $1 AND collection_requests.status = false
+GROUP BY
+    collection_requests.id, producer.name, producer.location
+`
+
+type GetAggregatorNewRequestsRow struct {
+	ID                           int32           `json:"id"`
+	ProducerID                   int32           `json:"producer_id"`
+	CollectorID                  int32           `json:"collector_id"`
+	RequestDate                  time.Time       `json:"request_date"`
+	Location                     sql.NullString  `json:"location"`
+	AdministrativeLevel1Location sql.NullString  `json:"administrative_level_1_location"`
+	Lat                          sql.NullFloat64 `json:"lat"`
+	Lng                          sql.NullFloat64 `json:"lng"`
+	PickupDate                   sql.NullTime    `json:"pickup_date"`
+	FirstContactPerson           string          `json:"first_contact_person"`
+	SecondContactPerson          sql.NullString  `json:"second_contact_person"`
+	Confirmed                    sql.NullBool    `json:"confirmed"`
+	Cancelled                    sql.NullBool    `json:"cancelled"`
+	Status                       sql.NullBool    `json:"status"`
+	CreatedAt                    time.Time       `json:"created_at"`
+	ProducerName                 sql.NullString  `json:"producer_name"`
+	ProducerLocation             sql.NullString  `json:"producer_location"`
+}
+
+func (q *Queries) GetAggregatorNewRequests(ctx context.Context, collectorID int32) ([]GetAggregatorNewRequestsRow, error) {
+	rows, err := q.db.QueryContext(ctx, getAggregatorNewRequests, collectorID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	items := []GetAggregatorNewRequestsRow{}
+	for rows.Next() {
+		var i GetAggregatorNewRequestsRow
+		if err := rows.Scan(
+			&i.ID,
+			&i.ProducerID,
+			&i.CollectorID,
+			&i.RequestDate,
+			&i.Location,
+			&i.AdministrativeLevel1Location,
+			&i.Lat,
+			&i.Lng,
+			&i.PickupDate,
+			&i.FirstContactPerson,
+			&i.SecondContactPerson,
+			&i.Confirmed,
+			&i.Cancelled,
+			&i.Status,
+			&i.CreatedAt,
+			&i.ProducerName,
+			&i.ProducerLocation,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
 const getAllCancelledCollectionRequests = `-- name: GetAllCancelledCollectionRequests :many
 SELECT 
     collection_requests.id, collection_requests.producer_id, collection_requests.collector_id, collection_requests.request_date, collection_requests.location, collection_requests.administrative_level_1_location, collection_requests.lat, collection_requests.lng, collection_requests.pickup_date, collection_requests.first_contact_person, collection_requests.second_contact_person, collection_requests.confirmed, collection_requests.cancelled, collection_requests.status, collection_requests.created_at,

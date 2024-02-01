@@ -228,6 +228,7 @@ func runProgram() {
 	router.GET("collections_producer_stats/:id", requestCollectionController.GetCollectionStats)
 	router.GET("collections_producer_complete/:id", requestCollectionController.GetAllProducerCompletedCollectionRequests)
 	router.GET("collections_producer_pending/:id", requestCollectionController.GetAllProducerPendingCollectionRequests)
+	router.GET("aggregator_new_collection_requests/:id", requestCollectionController.GetAggregatorNewRequests)
 	//--------------------------------------------------------------------------------------------
 
 	router.Run()
