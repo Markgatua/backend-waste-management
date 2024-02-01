@@ -888,7 +888,6 @@ func (auth AuthController) UpdateAggregatorUser(context *gin.Context) {
 		})
 		return
 	}
-
 	if exists {
 		context.JSON(http.StatusUnprocessableEntity, gin.H{
 			"error":   true,
@@ -896,7 +895,6 @@ func (auth AuthController) UpdateAggregatorUser(context *gin.Context) {
 		})
 		return
 	}
-
 	if param.Password != "" {
 		_, err = gen.REPO.DB.NamedExec(`UPDATE users set first_name=:first_name,last_name=:last_name,email=:email,user_company_id=:user_company_id,role_id=:role_id,is_active=:is_active ,password=:password  where id=:id`,
 			map[string]interface{}{
@@ -928,7 +926,6 @@ func (auth AuthController) UpdateAggregatorUser(context *gin.Context) {
 				"is_active":       param.IsActive,
 				"id":              param.UserID,
 			})
-
 		if err != nil && err != sql.ErrNoRows {
 			logger.Log("AuthController[password not set]", fmt.Sprint("Error adding user :: ", err), logger.LOG_LEVEL_ERROR)
 			context.JSON(http.StatusUnprocessableEntity, gin.H{
