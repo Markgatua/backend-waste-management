@@ -238,6 +238,15 @@ func GetEmailUser(email string) (*models.User, error) {
 	return &user, nil
 }
 
+func IsUserExistingOnUpdate(email string, userID int32) (bool, error) {
+	user := models.User{}
+	err := gen.REPO.DB.Get(&user, gen.REPO.DB.Rebind("select * from users where email=? and id !=?"), email, userID)
+	if err != nil {
+		return false, err
+	}
+	return user.ID.Valid, nil
+}
+
 func GetUserFromRecoveryTokenWithNoValidation(recoveryToken string) (*models.User, error) {
 	user := models.User{}
 	err := gen.REPO.DB.Get(&user, gen.REPO.DB.Rebind("select * from users where recovery_token=?"), recoveryToken)
@@ -832,7 +841,87 @@ func (auth AuthController) UpdateUserPassword(context *gin.Context) {
 		return
 	}
 }
+func (auth AuthController) UpdateAggregatorUser(context *gin.Context) {
+	type Params struct {
+		FirstName string `json:"first_name" binding:"required"`
+		LastName  string `json:"last_name" binding:"required"`
+		Email     string `json:"email" binding:"required"`
+		Password  string `json:"password"`
+		CompanyID int32  `json:"institution_id" binding:"required"`
+		RoleID    int32  `json:"role_id" binding:"required"`
+		UserID    int32  `json:"user_id" binding:"required"`
+		IsActive  *bool  `json:"is_active" binding:"required"`
+	}
 
+	var param Params
+	err := context.ShouldBindJSON(&param)
+	if err != nil {
+		context.JSON(http.StatusUnprocessableEntity, gin.H{
+			"error":   true,
+			"message": err.Error(),
+		})
+		return
+	}
+	exists, err := IsUserExistingOnUpdate(param.Email, param.UserID)
+	if err != nil {
+		logger.Log("AuthController", fmt.Sprint("Error adding user :: ", err.Error()), logger.LOG_LEVEL_ERROR)
+		context.JSON(http.StatusUnprocessableEntity, gin.H{
+			"error":   true,
+			"message": "Error adding user",
+		})
+		return
+	}
+
+	company, err := gen.REPO.GetCompany(context, param.CompanyID)
+	if err != nil {
+		context.JSON(http.StatusUnprocessableEntity, gin.H{
+			"error":   true,
+			"message": err.Error(),
+		})
+		return
+	}
+	if company.CompanyType != 2 {
+		context.JSON(http.StatusUnprocessableEntity, gin.H{
+			"error":   true,
+			"message": "Selected aggregator institution",
+		})
+		return
+	}
+
+	if exists {
+		context.JSON(http.StatusUnprocessableEntity, gin.H{
+			"error":   true,
+			"message": "User with the given email address already exists",
+		})
+		return
+	}
+
+	if param.Password != "" {
+		_, err = gen.REPO.DB.NamedExec(`UPDATE users set first_name=:first_name,last_name=:last_name,email=:email,user_company_id=:user_company_id,role_id=:role_id,is_active=:is_active where id=:email`,
+			map[string]interface{}{
+				"first_name":      param.FirstName,
+				"last_name":       param.LastName,
+				"email":           param.Email,
+				"user_company_id": param.CompanyID,
+				"role_id":         param.RoleID,
+				"is_active":       param.IsActive,
+				"id":              param.UserID,
+			})
+	} else {
+		_, err = gen.REPO.DB.NamedExec(`UPDATE users set first_name=:first_name,last_name=:last_name,email=:email,user_company_id=:user_company_id,role_id=:role_id,is_active=:is_active,password=:password where id=:email`,
+			map[string]interface{}{
+				"first_name":      param.FirstName,
+				"last_name":       param.LastName,
+				"email":           param.Email,
+				"user_company_id": param.CompanyID,
+				"role_id":         param.RoleID,
+				"is_active":       param.IsActive,
+				"id":              param.UserID,
+				"password":        helpers.Functions{}.HashPassword(param.Password),
+			})
+	}
+
+}
 func (auth AuthController) AddAggregatorUser(context *gin.Context) {
 	type Params struct {
 		FirstName string `json:"first_name" binding:"required"`
@@ -851,6 +940,23 @@ func (auth AuthController) AddAggregatorUser(context *gin.Context) {
 		})
 		return
 	}
+
+	company, err := gen.REPO.GetCompany(context, param.CompanyID)
+	if err != nil {
+		context.JSON(http.StatusUnprocessableEntity, gin.H{
+			"error":   true,
+			"message": err.Error(),
+		})
+		return
+	}
+	if company.CompanyType != 2 {
+		context.JSON(http.StatusUnprocessableEntity, gin.H{
+			"error":   true,
+			"message": "Selected aggregator institution",
+		})
+		return
+	}
+	
 	user, err := GetEmailUser(param.Email)
 	if user != nil {
 		context.JSON(http.StatusUnprocessableEntity, gin.H{
