@@ -943,7 +943,6 @@ func (auth AuthController) UpdateAggregatorUser(context *gin.Context) {
 		"error":   false,
 		"message": "User updated successfully",
 	})
-
 }
 func (auth AuthController) AddAggregatorUser(context *gin.Context) {
 	type Params struct {
