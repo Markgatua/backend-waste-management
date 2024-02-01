@@ -31,6 +31,7 @@ type Querier interface {
 	DeletePermissionByIds(ctx context.Context, permissionIds []int32) error
 	DeleteRole(ctx context.Context, id int32) error
 	DuplicateCounties(ctx context.Context, name string) (int64, error)
+	GetAggregatorNewRequests(ctx context.Context, collectorID int32) ([]GetAggregatorNewRequestsRow, error)
 	// companies.sql
 	GetAllAggregators(ctx context.Context) ([]GetAllAggregatorsRow, error)
 	GetAllCancelledCollectionRequests(ctx context.Context, cancelled sql.NullBool) ([]GetAllCancelledCollectionRequestsRow, error)

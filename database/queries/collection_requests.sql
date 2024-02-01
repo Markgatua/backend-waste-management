@@ -206,3 +206,18 @@ WHERE
     collection_requests.producer_id = $1 AND collection_requests.status = false
 GROUP BY
     collection_requests.id, collector.name;
+
+
+-- name: GetAggregatorNewRequests :many
+SELECT
+    collection_requests.*,
+    producer.name AS producer_name,
+    producer.location AS producer_location
+FROM
+    collection_requests
+LEFT JOIN
+    companies AS producer ON producer.id = collection_requests.producer_id
+WHERE
+    collection_requests.collector_id = $1 AND collection_requests.status = false
+GROUP BY
+    collection_requests.id, producer.name, producer.location;
