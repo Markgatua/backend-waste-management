@@ -259,5 +259,17 @@
                 "action": "view_collections"
             }
         ]
+    },
+    {
+        "module": "Statistics",
+        "key": "statics",
+        "permissions": [
+            {
+                "permission_id": 103,
+                "name": "View statistics",
+                "sub_module": "view stats",
+                "action": "view_stats"
+            }
+        ]
     }
 ]

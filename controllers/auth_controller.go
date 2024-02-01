@@ -88,16 +88,16 @@ type EditUserEmailParam struct {
 }
 
 type ResetPasswordApiParams struct {
-	Email     string `json:"email" binding:"required"`
-	Token     string `json:"token" binding:"required"`
-	Password  string `json:"password" binding:"required"`
+	Email    string `json:"email" binding:"required"`
+	Token    string `json:"token" binding:"required"`
+	Password string `json:"password" binding:"required"`
 }
 
 type ResetPasswordPhoneApiParams struct {
-	Phone     string `json:"phone" binding:"required"`
-	CallingCode     string `json:"calling_code" binding:"required"`
+	Phone       string `json:"phone" binding:"required"`
+	CallingCode string `json:"calling_code" binding:"required"`
 	OTPCode     string `json:"otp_code" binding:"required"`
-	Password  string `json:"password" binding:"required"`
+	Password    string `json:"password" binding:"required"`
 }
 
 type LoginUserEmailParam struct {
@@ -833,6 +833,59 @@ func (auth AuthController) UpdateUserPassword(context *gin.Context) {
 	}
 }
 
+func (auth AuthController) AddAggregatorUser(context *gin.Context) {
+	type Params struct {
+		FirstName string `json:"first_name" binding:"required"`
+		LastName  string `json:"last_name" binding:"required"`
+		Email     string `json:"email" binding:"required"`
+		Password  string `json:"password" binding:"required"`
+		CompanyID int32  `json:"institution_id" binding:"required"`
+		RoleID    int32  `json:"role_id" binding:"required"`
+	}
+	var param Params
+	err := context.ShouldBindJSON(&param)
+	if err != nil {
+		context.JSON(http.StatusUnprocessableEntity, gin.H{
+			"error":   true,
+			"message": err.Error(),
+		})
+		return
+	}
+	user, err := GetEmailUser(param.Email)
+	if user != nil {
+		context.JSON(http.StatusUnprocessableEntity, gin.H{
+			"error":   true,
+			"message": "User with the given email address already exists",
+		})
+		return
+	}
+	if len(param.Password) < 6 {
+		context.JSON(http.StatusUnprocessableEntity, gin.H{
+			"error":   true,
+			"message": "Password length should be greater than or equal to 6",
+		})
+		return
+	}
+
+	_, err = gen.REPO.DB.NamedExec(`INSERT INTO users (email,first_name,last_name,provider,role_id,user_company_id,created_at,updated_at,password) VALUES (:email,:first_name,:last_name,:provider,:role_id,:user_company_id,:created_at,:updated_at,:password)`,
+		map[string]interface{}{
+			"email":           param.Email,
+			"first_name":      param.FirstName,
+			"last_name":       param.LastName,
+			"role_id":         param.RoleID,
+			"provider":        "email",
+			"user_company_id": param.CompanyID,
+			"password":        helpers.Functions{}.HashPassword(param.Password),
+			"created_at":      time.Now(),
+			"updated_at":      time.Now(),
+		})
+
+	context.JSON(http.StatusOK, gin.H{
+		"error":   false,
+		"message": "Aggregator user created successfully",
+	})
+}
+
 func (auth AuthController) RegisterUserEmail(context *gin.Context) {
 	organization, _ := context.Params.Get("organization")
 	var registerUserEmailParam RegisterUserEmailParam
@@ -881,31 +934,31 @@ func (auth AuthController) RegisterUserEmail(context *gin.Context) {
 		if organization == "main_organization" {
 			_, err = gen.REPO.DB.NamedExec(`INSERT INTO users (email,first_name,last_name,user_type,provider,role_id,created_at,updated_at,password,is_main_organization_user,confirmed_at) VALUES (:email,:first_name,:last_name,:user_type,:provider,:role_id,:created_at,:updated_at,:password,:is_main_organization_user,:confirmed_at)`,
 				map[string]interface{}{
-					"email":                registerUserEmailParam.Email,
-					"first_name":           registerUserEmailParam.FirstName,
-					"last_name":            registerUserEmailParam.LastName,
-					"user_type":            registerUserEmailParam.UserType,
-					"role_id":              registerUserEmailParam.RoleId,
-					"provider":             "email",
+					"email":                     registerUserEmailParam.Email,
+					"first_name":                registerUserEmailParam.FirstName,
+					"last_name":                 registerUserEmailParam.LastName,
+					"user_type":                 registerUserEmailParam.UserType,
+					"role_id":                   registerUserEmailParam.RoleId,
+					"provider":                  "email",
 					"is_main_organization_user": organization == "main_organization",
-					"confirmed_at":         time.Now(),
-					"password":             helpers.Functions{}.HashPassword(registerUserEmailParam.Password),
-					"created_at":           time.Now(),
-					"updated_at":           time.Now(),
+					"confirmed_at":              time.Now(),
+					"password":                  helpers.Functions{}.HashPassword(registerUserEmailParam.Password),
+					"created_at":                time.Now(),
+					"updated_at":                time.Now(),
 				})
 		} else {
 			_, err = gen.REPO.DB.NamedExec(`INSERT INTO users (email,first_name,last_name,user_type,provider,role_id,created_at,updated_at,password,is_main_organization_user) VALUES (:email,:first_name,:last_name,:user_type,:provider,:role_id,:created_at,:updated_at,:password,:is_main_organization_user)`,
 				map[string]interface{}{
-					"email":                registerUserEmailParam.Email,
-					"first_name":           registerUserEmailParam.FirstName,
-					"last_name":            registerUserEmailParam.LastName,
-					"user_type":            registerUserEmailParam.UserType,
-					"role_id":              registerUserEmailParam.RoleId,
-					"provider":             "email",
+					"email":                     registerUserEmailParam.Email,
+					"first_name":                registerUserEmailParam.FirstName,
+					"last_name":                 registerUserEmailParam.LastName,
+					"user_type":                 registerUserEmailParam.UserType,
+					"role_id":                   registerUserEmailParam.RoleId,
+					"provider":                  "email",
 					"is_main_organization_user": organization == "main_organization",
-					"password":             helpers.Functions{}.HashPassword(registerUserEmailParam.Password),
-					"created_at":           time.Now(),
-					"updated_at":           time.Now(),
+					"password":                  helpers.Functions{}.HashPassword(registerUserEmailParam.Password),
+					"created_at":                time.Now(),
+					"updated_at":                time.Now(),
 				})
 		}
 
@@ -1163,7 +1216,7 @@ func (auth AuthController) SubmitNewPasswordApi(context *gin.Context) {
 		})
 		return
 	}
-	
+
 	user_ := models.User{}
 	gen.REPO.DB.Get(&user_, gen.REPO.DB.Rebind("select id from users where recovery_token=?"), resetPasswordApiParams.Token)
 

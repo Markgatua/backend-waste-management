@@ -119,6 +119,10 @@ func runProgram() {
 	router.POST("/upload_files", middlewares.PermissionBlockerMiddleware("upload_files"), controllers.FileController{}.UploadFiles)
 	//-------------------------------------------------------------------------------------------
 
+	//stats --------
+	router.GET("/main_organization_stats", middlewares.PermissionBlockerMiddleware("view_stats"), controllers.StatsController{}.GetMainOrganizationStats)
+	//stats -------
+
 	router.GET("/users", middlewares.PermissionBlockerMiddleware("view_user"), usersController.GetAllUsers)
 	//main organizations is
 	router.GET("/users/main_organization", middlewares.PermissionBlockerMiddleware("view_user"), usersController.GetAllMainOrganizationUsers)
@@ -155,6 +159,8 @@ func runProgram() {
 	router.PUT("aggregator/set_active_inactive_status", middlewares.PermissionBlockerMiddleware("edit_aggregator"), controllers.AggregatorController{}.UpdateAggregatorStatus)
 	router.DELETE("aggregator/delete/:id", middlewares.PermissionBlockerMiddleware("delete_aggregator"), controllers.AggregatorController{}.DeleteAggregator)
 	router.PUT("aggregator/update", middlewares.PermissionBlockerMiddleware("edit_aggregator"), controllers.AggregatorController{}.UpdateAggregator)
+
+	router.POST("aggregator/add/user",middlewares.PermissionBlockerMiddleware("add_user"),authController.AddAggregatorUser)
 	//-------------------------------------------------------------------------------------------
 
 

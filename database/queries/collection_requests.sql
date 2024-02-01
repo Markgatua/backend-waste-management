@@ -11,10 +11,10 @@ set
 where id = $3;
 
 -- name: ConfirmCollectionRequest :exec
-update collection_requests set confirmed = $1 where id = $2;
+update collection_requests set status = 2 where id = $1;
 
 -- name: CancelCollectionRequest :exec
-update collection_requests set cancelled = $1 where id = $2;
+update collection_requests set status = 4 where id = $1;
 
 
 -- name: GetAllCollectionRequests :many
@@ -63,7 +63,7 @@ LEFT JOIN
     companies AS collector ON collector.id = collection_requests.collector_id
 LEFT JOIN 
     companies AS secondcollector ON secondcollector.id = collection_requests.second_collector_id
-WHERE collection_requests.cancelled=$1;
+WHERE collection_requests.cancelled=4;
 
 -- name: GetAllPendingConfirmationCollectionRequests :many
 SELECT 
@@ -79,7 +79,7 @@ LEFT JOIN
     companies AS collector ON collector.id = collection_requests.collector_id
 LEFT JOIN 
     companies AS secondcollector ON secondcollector.id = collection_requests.second_collector_id
-WHERE collection_requests.confirmed=$1;
+WHERE collection_requests.status=2;
 
 -- name: GetAllPendingCollectionRequests :many
 SELECT 
@@ -95,7 +95,7 @@ LEFT JOIN
     companies AS collector ON collector.id = collection_requests.collector_id
 LEFT JOIN 
     companies AS secondcollector ON secondcollector.id = collection_requests.second_collector_id
-WHERE collection_requests.confirmed=$1;
+WHERE collection_requests.confirmed=2;
 
 -- name: GetAllCollectionRequestsForACollector :many
 SELECT 
