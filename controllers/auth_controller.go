@@ -244,6 +244,7 @@ func IsUserExistingOnUpdate(email string, userID int32) (bool, error) {
 	if err != nil {
 		return false, err
 	}
+	fmt.Println(user)
 	return user.ID.Valid, nil
 }
 
@@ -863,7 +864,7 @@ func (auth AuthController) UpdateAggregatorUser(context *gin.Context) {
 		return
 	}
 	exists, err := IsUserExistingOnUpdate(param.Email, param.UserID)
-	if err != nil {
+	if err != nil && err != sql.ErrNoRows {
 		logger.Log("AuthController", fmt.Sprint("Error adding user :: ", err.Error()), logger.LOG_LEVEL_ERROR)
 		context.JSON(http.StatusUnprocessableEntity, gin.H{
 			"error":   true,
@@ -897,18 +898,7 @@ func (auth AuthController) UpdateAggregatorUser(context *gin.Context) {
 	}
 
 	if param.Password != "" {
-		_, err = gen.REPO.DB.NamedExec(`UPDATE users set first_name=:first_name,last_name=:last_name,email=:email,user_company_id=:user_company_id,role_id=:role_id,is_active=:is_active where id=:email`,
-			map[string]interface{}{
-				"first_name":      param.FirstName,
-				"last_name":       param.LastName,
-				"email":           param.Email,
-				"user_company_id": param.CompanyID,
-				"role_id":         param.RoleID,
-				"is_active":       param.IsActive,
-				"id":              param.UserID,
-			})
-	} else {
-		_, err = gen.REPO.DB.NamedExec(`UPDATE users set first_name=:first_name,last_name=:last_name,email=:email,user_company_id=:user_company_id,role_id=:role_id,is_active=:is_active,password=:password where id=:email`,
+		_, err = gen.REPO.DB.NamedExec(`UPDATE users set first_name=:first_name,last_name=:last_name,email=:email,user_company_id=:user_company_id,role_id=:role_id,is_active=:is_active ,password=:password  where id=:id`,
 			map[string]interface{}{
 				"first_name":      param.FirstName,
 				"last_name":       param.LastName,
@@ -919,7 +909,40 @@ func (auth AuthController) UpdateAggregatorUser(context *gin.Context) {
 				"id":              param.UserID,
 				"password":        helpers.Functions{}.HashPassword(param.Password),
 			})
+		if err != nil && err != sql.ErrNoRows {
+			logger.Log("AuthController [password set]", fmt.Sprint("Error adding user :: ", err), logger.LOG_LEVEL_ERROR)
+			context.JSON(http.StatusUnprocessableEntity, gin.H{
+				"error":   true,
+				"message": "Error adding user",
+			})
+			return
+		}
+	} else {
+		_, err = gen.REPO.DB.NamedExec(`UPDATE users set first_name=:first_name,last_name=:last_name,email=:email,user_company_id=:user_company_id,role_id=:role_id,is_active=:is_active where id=:id`,
+			map[string]interface{}{
+				"first_name":      param.FirstName,
+				"last_name":       param.LastName,
+				"email":           param.Email,
+				"user_company_id": param.CompanyID,
+				"role_id":         param.RoleID,
+				"is_active":       param.IsActive,
+				"id":              param.UserID,
+			})
+
+		if err != nil && err != sql.ErrNoRows {
+			logger.Log("AuthController[password not set]", fmt.Sprint("Error adding user :: ", err), logger.LOG_LEVEL_ERROR)
+			context.JSON(http.StatusUnprocessableEntity, gin.H{
+				"error":   true,
+				"message": "Error updating user params",
+			})
+			return
+		}
 	}
+
+	context.JSON(http.StatusOK, gin.H{
+		"error":   false,
+		"message": "User updated successfully",
+	})
 
 }
 func (auth AuthController) AddAggregatorUser(context *gin.Context) {
@@ -956,7 +979,7 @@ func (auth AuthController) AddAggregatorUser(context *gin.Context) {
 		})
 		return
 	}
-	
+
 	user, err := GetEmailUser(param.Email)
 	if user != nil {
 		context.JSON(http.StatusUnprocessableEntity, gin.H{
@@ -973,7 +996,7 @@ func (auth AuthController) AddAggregatorUser(context *gin.Context) {
 		return
 	}
 
-	_, err = gen.REPO.DB.NamedExec(`INSERT INTO users (email,first_name,last_name,provider,role_id,user_company_id,created_at,updated_at,password) VALUES (:email,:first_name,:last_name,:provider,:role_id,:user_company_id,:created_at,:updated_at,:password)`,
+	_, err = gen.REPO.DB.NamedExec(`INSERT INTO users (email,first_name,last_name,provider,role_id,user_company_id,created_at,updated_at,password,confirmed_at) VALUES (:email,:first_name,:last_name,:provider,:role_id,:user_company_id,:created_at,:updated_at,:password,:confirmed_at)`,
 		map[string]interface{}{
 			"email":           param.Email,
 			"first_name":      param.FirstName,
@@ -984,8 +1007,17 @@ func (auth AuthController) AddAggregatorUser(context *gin.Context) {
 			"password":        helpers.Functions{}.HashPassword(param.Password),
 			"created_at":      time.Now(),
 			"updated_at":      time.Now(),
+			"confirmed_at":    time.Now(),
 		})
 
+	if err != nil && err != sql.ErrNoRows {
+		logger.Log("AuthController", fmt.Sprint("Error adding user :: ", err.Error()), logger.LOG_LEVEL_ERROR)
+		context.JSON(http.StatusUnprocessableEntity, gin.H{
+			"error":   true,
+			"message": "Error adding user",
+		})
+		return
+	}
 	context.JSON(http.StatusOK, gin.H{
 		"error":   false,
 		"message": "Aggregator user created successfully",
