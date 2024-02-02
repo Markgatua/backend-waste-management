@@ -231,8 +231,10 @@ func GetUserByID(userID int64) (*models.User, error) {
 }
 func GetEmailUser(email string) (*models.User, error) {
 	user := models.User{}
-	err := gen.REPO.DB.Get(&user, gen.REPO.DB.Rebind("select * from users where email=?"), email)
+	err := gen.REPO.DB.Get(&user, gen.REPO.DB.Rebind(
+		"select users.*,companies.name as company_name from users left join companies on companies.id=users.user_company_id where users.email=?"), email)
 	if err != nil {
+		logger.Log("AuthController/GetEmailUser", fmt.Sprint(err.Error()), logger.LOG_LEVEL_ERROR)
 		return nil, err
 	}
 	return &user, nil

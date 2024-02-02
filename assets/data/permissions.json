@@ -179,8 +179,6 @@
             }
         ]
     },
-
-
     {
         "module": "Green Champion",
         "key": "green_champion",
@@ -211,7 +209,6 @@
             }
         ]
     },
-
     {
         "module": "Files",
         "key": "files",
