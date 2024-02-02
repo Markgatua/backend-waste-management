@@ -19,6 +19,10 @@ type User struct {
 	IsActive                null.Bool   `db:"is_active" json:"is_active"`
 	CallingCode             null.String `db:"calling_code" json:"calling_code"`
 	CompanyName             null.String `db:"company_name" json:"company_name"`
+	CompanyLat       		null.Float	`db:"company_lat" json:"company_lat"`
+	CompanyLng 				null.Float	`db:"company_lng" json:"company_lng"`
+	CompanyAdministrativeLevel1Location				null.String	`db:"company_administrative_level_1_location" json:"company_administrative_level_1_location"`
+	CompanyLocation         null.String	`db:"company_location" json:"company_location"`
 
 	AvatarUrl          null.String `db:"avatar_url" json:"avatar_url"`
 	Phone              null.String `db:"phone" json:"phone"`

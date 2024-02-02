@@ -927,7 +927,7 @@ func (q *Queries) GetWasteItemsProducerData(ctx context.Context, producerID int3
 
 const insertNewCollectionRequest = `-- name: InsertNewCollectionRequest :exec
 
-insert into collection_requests( producer_id,collector_id,request_date,location,lat,lng,administrative_level_1_location,first_contact_person ) values ($1, $2, $3, $4, $5, $6, $7, $8) returning id, producer_id, collector_id, request_date, location, administrative_level_1_location, lat, lng, pickup_date, status, first_contact_person, second_contact_person, created_at
+insert into collection_requests( producer_id,collector_id,request_date,location,lat,lng,administrative_level_1_location,first_contact_person,status ) values ($1, $2, $3, $4, $5, $6, $7, $8, $9) returning id, producer_id, collector_id, request_date, location, administrative_level_1_location, lat, lng, pickup_date, status, first_contact_person, second_contact_person, created_at
 `
 
 type InsertNewCollectionRequestParams struct {
@@ -939,6 +939,7 @@ type InsertNewCollectionRequestParams struct {
 	Lng                          sql.NullFloat64 `json:"lng"`
 	AdministrativeLevel1Location sql.NullString  `json:"administrative_level_1_location"`
 	FirstContactPerson           string          `json:"first_contact_person"`
+	Status                       int32           `json:"status"`
 }
 
 // collection_requests.sql
@@ -952,6 +953,7 @@ func (q *Queries) InsertNewCollectionRequest(ctx context.Context, arg InsertNewC
 		arg.Lng,
 		arg.AdministrativeLevel1Location,
 		arg.FirstContactPerson,
+		arg.Status,
 	)
 	return err
 }
