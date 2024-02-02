@@ -239,6 +239,7 @@ CREATE TABLE buyers(
   first_name VARCHAR(255) NOT NULL,
   last_name VARCHAR(255) NOT NULL,
   is_active BOOLEAN not null, 
+  region VARCHAR(255) NULL,
   calling_code VARCHAR(6) NULL,
   location VARCHAR(255) NULL, -- the location of this company ie citadel muthithi road
   administrative_level_1_location VARCHAR(255) NULL, -- in kenya, this will be county, in uganda it will be a different value , ie Nairobi county
@@ -249,6 +250,8 @@ CREATE TABLE buyers(
   updated_at TIMESTAMP NOT NULL DEFAULT NOW(),
   FOREIGN Key (company_id) REFERENCES companies(id)
 );
+CREATE UNIQUE INDEX buyer_unique_company_idx on buyers (LOWER(company));  
+
 
 CREATE TABLE sales(
   id SERIAL PRIMARY KEY,
@@ -272,8 +275,8 @@ CREATE TABLE sale_items(
   FOREIGN Key (sale_id) REFERENCES sales(id),
   FOREIGN Key (waste_type_id) REFERENCES waste_types(id),
   amount_of_waste DECIMAL NULL,
-  cost_per_kg DECIMAL NULL
-
+  cost_per_kg DECIMAL NULL,
+  total_amount DECIMAL NOT NULL
 );
 
 CREATE TABLE sale_transactions(
@@ -294,48 +297,6 @@ CREATE TABLE sale_transactions(
   mpesa_result_code VARCHAR NULL,
   mpesa_result_desc VARCHAR NULL,
   ipay_status VARCHAR NULL,
-  created_at TIMESTAMP NOT NULL DEFAULT NOW(),
-  updated_at TIMESTAMP NOT NULL DEFAULT NOW()
-);
-
-CREATE TABLE waste_for_sale (
-  id SERIAL PRIMARY KEY,
-  seller INTEGER,
-  FOREIGN Key (seller) REFERENCES users(id),
-  waste JSON
-);
-
-CREATE TABLE waste_buyers (
-  id SERIAL PRIMARY KEY,
-  buyer_id INTEGER,
-  FOREIGN Key (buyer_id) REFERENCES users(id),
-  rates JSON
-);
-
-CREATE TABLE payment_methods (
-  id SERIAL PRIMARY KEY,
-  payment_method VARCHAR(255) NOT NULL,
-  created_at TIMESTAMP NOT NULL DEFAULT NOW()
-);
-
-CREATE TABLE waste_transactions (
-  id SERIAL PRIMARY KEY,
-  date TIMESTAMP NOT NULL DEFAULT NOW(),
-  buyer_id INTEGER,
-  FOREIGN KEY (buyer_id) REFERENCES users(id),
-  seller_id INTEGER,
-  FOREIGN KEY (seller_id) REFERENCES users(id),
-  waste_products JSON,
-  total_amount VARCHAR NOT NULL,
-  payment_method_id INTEGER,
-  FOREIGN KEY (payment_method_id) REFERENCES payment_methods(id),
-  merchant_request_id VARCHAR(255) NULL,
-  checkout_request_id VARCHAR(255) NULL,
-  mpesa_result_code VARCHAR(255) NULL,
-  mpesa_result_desc VARCHAR(255) NULL,
-  mpesa_receipt_code VARCHAR(255) NULL,
-  time_paid VARCHAR(255) NULL,
-  is_paid BOOLEAN DEFAULT FALSE,
   created_at TIMESTAMP NOT NULL DEFAULT NOW(),
   updated_at TIMESTAMP NOT NULL DEFAULT NOW()
 );

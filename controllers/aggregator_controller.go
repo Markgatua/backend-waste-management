@@ -2,6 +2,7 @@ package controllers
 
 import (
 	"database/sql"
+	"fmt"
 	"net/http"
 	"strconv"
 	"strings"
@@ -98,16 +99,17 @@ func (controller AggregatorController) InsertAggregator(context *gin.Context) {
 	}
 
 	company, insertError := gen.REPO.InsertCompany(context, gen.InsertCompanyParams{
-		AdministrativeLevel1Location: null.StringFrom(params.Location.AdministrativeAreaLevel1).NullString,
 		Name:                         params.Name,
 		Location:                     null.StringFrom(params.Location.Location).NullString,
-		IsActive:                     *params.IsActive,
 		CountryID:                    country.ID,
 		OrganizationID:               sql.NullInt32{Int32: params.OrganizationID, Valid: params.OrganizationID != 0},
 		Lat:                          null.FloatFrom(params.Location.LatLng.Lat).NullFloat64,
 		Lng:                          null.FloatFrom(params.Location.LatLng.Lng).NullFloat64,
 		Region:                       null.StringFrom(params.Region).NullString,
-		CompanyType:                  2, //params.Companytype,
+		IsActive:                     *params.IsActive,
+		AdministrativeLevel1Location: null.StringFrom(params.Location.AdministrativeAreaLevel1).NullString,
+
+		CompanyType: 2, //params.Companytype,
 	})
 
 	if insertError != nil {
@@ -344,5 +346,169 @@ func (aggregatorController AggregatorController) UpdateAggregator(context *gin.C
 	context.JSON(http.StatusOK, gin.H{
 		"error":   false,
 		"message": "Successfully updated Company Data",
+	})
+}
+
+func (aggregatorController AggregatorController) AddBuyer(context *gin.Context) {
+	auth, _ := helpers.Functions{}.CurrentUserFromToken(context)
+	type Param struct {
+		FirstName   string          `json:"first_name"  binding:"required"`
+		LastName    string          `json:"last_name"  binding:"required"`
+		Company     string          `json:"company"  binding:"required"`
+		Location    models.Location `json:"location" binding:"required"`
+		CallingCode string          `json:"calling_code" binding:"required"`
+		Phone       string          `json:"phone" binding:"required"`
+		Region      string          `json:"region"`
+		IsActive    *bool           `json:"is_active" binding:"required"`
+	}
+	var params Param
+	err := context.ShouldBindJSON(&params)
+	if err != nil {
+		context.JSON(http.StatusUnprocessableEntity, gin.H{
+			"error":   true,
+			"message": err.Error(),
+		})
+		return
+	}
+
+	buyer, err := gen.REPO.CreateBuyer(context, gen.CreateBuyerParams{
+		Lat:                          null.FloatFrom(params.Location.LatLng.Lat).NullFloat64,
+		Lng:                          null.FloatFrom(params.Location.LatLng.Lng).NullFloat64,
+		Region:                       null.StringFrom(params.Region).NullString,
+		IsActive:                     *params.IsActive,
+		Company:                      null.StringFrom(params.Company).NullString,
+		CallingCode:                  null.StringFrom(params.CallingCode).NullString,
+		Phone:                        null.StringFrom(params.Phone).NullString,
+		Location:                     null.StringFrom(params.Location.Location).NullString,
+		CompanyID:                    int32(auth.UserCompanyId.Int64),
+		CreatedAt:                    time.Now(),
+		FirstName:                    params.FirstName,
+		LastName:                     params.LastName,
+		UpdatedAt:                    time.Now(),
+		AdministrativeLevel1Location: null.StringFrom(params.Location.AdministrativeAreaLevel1).NullString,
+	})
+
+	if err != nil {
+		context.JSON(http.StatusUnprocessableEntity, gin.H{
+			"error":   true,
+			"message": err.Error(),
+		})
+		return
+	}
+	context.JSON(http.StatusOK, gin.H{
+		"error":   false,
+		"content": buyer,
+	})
+}
+
+func (aggregatorController AggregatorController) UpdateBuyer(context *gin.Context) {
+	auth, _ := helpers.Functions{}.CurrentUserFromToken(context)
+	type Param struct {
+		FirstName   string          `json:"first_name"  binding:"required"`
+		LastName    string          `json:"last_name"  binding:"required"`
+		Company     string          `json:"company"  binding:"required"`
+		Location    models.Location `json:"location" binding:"required"`
+		CallingCode string          `json:"calling_code" binding:"required"`
+		Phone       string          `json:"phone" binding:"required"`
+		Region      string          `json:"region"`
+		BuyerID     int32           `json:"buyer_id" binding:"required"`
+		IsActive    *bool           `json:"is_active" binding:"required"`
+	}
+	var params Param
+	err := context.ShouldBindJSON(&params)
+	if err != nil {
+		context.JSON(http.StatusUnprocessableEntity, gin.H{
+			"error":   true,
+			"message": err.Error(),
+		})
+		return
+	}
+
+	var duplicateBuyerCount int
+	err = gen.REPO.DB.Get(&duplicateBuyerCount, "SELECT count(*) FROM buyers where company_id=? and lower(comapny)=? and lower(FirstName)=? and lower(LastName)=? where id!=?",
+		auth.UserCompanyId.Int64, strings.ToLower(params.Company), strings.ToLower(params.FirstName), strings.ToLower(params.LastName), params.BuyerID)
+
+	if err != nil {
+		context.JSON(http.StatusUnprocessableEntity, gin.H{
+			"error":   true,
+			"message": err.Error(),
+		})
+		return
+	}
+	if duplicateBuyerCount > 0 {
+		context.JSON(http.StatusUnprocessableEntity, gin.H{
+			"error":   true,
+			"message": "Duplicate buyer",
+		})
+		return
+	}
+
+	err = gen.REPO.UpdateBuyer(context, gen.UpdateBuyerParams{
+		Lat:                          null.FloatFrom(params.Location.LatLng.Lat).NullFloat64,
+		Lng:                          null.FloatFrom(params.Location.LatLng.Lng).NullFloat64,
+		Region:                       null.StringFrom(params.Region).NullString,
+		IsActive:                     *params.IsActive,
+		Company:                      null.StringFrom(params.Company).NullString,
+		CallingCode:                  null.StringFrom(params.CallingCode).NullString,
+		Phone:                        null.StringFrom(params.Phone).NullString,
+		Location:                     null.StringFrom(params.Location.Location).NullString,
+		CompanyID:                    int32(auth.UserCompanyId.Int64),
+		FirstName:                    params.FirstName,
+		LastName:                     params.LastName,
+		ID:                           params.BuyerID,
+		AdministrativeLevel1Location: null.StringFrom(params.Location.AdministrativeAreaLevel1).NullString,
+	})
+
+	if err != nil {
+		context.JSON(http.StatusUnprocessableEntity, gin.H{
+			"error":   true,
+			"message": err.Error(),
+		})
+		return
+	}
+	context.JSON(http.StatusOK, gin.H{
+		"error":   false,
+		"message": "Buyer updated successfully",
+	})
+
+}
+
+func (aggregatorController AggregatorController) DeleteBuyer(context *gin.Context) {
+	id, _ := context.Params.Get("id")
+	var id32 int32
+	fmt.Sscan(id, &id32)
+
+	err := gen.REPO.DeleteBuyer(context, id32)
+
+	if err != nil {
+		context.JSON(http.StatusUnprocessableEntity, gin.H{
+			"error":   true,
+			"message": err.Error(),
+		})
+		return
+	}
+	context.JSON(http.StatusOK, gin.H{
+		"error":   false,
+		"message": "Buyer updated successfully",
+	})
+}
+
+func (aggregatorController AggregatorController) GetBuyers(context *gin.Context) {
+	id, _ := context.Params.Get("id")
+	var id32 int32
+	fmt.Sscan(id, &id32)
+
+	err := gen.REPO.DeleteBuyer(context, id32)
+
+	if err != nil {
+		context.JSON(http.StatusUnprocessableEntity, gin.H{
+			"error":   true,
+			"message": err.Error(),
+		})
+		return
+	}
+	context.JSON(http.StatusOK, gin.H{
+		"error":   false,
+		"message": "Buyer updated successfully",
 	})
 }

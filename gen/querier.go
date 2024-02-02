@@ -19,11 +19,15 @@ type Querier interface {
 	CheckSubCountiesDuplicate(ctx context.Context, name string) (int64, error)
 	CollectionWeightTotals(ctx context.Context, producerID int32) (CollectionWeightTotalsRow, error)
 	ConfirmCollectionRequest(ctx context.Context, id int32) error
+	CreateBuyer(ctx context.Context, arg CreateBuyerParams) (Buyer, error)
 	CreateCountry(ctx context.Context, arg CreateCountryParams) error
 	CreateMainOrganizationAdmin(ctx context.Context, arg CreateMainOrganizationAdminParams) error
 	CreatePermission(ctx context.Context, arg CreatePermissionParams) (Permission, error)
 	CreateRole(ctx context.Context, arg CreateRoleParams) (Role, error)
+	CreateSale(ctx context.Context, arg CreateSaleParams) (Sale, error)
+	CreateSaleItem(ctx context.Context, arg CreateSaleItemParams) (SaleItem, error)
 	DeactivateRole(ctx context.Context, roleID int32) error
+	DeleteBuyer(ctx context.Context, id int32) error
 	DeleteChampionCollector(ctx context.Context, id int32) error
 	DeleteCompany(ctx context.Context, id int32) error
 	DeleteOrganization(ctx context.Context, id int32) error
@@ -103,11 +107,13 @@ type Querier interface {
 	// waste_items.sql
 	InsertWasteItem(ctx context.Context, arg InsertWasteItemParams) (WasteItem, error)
 	InsertWasteType(ctx context.Context, arg InsertWasteTypeParams) (WasteType, error)
+	MakeCashPayment(ctx context.Context, arg MakeCashPaymentParams) (SaleTransaction, error)
 	RemoveAggrigatorsAssignedFromGreenChampions(ctx context.Context, championID int32) error
 	RemovePermissionsFromRole(ctx context.Context, arg RemovePermissionsFromRoleParams) error
 	RemoveRolePermissions(ctx context.Context, roleID int32) error
 	RevokePermission(ctx context.Context, arg RevokePermissionParams) error
 	RoleExists(ctx context.Context, name string) (int64, error)
+	UpdateBuyer(ctx context.Context, arg UpdateBuyerParams) error
 	UpdateChampionCollector(ctx context.Context, arg UpdateChampionCollectorParams) error
 	UpdateCollectionRequest(ctx context.Context, arg UpdateCollectionRequestParams) error
 	UpdateCompany(ctx context.Context, arg UpdateCompanyParams) error

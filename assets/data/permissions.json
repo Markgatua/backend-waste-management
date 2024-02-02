@@ -257,6 +257,39 @@
             }
         ]
     },
+
+    {
+        "module": "Waste buyer",
+        "key": "buyer",
+        "permissions": [
+            {
+                "permission_id": 103,
+                "name": "Delete buyer",
+                "sub_module": "Buyer",
+                "action": "delete_buyer"
+            },
+            {
+                "permission_id": 103,
+                "name": "View buyer",
+                "sub_module": "Buyer",
+                "action": "view_buyer"
+            },
+            {
+                "permission_id": 103,
+                "name": "Add buyer",
+                "sub_module": "Buyer",
+                "action": "add_buyer"
+            },
+            {
+                "permission_id": 103,
+                "name": "Edit Green Champion",
+                "sub_module": "Green Champion",
+                "action": "edit_buyer"
+            }
+        ]
+    },
+
+
     {
         "module": "Statistics",
         "key": "statics",

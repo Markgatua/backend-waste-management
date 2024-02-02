@@ -141,6 +141,13 @@ func runProgram() {
 	//router.GET("countries", geoController.GetAllCountries)
 	//-------------------------------------------------------------------------------------------
 
+	//---------------------------buyer----------------------------------------------------
+	router.POST("buyer/add", middlewares.PermissionBlockerMiddleware("add_buyer"), controllers.AggregatorController{}.AddBuyer)
+	router.PUT("buyer/update", middlewares.PermissionBlockerMiddleware("edit_buyer"), controllers.AggregatorController{}.UpdateBuyer)
+	router.GET("buyers", middlewares.PermissionBlockerMiddleware("view_buyer"), controllers.AggregatorController{}.GetBuyers)
+	router.DELETE("buyer/delete/:id", middlewares.PermissionBlockerMiddleware("delete_buyer"), controllers.AggregatorController{}.DeleteBuyer)
+	//-------------------------------------------------------------------------------------------
+
 	//---------------------------organization----------------------------------------------------
 	router.POST("organization/add", middlewares.PermissionBlockerMiddleware("add_organization"), organzationController.InsertOrganization)
 	router.PUT("organization/update", middlewares.PermissionBlockerMiddleware("edit_organization"), organzationController.UpdateOrganization)
@@ -150,6 +157,7 @@ func runProgram() {
 	router.DELETE("organization/delete/:id", middlewares.PermissionBlockerMiddleware("delete_organization"), organzationController.DeleteOrganization)
 	router.GET("organization/:id", middlewares.PermissionBlockerMiddleware("view_organizations"), organzationController.GetOrganization)
 	//-------------------------------------------------------------------------------------------
+
 
 	//---------------------------Aggregator ------------------------------------------------------
 	router.POST("aggregator/add", middlewares.PermissionBlockerMiddleware("add_aggregator"), controllers.AggregatorController{}.InsertAggregator)
