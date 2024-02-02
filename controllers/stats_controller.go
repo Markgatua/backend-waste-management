@@ -1,8 +1,8 @@
 package controllers
 
 import (
+	"context"
 	"net/http"
-	"strconv"
 	"ttnmwastemanagementsystem/gen"
 
 	"github.com/gin-gonic/gin"
@@ -10,11 +10,19 @@ import (
 
 type StatsController struct{}
 
-func (controller StatsController) GetTTNMOrganizations(context *gin.Context) {
-	id := context.Param("id")
-	id_, _ := strconv.ParseUint(id, 10, 32)
-	println("------------------------------", id_)
-	ttnm, err := gen.REPO.GetMainOrganization(context, id)
+func (controller StatsController) GetMainOrganizationStats(context *gin.Context) {
+	var startDate = context.Query("start_date")
+	var endDate = context.Query("end_date")
+
+	organizationStats, err := GetOrganizationCount(startDate, endDate)
+	if err != nil {
+		context.JSON(http.StatusUnprocessableEntity, gin.H{
+			"error":   true,
+			"message": err.Error(),
+		})
+		return
+	}
+	branchStats, err := GetBranchCount(startDate, endDate)
 	if err != nil {
 		context.JSON(http.StatusUnprocessableEntity, gin.H{
 			"error":   true,
@@ -23,17 +31,20 @@ func (controller StatsController) GetTTNMOrganizations(context *gin.Context) {
 		return
 	}
 	context.JSON(http.StatusOK, gin.H{
-		"error":   false,
-		"Profile": ttnm,
+		"error": false,
+		"content": gin.H{
+			"organization": organizationStats,
+			"branches": branchStats,
+		},
 	})
 }
 
-func GetOrganizationCount(startDate string, endDate string) {
-
+func GetOrganizationCount(startDate string, endDate string) ([]gen.GetOrganizationCountRow, error) {
+	return gen.REPO.GetOrganizationCount(context.Background())
 }
 
-func GetBranchCount(startDate string, endDate string) {
-
+func GetBranchCount(startDate string, endDate string) ([]gen.GetBranchCountRow, error) {
+	return gen.REPO.GetBranchCount(context.Background())
 }
 
 func GetMainSystemUsersCount(startDate string, endDate string) {

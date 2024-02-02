@@ -2,9 +2,11 @@ package controllers
 
 import (
 	"database/sql"
+	"fmt"
 	"net/http"
 	"strconv"
 	"ttnmwastemanagementsystem/gen"
+	"ttnmwastemanagementsystem/helpers"
 
 	"github.com/gin-gonic/gin"
 	_ "github.com/gin-gonic/gin"
@@ -51,14 +53,13 @@ func (controller UsersController) SetActiveInActiveStatus(context *gin.Context) 
 			"error":   true,
 			"message": "Error setting user status",
 		})
-	}else{
+	} else {
 		context.JSON(http.StatusOK, gin.H{
 			"error":   false,
 			"message": "Updated user status",
 		})
 	}
 }
-
 
 func (usersController UsersController) GetAllMainOrganizationUsers(context *gin.Context) {
 	users, err := gen.REPO.GetAllMainOrganizationUsers(context)
@@ -77,7 +78,34 @@ func (usersController UsersController) GetAllMainOrganizationUsers(context *gin.
 }
 
 func (usersController UsersController) GetAllUsers(context *gin.Context) {
-	users, err := gen.REPO.GetAllUsers(context)
+
+	auth, _ := helpers.Functions{}.CurrentUserFromToken(context)
+
+	search := context.Query("s")
+	itemsPerPage := context.Query("ipp")
+	page := context.Query("p")
+	//sortBy := context.Query("sort_by")
+	//orderBy := context.Query("order_by")
+	roleID := context.Query("role_id")
+
+	searchQuery := ""
+	if search != "" {
+		searchQuery = " and WHERE to_tsvector(body) @@ to_tsquery('" + search + "')"
+	}
+	limitOffset := " LIMIT " + itemsPerPage + " OFFSET " + page
+	roleIDQuery := ""
+	if roleID != "" {
+		roleIDQuery = " and where users.role_id=" + roleID
+	}
+	companyQuery := fmt.Sprint(" and where users.user_company_id=", auth.UserCompanyId.Int64)
+
+	query := `select users.id, users.first_name, users.last_name, users.email, users.avatar_url, users.calling_code, users.phone, users.is_active, roles.name as role_name,
+    roles.id as role_id from users inner join roles on users.role_id = roles.id where users.email not ilike 'superadmin@admin.com'
+    and users.is_main_organization_user = false ` + companyQuery + roleIDQuery + searchQuery + limitOffset
+
+	var results []gen.GetAllUsersRow
+
+	err := gen.REPO.DB.Select(&results, query)
 	if err != nil {
 		context.JSON(http.StatusUnprocessableEntity, gin.H{
 			"error":   true,
@@ -86,9 +114,18 @@ func (usersController UsersController) GetAllUsers(context *gin.Context) {
 		return
 	}
 
+	// users, err := gen.REPO.GetAllUsers(context)
+	// if err != nil {
+	// 	context.JSON(http.StatusUnprocessableEntity, gin.H{
+	// 		"error":   true,
+	// 		"message": err.Error(),
+	// 	})
+	// 	return
+	// }
+
 	context.JSON(http.StatusOK, gin.H{
 		"error": false,
-		"users": users,
+		"users": results,
 	})
 }
 
@@ -173,16 +210,16 @@ func (usersController UsersController) GetUsersWithRole(context *gin.Context) {
 	})
 }
 
-func(usersController  UsersController) GetCompanyUsers(context *gin.Context){
-	id :=  context.Param("id")
+func (usersController UsersController) GetCompanyUsers(context *gin.Context) {
+	id := context.Param("id")
 
-	id_,_ :=strconv.ParseUint(id,10,32);
+	id_, _ := strconv.ParseUint(id, 10, 32)
 
-	users, err := gen.REPO.GetCompanyUsers(context, sql.NullInt32{Int32: int32(id_),Valid: true});
-	if err!=nil{
-		context.JSON(http.StatusUnprocessableEntity,gin.H{
-		   "error":true,
-		   "message":err.Error(),	
+	users, err := gen.REPO.GetCompanyUsers(context, sql.NullInt32{Int32: int32(id_), Valid: true})
+	if err != nil {
+		context.JSON(http.StatusUnprocessableEntity, gin.H{
+			"error":   true,
+			"message": err.Error(),
 		})
 		return
 	}
@@ -192,4 +229,3 @@ func(usersController  UsersController) GetCompanyUsers(context *gin.Context){
 		"users": users,
 	})
 }
-

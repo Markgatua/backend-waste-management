@@ -88,16 +88,16 @@ type EditUserEmailParam struct {
 }
 
 type ResetPasswordApiParams struct {
-	Email     string `json:"email" binding:"required"`
-	Token     string `json:"token" binding:"required"`
-	Password  string `json:"password" binding:"required"`
+	Email    string `json:"email" binding:"required"`
+	Token    string `json:"token" binding:"required"`
+	Password string `json:"password" binding:"required"`
 }
 
 type ResetPasswordPhoneApiParams struct {
-	Phone     string `json:"phone" binding:"required"`
-	CallingCode     string `json:"calling_code" binding:"required"`
+	Phone       string `json:"phone" binding:"required"`
+	CallingCode string `json:"calling_code" binding:"required"`
 	OTPCode     string `json:"otp_code" binding:"required"`
-	Password  string `json:"password" binding:"required"`
+	Password    string `json:"password" binding:"required"`
 }
 
 type LoginUserEmailParam struct {
@@ -231,11 +231,23 @@ func GetUserByID(userID int64) (*models.User, error) {
 }
 func GetEmailUser(email string) (*models.User, error) {
 	user := models.User{}
-	err := gen.REPO.DB.Get(&user, gen.REPO.DB.Rebind("select * from users where email=?"), email)
+	err := gen.REPO.DB.Get(&user, gen.REPO.DB.Rebind(
+		"select users.*,companies.name as company_name from users left join companies on companies.id=users.user_company_id where users.email=?"), email)
 	if err != nil {
+		logger.Log("AuthController/GetEmailUser", fmt.Sprint(err.Error()), logger.LOG_LEVEL_ERROR)
 		return nil, err
 	}
 	return &user, nil
+}
+
+func IsUserExistingOnUpdate(email string, userID int32) (bool, error) {
+	user := models.User{}
+	err := gen.REPO.DB.Get(&user, gen.REPO.DB.Rebind("select * from users where email=? and id !=?"), email, userID)
+	if err != nil {
+		return false, err
+	}
+	fmt.Println(user)
+	return user.ID.Valid, nil
 }
 
 func GetUserFromRecoveryTokenWithNoValidation(recoveryToken string) (*models.User, error) {
@@ -832,6 +844,183 @@ func (auth AuthController) UpdateUserPassword(context *gin.Context) {
 		return
 	}
 }
+func (auth AuthController) UpdateAggregatorUser(context *gin.Context) {
+	type Params struct {
+		FirstName string `json:"first_name" binding:"required"`
+		LastName  string `json:"last_name" binding:"required"`
+		Email     string `json:"email" binding:"required"`
+		Password  string `json:"password"`
+		CompanyID int32  `json:"institution_id" binding:"required"`
+		RoleID    int32  `json:"role_id" binding:"required"`
+		UserID    int32  `json:"user_id" binding:"required"`
+		IsActive  *bool  `json:"is_active" binding:"required"`
+	}
+
+	var param Params
+	err := context.ShouldBindJSON(&param)
+	if err != nil {
+		context.JSON(http.StatusUnprocessableEntity, gin.H{
+			"error":   true,
+			"message": err.Error(),
+		})
+		return
+	}
+	exists, err := IsUserExistingOnUpdate(param.Email, param.UserID)
+	if err != nil && err != sql.ErrNoRows {
+		logger.Log("AuthController", fmt.Sprint("Error adding user :: ", err.Error()), logger.LOG_LEVEL_ERROR)
+		context.JSON(http.StatusUnprocessableEntity, gin.H{
+			"error":   true,
+			"message": "Error adding user",
+		})
+		return
+	}
+
+	company, err := gen.REPO.GetCompany(context, param.CompanyID)
+	if err != nil {
+		context.JSON(http.StatusUnprocessableEntity, gin.H{
+			"error":   true,
+			"message": err.Error(),
+		})
+		return
+	}
+	if company.CompanyType != 2 {
+		context.JSON(http.StatusUnprocessableEntity, gin.H{
+			"error":   true,
+			"message": "Selected aggregator institution",
+		})
+		return
+	}
+	if exists {
+		context.JSON(http.StatusUnprocessableEntity, gin.H{
+			"error":   true,
+			"message": "User with the given email address already exists",
+		})
+		return
+	}
+	if param.Password != "" {
+		_, err = gen.REPO.DB.NamedExec(`UPDATE users set first_name=:first_name,last_name=:last_name,email=:email,user_company_id=:user_company_id,role_id=:role_id,is_active=:is_active ,password=:password  where id=:id`,
+			map[string]interface{}{
+				"first_name":      param.FirstName,
+				"last_name":       param.LastName,
+				"email":           param.Email,
+				"user_company_id": param.CompanyID,
+				"role_id":         param.RoleID,
+				"is_active":       param.IsActive,
+				"id":              param.UserID,
+				"password":        helpers.Functions{}.HashPassword(param.Password),
+			})
+		if err != nil && err != sql.ErrNoRows {
+			logger.Log("AuthController [password set]", fmt.Sprint("Error adding user :: ", err), logger.LOG_LEVEL_ERROR)
+			context.JSON(http.StatusUnprocessableEntity, gin.H{
+				"error":   true,
+				"message": "Error adding user",
+			})
+			return
+		}
+	} else {
+		_, err = gen.REPO.DB.NamedExec(`UPDATE users set first_name=:first_name,last_name=:last_name,email=:email,user_company_id=:user_company_id,role_id=:role_id,is_active=:is_active where id=:id`,
+			map[string]interface{}{
+				"first_name":      param.FirstName,
+				"last_name":       param.LastName,
+				"email":           param.Email,
+				"user_company_id": param.CompanyID,
+				"role_id":         param.RoleID,
+				"is_active":       param.IsActive,
+				"id":              param.UserID,
+			})
+		if err != nil && err != sql.ErrNoRows {
+			logger.Log("AuthController[password not set]", fmt.Sprint("Error adding user :: ", err), logger.LOG_LEVEL_ERROR)
+			context.JSON(http.StatusUnprocessableEntity, gin.H{
+				"error":   true,
+				"message": "Error updating user params",
+			})
+			return
+		}
+	}
+
+	context.JSON(http.StatusOK, gin.H{
+		"error":   false,
+		"message": "User updated successfully",
+	})
+}
+func (auth AuthController) AddAggregatorUser(context *gin.Context) {
+	type Params struct {
+		FirstName string `json:"first_name" binding:"required"`
+		LastName  string `json:"last_name" binding:"required"`
+		Email     string `json:"email" binding:"required"`
+		Password  string `json:"password" binding:"required"`
+		CompanyID int32  `json:"institution_id" binding:"required"`
+		RoleID    int32  `json:"role_id" binding:"required"`
+	}
+	var param Params
+	err := context.ShouldBindJSON(&param)
+	if err != nil {
+		context.JSON(http.StatusUnprocessableEntity, gin.H{
+			"error":   true,
+			"message": err.Error(),
+		})
+		return
+	}
+
+	company, err := gen.REPO.GetCompany(context, param.CompanyID)
+	if err != nil {
+		context.JSON(http.StatusUnprocessableEntity, gin.H{
+			"error":   true,
+			"message": err.Error(),
+		})
+		return
+	}
+	if company.CompanyType != 2 {
+		context.JSON(http.StatusUnprocessableEntity, gin.H{
+			"error":   true,
+			"message": "Selected aggregator institution",
+		})
+		return
+	}
+
+	user, err := GetEmailUser(param.Email)
+	if user != nil {
+		context.JSON(http.StatusUnprocessableEntity, gin.H{
+			"error":   true,
+			"message": "User with the given email address already exists",
+		})
+		return
+	}
+	if len(param.Password) < 6 {
+		context.JSON(http.StatusUnprocessableEntity, gin.H{
+			"error":   true,
+			"message": "Password length should be greater than or equal to 6",
+		})
+		return
+	}
+
+	_, err = gen.REPO.DB.NamedExec(`INSERT INTO users (email,first_name,last_name,provider,role_id,user_company_id,created_at,updated_at,password,confirmed_at) VALUES (:email,:first_name,:last_name,:provider,:role_id,:user_company_id,:created_at,:updated_at,:password,:confirmed_at)`,
+		map[string]interface{}{
+			"email":           param.Email,
+			"first_name":      param.FirstName,
+			"last_name":       param.LastName,
+			"role_id":         param.RoleID,
+			"provider":        "email",
+			"user_company_id": param.CompanyID,
+			"password":        helpers.Functions{}.HashPassword(param.Password),
+			"created_at":      time.Now(),
+			"updated_at":      time.Now(),
+			"confirmed_at":    time.Now(),
+		})
+
+	if err != nil && err != sql.ErrNoRows {
+		logger.Log("AuthController", fmt.Sprint("Error adding user :: ", err.Error()), logger.LOG_LEVEL_ERROR)
+		context.JSON(http.StatusUnprocessableEntity, gin.H{
+			"error":   true,
+			"message": "Error adding user",
+		})
+		return
+	}
+	context.JSON(http.StatusOK, gin.H{
+		"error":   false,
+		"message": "Aggregator user created successfully",
+	})
+}
 
 func (auth AuthController) RegisterUserEmail(context *gin.Context) {
 	organization, _ := context.Params.Get("organization")
@@ -881,31 +1070,31 @@ func (auth AuthController) RegisterUserEmail(context *gin.Context) {
 		if organization == "main_organization" {
 			_, err = gen.REPO.DB.NamedExec(`INSERT INTO users (email,first_name,last_name,user_type,provider,role_id,created_at,updated_at,password,is_main_organization_user,confirmed_at) VALUES (:email,:first_name,:last_name,:user_type,:provider,:role_id,:created_at,:updated_at,:password,:is_main_organization_user,:confirmed_at)`,
 				map[string]interface{}{
-					"email":                registerUserEmailParam.Email,
-					"first_name":           registerUserEmailParam.FirstName,
-					"last_name":            registerUserEmailParam.LastName,
-					"user_type":            registerUserEmailParam.UserType,
-					"role_id":              registerUserEmailParam.RoleId,
-					"provider":             "email",
+					"email":                     registerUserEmailParam.Email,
+					"first_name":                registerUserEmailParam.FirstName,
+					"last_name":                 registerUserEmailParam.LastName,
+					"user_type":                 registerUserEmailParam.UserType,
+					"role_id":                   registerUserEmailParam.RoleId,
+					"provider":                  "email",
 					"is_main_organization_user": organization == "main_organization",
-					"confirmed_at":         time.Now(),
-					"password":             helpers.Functions{}.HashPassword(registerUserEmailParam.Password),
-					"created_at":           time.Now(),
-					"updated_at":           time.Now(),
+					"confirmed_at":              time.Now(),
+					"password":                  helpers.Functions{}.HashPassword(registerUserEmailParam.Password),
+					"created_at":                time.Now(),
+					"updated_at":                time.Now(),
 				})
 		} else {
 			_, err = gen.REPO.DB.NamedExec(`INSERT INTO users (email,first_name,last_name,user_type,provider,role_id,created_at,updated_at,password,is_main_organization_user) VALUES (:email,:first_name,:last_name,:user_type,:provider,:role_id,:created_at,:updated_at,:password,:is_main_organization_user)`,
 				map[string]interface{}{
-					"email":                registerUserEmailParam.Email,
-					"first_name":           registerUserEmailParam.FirstName,
-					"last_name":            registerUserEmailParam.LastName,
-					"user_type":            registerUserEmailParam.UserType,
-					"role_id":              registerUserEmailParam.RoleId,
-					"provider":             "email",
+					"email":                     registerUserEmailParam.Email,
+					"first_name":                registerUserEmailParam.FirstName,
+					"last_name":                 registerUserEmailParam.LastName,
+					"user_type":                 registerUserEmailParam.UserType,
+					"role_id":                   registerUserEmailParam.RoleId,
+					"provider":                  "email",
 					"is_main_organization_user": organization == "main_organization",
-					"password":             helpers.Functions{}.HashPassword(registerUserEmailParam.Password),
-					"created_at":           time.Now(),
-					"updated_at":           time.Now(),
+					"password":                  helpers.Functions{}.HashPassword(registerUserEmailParam.Password),
+					"created_at":                time.Now(),
+					"updated_at":                time.Now(),
 				})
 		}
 
@@ -1163,7 +1352,7 @@ func (auth AuthController) SubmitNewPasswordApi(context *gin.Context) {
 		})
 		return
 	}
-	
+
 	user_ := models.User{}
 	gen.REPO.DB.Get(&user_, gen.REPO.DB.Rebind("select id from users where recovery_token=?"), resetPasswordApiParams.Token)
 

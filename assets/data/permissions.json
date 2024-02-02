@@ -179,8 +179,6 @@
             }
         ]
     },
-
-
     {
         "module": "Green Champion",
         "key": "green_champion",
@@ -211,7 +209,6 @@
             }
         ]
     },
-
     {
         "module": "Files",
         "key": "files",
@@ -257,6 +254,18 @@
                 "name": "View Collection Requests",
                 "sub_module": "Waste Collection",
                 "action": "view_collections"
+            }
+        ]
+    },
+    {
+        "module": "Statistics",
+        "key": "statics",
+        "permissions": [
+            {
+                "permission_id": 103,
+                "name": "View statistics",
+                "sub_module": "view stats",
+                "action": "view_stats"
             }
         ]
     }

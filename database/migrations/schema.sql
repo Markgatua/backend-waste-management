@@ -118,6 +118,7 @@ CREATE TABLE companies (
 
 ALTER TABLE companies ADD CONSTRAINT check_company_type CHECK (company_type IN (1,2)); -- make sure company type is either 1 or 2
 
+
 -- Create "users" table
 CREATE TABLE users(
     id SERIAL PRIMARY KEY,
@@ -232,6 +233,76 @@ CREATE TABLE notifications (
 );
 
 CREATE UNIQUE INDEX waste_types_unique_name_idx on waste_types (LOWER(name));  
+
+
+
+
+-- Create "buyers" table, these are the ones that buy waste from aggregators
+CREATE TABLE buyers(
+  id SERIAL PRIMARY KEY,
+  company_id int not null,
+  company VARCHAR NULL,
+  first_name VARCHAR(255) NOT NULL,
+  last_name VARCHAR(255) NOT NULL,
+  is_active BOOLEAN not null, 
+  calling_code VARCHAR(6) NULL,
+  location VARCHAR(255) NULL, -- the location of this company ie citadel muthithi road
+  administrative_level_1_location VARCHAR(255) NULL, -- in kenya, this will be county, in uganda it will be a different value , ie Nairobi county
+  lat float NULL,
+  lng float NULL,
+  phone VARCHAR(15) NULL DEFAULT NULL,
+  created_at TIMESTAMP NOT NULL DEFAULT NOW(),
+  updated_at TIMESTAMP NOT NULL DEFAULT NOW(),
+  FOREIGN Key (company_id) REFERENCES companies(id)
+);
+
+CREATE TABLE sales(
+  id SERIAL PRIMARY KEY,
+  ref VARCHAR not null,
+  company_id int not null,
+  buyer_id int not null,
+  FOREIGN Key (buyer_id) REFERENCES buyers(id),
+  FOREIGN Key (company_id) REFERENCES companies(id),
+  total_amount_of_waste DECIMAL NULL, --in kgs
+  total_amount DECIMAL NULL, --ksh
+  date TIMESTAMP NOT NULL DEFAULT NOW(),
+  dump json NULL
+);
+
+CREATE TABLE sale_items(
+  id SERIAL PRIMARY KEY,
+  company_id INTEGER NOT NULL,
+  sale_id INTEGER NOT NULL,
+  FOREIGN Key (company_id) REFERENCES companies(id),
+  waste_type_id INTEGER NOT NULL,
+  FOREIGN Key (sale_id) REFERENCES sales(id),
+  FOREIGN Key (waste_type_id) REFERENCES waste_types(id),
+  amount_of_waste DECIMAL NULL,
+  cost_per_kg DECIMAL NULL
+
+);
+
+CREATE TABLE sale_transactions(
+  ref VARCHAR NULL,
+  id SERIAL PRIMARY KEY,
+  sale_id INTEGER not NULL,
+  FOREIGN Key (sale_id) REFERENCES sales(id),
+  company_id int not null,
+  FOREIGN Key (company_id) REFERENCES companies(id),
+  payment_method VARCHAR NOT NULL,
+  checkout_request_id VARCHAR NULL,
+  merchant_request_id VARCHAR NULL,
+  card_mask VARCHAR NULL,
+  msisdn_idnum VARCHAR NULL,
+  transaction_date TIMESTAMP NULL,
+  receipt_no VARCHAR NULL,
+  amount DECIMAL not NULL,
+  mpesa_result_code VARCHAR NULL,
+  mpesa_result_desc VARCHAR NULL,
+  ipay_status VARCHAR NULL,
+  created_at TIMESTAMP NOT NULL DEFAULT NOW(),
+  updated_at TIMESTAMP NOT NULL DEFAULT NOW()
+);
 
 CREATE TABLE waste_for_sale (
   id SERIAL PRIMARY KEY,

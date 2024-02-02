@@ -119,6 +119,10 @@ func runProgram() {
 	router.POST("/upload_files", middlewares.PermissionBlockerMiddleware("upload_files"), controllers.FileController{}.UploadFiles)
 	//-------------------------------------------------------------------------------------------
 
+	//stats --------
+	router.GET("/main_organization_stats", middlewares.PermissionBlockerMiddleware("view_stats"), controllers.StatsController{}.GetMainOrganizationStats)
+	//stats -------
+
 	router.GET("/users", middlewares.PermissionBlockerMiddleware("view_user"), usersController.GetAllUsers)
 	//main organizations is
 	router.GET("/users/main_organization", middlewares.PermissionBlockerMiddleware("view_user"), usersController.GetAllMainOrganizationUsers)
@@ -132,7 +136,6 @@ func runProgram() {
 	router.GET("/user/:id", middlewares.PermissionBlockerMiddleware("view_user"), usersController.GetUser)
 
 	router.GET("/company/users/:id", usersController.GetCompanyUsers)
-
 
 	//---------------------------countries-------------------------------------------------------
 	//router.GET("countries", geoController.GetAllCountries)
@@ -155,8 +158,11 @@ func runProgram() {
 	router.PUT("aggregator/set_active_inactive_status", middlewares.PermissionBlockerMiddleware("edit_aggregator"), controllers.AggregatorController{}.UpdateAggregatorStatus)
 	router.DELETE("aggregator/delete/:id", middlewares.PermissionBlockerMiddleware("delete_aggregator"), controllers.AggregatorController{}.DeleteAggregator)
 	router.PUT("aggregator/update", middlewares.PermissionBlockerMiddleware("edit_aggregator"), controllers.AggregatorController{}.UpdateAggregator)
-	//-------------------------------------------------------------------------------------------
 
+	router.POST("aggregator/add/user", middlewares.PermissionBlockerMiddleware("add_user"), authController.AddAggregatorUser)
+	router.PUT("aggregator/update/user", middlewares.PermissionBlockerMiddleware("edit_user"), authController.UpdateAggregatorUser)
+
+	//-------------------------------------------------------------------------------------------
 
 	//---------------------------Green champion ------------------------------------------------------
 	router.POST("green_champion/add", middlewares.PermissionBlockerMiddleware("add_green_champion"), controllers.GreenChampionController{}.InsertGreenChampion)
@@ -207,7 +213,7 @@ func runProgram() {
 
 	//--------------------------- Assign collectors to champions-----------------------------------------------------
 	router.POST("assign_collectors_to_champions/assign", middlewares.PermissionBlockerMiddleware("assign_collector_to_champion"), championCollectorController.AssignAggregatorsToGreenChampionsParam)
-	
+
 	router.GET("get_collectors_for_green_champion/:id", middlewares.PermissionBlockerMiddleware("view_champion_collector"), championCollectorController.GetCollectorsForGreenChampion)
 	router.GET("get_green_champions_for_collector/:id", middlewares.PermissionBlockerMiddleware("view_champion_collector"), championCollectorController.GetAllChampionsForACollector)
 	//--------------------------------------------------------------------------------------------

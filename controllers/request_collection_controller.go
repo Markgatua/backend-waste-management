@@ -145,18 +145,18 @@ func (requestCollectionController RequestCollectionController) ConfirmCollection
 		return
 	}
 
-	insertError := gen.REPO.ConfirmCollectionRequest(context, gen.ConfirmCollectionRequestParams{
-		ID:        params.ID,
-		Confirmed: sql.NullBool{Bool: *params.Confirm,Valid: true},
-	})
+	// insertError := gen.REPO.ConfirmCollectionRequest(context, gen.ConfirmCollectionRequestParams{
+	// 	ID:        params.ID,
+	// 	Confirmed: sql.NullBool{Bool: *params.Confirm,Valid: true},
+	// })
 
-	if insertError != nil {
-		context.JSON(http.StatusUnprocessableEntity, gin.H{
-			"error":   true,
-			"message": "Failed to Confirm Collection Request",
-		})
-		return
-	}
+	// if insertError != nil {
+	// 	context.JSON(http.StatusUnprocessableEntity, gin.H{
+	// 		"error":   true,
+	// 		"message": "Failed to Confirm Collection Request",
+	// 	})
+	// 	return
+	// }
 
 	context.JSON(http.StatusOK, gin.H{
 		"error":   false,
@@ -175,18 +175,17 @@ func (requestCollectionController RequestCollectionController) CancelCollectionR
 		return
 	}
 
-	insertError := gen.REPO.CancelCollectionRequest(context, gen.CancelCollectionRequestParams{
-		ID:        params.ID,
-		Cancelled: sql.NullBool{Bool: *params.Cancel, Valid: true},
-	})
+	// insertError := gen.REPO.CancelCollectionRequest(context, gen.CancelCollectionRequestParams{
+	// 	ID:        params.ID,
+	// })
 
-	if insertError != nil {
-		context.JSON(http.StatusUnprocessableEntity, gin.H{
-			"error":   true,
-			"message": "Failed to Cancel Collection Request",
-		})
-		return
-	}
+	// if insertError != nil {
+	// 	context.JSON(http.StatusUnprocessableEntity, gin.H{
+	// 		"error":   true,
+	// 		"message": "Failed to Cancel Collection Request",
+	// 	})
+	// 	return
+	// }
 
 	context.JSON(http.StatusOK, gin.H{
 		"error":   false,
@@ -206,19 +205,19 @@ func (requestCollectionController RequestCollectionController) UpdateCollectionR
 		return
 	}
 
-	insertError := gen.REPO.UpdateCollectionRequest(context, gen.UpdateCollectionRequestParams{
-		ID:        params.ID,
-		Status: sql.NullBool{Bool: *params.Status, Valid: true},
-		PickupDate: sql.NullTime{Time: params.PickupDate, Valid: true},
-	})
+	// insertError := gen.REPO.UpdateCollectionRequest(context, gen.UpdateCollectionRequestParams{
+	// 	ID:        params.ID,
+	// 	Status: sql.NullBool{Bool: *params.Status, Valid: true},
+	// 	PickupDate: sql.NullTime{Time: params.PickupDate, Valid: true},
+	// })
 
-	if insertError != nil {
-		context.JSON(http.StatusUnprocessableEntity, gin.H{
-			"error":   true,
-			"message": "Failed to Update Collection Request",
-		})
-		return
-	}
+	// if insertError != nil {
+	// 	context.JSON(http.StatusUnprocessableEntity, gin.H{
+	// 		"error":   true,
+	// 		"message": "Failed to Update Collection Request",
+	// 	})
+	// 	return
+	// }
 
 	context.JSON(http.StatusOK, gin.H{
 		"error":   false,
