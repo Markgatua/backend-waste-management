@@ -158,9 +158,9 @@ func runProgram() {
 	router.GET("organization/:id", middlewares.PermissionBlockerMiddleware("view_organizations"), organzationController.GetOrganization)
 	//-------------------------------------------------------------------------------------------
 
-	
 	//---------------------------Sell-------------------------------------------------------------
 	router.POST("aggregator/sell_waste_to_buyer", middlewares.PermissionBlockerMiddleware("sell"), controllers.AggregatorController{}.InsertAggregator)
+	router.GET("aggregator/sales", middlewares.PermissionBlockerMiddleware("view_sale_history"), controllers.AggregatorController{}.GetSales)
 	//--------------------------------------------------------------------------------------------
 
 	//---------------------------Aggregator ------------------------------------------------------

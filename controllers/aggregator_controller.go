@@ -660,3 +660,30 @@ func SellWasteToBuyerCash(param SellWasteParam, auth *models.User) error {
 func SellWasteToBuyerCashless() {
 
 }
+
+func (aggregatorController AggregatorController) GetSales(context *gin.Context) {
+	auth, _ := helpers.Functions{}.CurrentUserFromToken(context)
+
+	search := context.Query("s")
+	itemsPerPage := context.Query("ipp")
+	page := context.Query("p")
+	//sortBy := context.Query("sort_by")
+	//orderBy := context.Query("order_by")
+	roleID := context.Query("role_id")
+
+	searchQuery := ""
+	if search != "" {
+		searchQuery = " and WHERE to_tsvector(body) @@ to_tsquery('" + search + "')"
+	}
+	limitOffset := " LIMIT " + itemsPerPage + " OFFSET " + page
+	roleIDQuery := ""
+	if roleID != "" {
+		roleIDQuery = " and where users.role_id=" + roleID
+	}
+	companyQuery := fmt.Sprint(" and where users.user_company_id=", auth.UserCompanyId.Int64)
+
+	query := `select users.id, users.first_name, users.last_name, users.email, users.avatar_url, users.calling_code, users.phone, users.is_active, roles.name as role_name,
+    roles.id as role_id from users inner join roles on users.role_id = roles.id where users.email not ilike 'superadmin@admin.com'
+    and users.is_main_organization_user = false ` + companyQuery + roleIDQuery + searchQuery + limitOffset
+
+}
