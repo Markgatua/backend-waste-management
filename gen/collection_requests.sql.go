@@ -28,8 +28,8 @@ where collection_requests.producer_id=$1 GROUP BY waste_types.name
 `
 
 type CollectionWeightTotalsRow struct {
-	TotalWeight int64  `json:"total_weight"`
-	Name        string `json:"name"`
+	TotalWeight int64  json:"total_weight"
+	Name        string json:"name"
 }
 
 func (q *Queries) CollectionWeightTotals(ctx context.Context, producerID int32) (CollectionWeightTotalsRow, error) {
@@ -66,16 +66,16 @@ WHERE collection_requests.cancelled=4
 `
 
 type GetAllCancelledCollectionRequestsRow struct {
-	ID                  int32          `json:"id"`
-	ProducerID          int32          `json:"producer_id"`
-	CollectorID         int32          `json:"collector_id"`
-	RequestDate         time.Time      `json:"request_date"`
-	PickupDate          sql.NullTime   `json:"pickup_date"`
-	Status              int32          `json:"status"`
-	CreatedAt           time.Time      `json:"created_at"`
-	AggregatorName      sql.NullString `json:"aggregator_name"`
-	ChampionName        sql.NullString `json:"champion_name"`
-	SecondCollectorName sql.NullString `json:"second_collector_name"`
+	ID                  int32          json:"id"
+	ProducerID          int32          json:"producer_id"
+	CollectorID         int32          json:"collector_id"
+	RequestDate         time.Time      json:"request_date"
+	PickupDate          sql.NullTime   json:"pickup_date"
+	Status              int32          json:"status"
+	CreatedAt           time.Time      json:"created_at"
+	AggregatorName      sql.NullString json:"aggregator_name"
+	ChampionName        sql.NullString json:"champion_name"
+	SecondCollectorName sql.NullString json:"second_collector_name"
 }
 
 func (q *Queries) GetAllCancelledCollectionRequests(ctx context.Context) ([]GetAllCancelledCollectionRequestsRow, error) {
@@ -129,16 +129,16 @@ LEFT JOIN
 `
 
 type GetAllCollectionRequestsRow struct {
-	ID                  int32          `json:"id"`
-	ProducerID          int32          `json:"producer_id"`
-	CollectorID         int32          `json:"collector_id"`
-	RequestDate         time.Time      `json:"request_date"`
-	PickupDate          sql.NullTime   `json:"pickup_date"`
-	Status              int32          `json:"status"`
-	CreatedAt           time.Time      `json:"created_at"`
-	AggregatorName      sql.NullString `json:"aggregator_name"`
-	ChampionName        sql.NullString `json:"champion_name"`
-	SecondCollectorName sql.NullString `json:"second_collector_name"`
+	ID                  int32          json:"id"
+	ProducerID          int32          json:"producer_id"
+	CollectorID         int32          json:"collector_id"
+	RequestDate         time.Time      json:"request_date"
+	PickupDate          sql.NullTime   json:"pickup_date"
+	Status              int32          json:"status"
+	CreatedAt           time.Time      json:"created_at"
+	AggregatorName      sql.NullString json:"aggregator_name"
+	ChampionName        sql.NullString json:"champion_name"
+	SecondCollectorName sql.NullString json:"second_collector_name"
 }
 
 func (q *Queries) GetAllCollectionRequests(ctx context.Context) ([]GetAllCollectionRequestsRow, error) {
@@ -193,16 +193,16 @@ WHERE collection_requests.collector_id=$1
 `
 
 type GetAllCollectionRequestsForACollectorRow struct {
-	ID                  int32          `json:"id"`
-	ProducerID          int32          `json:"producer_id"`
-	CollectorID         int32          `json:"collector_id"`
-	RequestDate         time.Time      `json:"request_date"`
-	PickupDate          sql.NullTime   `json:"pickup_date"`
-	Status              int32          `json:"status"`
-	CreatedAt           time.Time      `json:"created_at"`
-	AggregatorName      sql.NullString `json:"aggregator_name"`
-	ChampionName        sql.NullString `json:"champion_name"`
-	SecondCollectorName sql.NullString `json:"second_collector_name"`
+	ID                  int32          json:"id"
+	ProducerID          int32          json:"producer_id"
+	CollectorID         int32          json:"collector_id"
+	RequestDate         time.Time      json:"request_date"
+	PickupDate          sql.NullTime   json:"pickup_date"
+	Status              int32          json:"status"
+	CreatedAt           time.Time      json:"created_at"
+	AggregatorName      sql.NullString json:"aggregator_name"
+	ChampionName        sql.NullString json:"champion_name"
+	SecondCollectorName sql.NullString json:"second_collector_name"
 }
 
 func (q *Queries) GetAllCollectionRequestsForACollector(ctx context.Context, collectorID int32) ([]GetAllCollectionRequestsForACollectorRow, error) {
@@ -257,16 +257,16 @@ WHERE collection_requests.status=$1
 `
 
 type GetAllCompletedCollectionRequestsRow struct {
-	ID                  int32          `json:"id"`
-	ProducerID          int32          `json:"producer_id"`
-	CollectorID         int32          `json:"collector_id"`
-	RequestDate         time.Time      `json:"request_date"`
-	PickupDate          sql.NullTime   `json:"pickup_date"`
-	Status              int32          `json:"status"`
-	CreatedAt           time.Time      `json:"created_at"`
-	AggregatorName      sql.NullString `json:"aggregator_name"`
-	ChampionName        sql.NullString `json:"champion_name"`
-	SecondCollectorName sql.NullString `json:"second_collector_name"`
+	ID                  int32          json:"id"
+	ProducerID          int32          json:"producer_id"
+	CollectorID         int32          json:"collector_id"
+	RequestDate         time.Time      json:"request_date"
+	PickupDate          sql.NullTime   json:"pickup_date"
+	Status              int32          json:"status"
+	CreatedAt           time.Time      json:"created_at"
+	AggregatorName      sql.NullString json:"aggregator_name"
+	ChampionName        sql.NullString json:"champion_name"
+	SecondCollectorName sql.NullString json:"second_collector_name"
 }
 
 func (q *Queries) GetAllCompletedCollectionRequests(ctx context.Context, status int32) ([]GetAllCompletedCollectionRequestsRow, error) {
@@ -321,16 +321,16 @@ WHERE collection_requests.confirmed=2
 `
 
 type GetAllPendingCollectionRequestsRow struct {
-	ID                  int32          `json:"id"`
-	ProducerID          int32          `json:"producer_id"`
-	CollectorID         int32          `json:"collector_id"`
-	RequestDate         time.Time      `json:"request_date"`
-	PickupDate          sql.NullTime   `json:"pickup_date"`
-	Status              int32          `json:"status"`
-	CreatedAt           time.Time      `json:"created_at"`
-	AggregatorName      sql.NullString `json:"aggregator_name"`
-	ChampionName        sql.NullString `json:"champion_name"`
-	SecondCollectorName sql.NullString `json:"second_collector_name"`
+	ID                  int32          json:"id"
+	ProducerID          int32          json:"producer_id"
+	CollectorID         int32          json:"collector_id"
+	RequestDate         time.Time      json:"request_date"
+	PickupDate          sql.NullTime   json:"pickup_date"
+	Status              int32          json:"status"
+	CreatedAt           time.Time      json:"created_at"
+	AggregatorName      sql.NullString json:"aggregator_name"
+	ChampionName        sql.NullString json:"champion_name"
+	SecondCollectorName sql.NullString json:"second_collector_name"
 }
 
 func (q *Queries) GetAllPendingCollectionRequests(ctx context.Context) ([]GetAllPendingCollectionRequestsRow, error) {
@@ -385,16 +385,16 @@ WHERE collection_requests.status=2
 `
 
 type GetAllPendingConfirmationCollectionRequestsRow struct {
-	ID                  int32          `json:"id"`
-	ProducerID          int32          `json:"producer_id"`
-	CollectorID         int32          `json:"collector_id"`
-	RequestDate         time.Time      `json:"request_date"`
-	PickupDate          sql.NullTime   `json:"pickup_date"`
-	Status              int32          `json:"status"`
-	CreatedAt           time.Time      `json:"created_at"`
-	AggregatorName      sql.NullString `json:"aggregator_name"`
-	ChampionName        sql.NullString `json:"champion_name"`
-	SecondCollectorName sql.NullString `json:"second_collector_name"`
+	ID                  int32          json:"id"
+	ProducerID          int32          json:"producer_id"
+	CollectorID         int32          json:"collector_id"
+	RequestDate         time.Time      json:"request_date"
+	PickupDate          sql.NullTime   json:"pickup_date"
+	Status              int32          json:"status"
+	CreatedAt           time.Time      json:"created_at"
+	AggregatorName      sql.NullString json:"aggregator_name"
+	ChampionName        sql.NullString json:"champion_name"
+	SecondCollectorName sql.NullString json:"second_collector_name"
 }
 
 func (q *Queries) GetAllPendingConfirmationCollectionRequests(ctx context.Context) ([]GetAllPendingConfirmationCollectionRequestsRow, error) {
@@ -449,15 +449,15 @@ GROUP BY
 `
 
 type GetAllProducerCompletedCollectionRequestsRow struct {
-	ID            int32          `json:"id"`
-	ProducerID    int32          `json:"producer_id"`
-	CollectorID   int32          `json:"collector_id"`
-	RequestDate   time.Time      `json:"request_date"`
-	PickupDate    sql.NullTime   `json:"pickup_date"`
-	Status        int32          `json:"status"`
-	CreatedAt     time.Time      `json:"created_at"`
-	CollectorName sql.NullString `json:"collector_name"`
-	TotalWeight   string         `json:"total_weight"`
+	ID            int32          json:"id"
+	ProducerID    int32          json:"producer_id"
+	CollectorID   int32          json:"collector_id"
+	RequestDate   time.Time      json:"request_date"
+	PickupDate    sql.NullTime   json:"pickup_date"
+	Status        int32          json:"status"
+	CreatedAt     time.Time      json:"created_at"
+	CollectorName sql.NullString json:"collector_name"
+	TotalWeight   string         json:"total_weight"
 }
 
 func (q *Queries) GetAllProducerCompletedCollectionRequests(ctx context.Context, producerID int32) ([]GetAllProducerCompletedCollectionRequestsRow, error) {
@@ -511,15 +511,15 @@ GROUP BY
 `
 
 type GetAllProducerPendingCollectionRequestsRow struct {
-	ID            int32          `json:"id"`
-	ProducerID    int32          `json:"producer_id"`
-	CollectorID   int32          `json:"collector_id"`
-	RequestDate   time.Time      `json:"request_date"`
-	PickupDate    sql.NullTime   `json:"pickup_date"`
-	Status        int32          `json:"status"`
-	CreatedAt     time.Time      `json:"created_at"`
-	CollectorName sql.NullString `json:"collector_name"`
-	TotalWeight   string         `json:"total_weight"`
+	ID            int32          json:"id"
+	ProducerID    int32          json:"producer_id"
+	CollectorID   int32          json:"collector_id"
+	RequestDate   time.Time      json:"request_date"
+	PickupDate    sql.NullTime   json:"pickup_date"
+	Status        int32          json:"status"
+	CreatedAt     time.Time      json:"created_at"
+	CollectorName sql.NullString json:"collector_name"
+	TotalWeight   string         json:"total_weight"
 }
 
 func (q *Queries) GetAllProducerPendingCollectionRequests(ctx context.Context, producerID int32) ([]GetAllProducerPendingCollectionRequestsRow, error) {
@@ -570,14 +570,14 @@ GROUP BY
 `
 
 type GetCollectionStatsRow struct {
-	ID          int32        `json:"id"`
-	ProducerID  int32        `json:"producer_id"`
-	CollectorID int32        `json:"collector_id"`
-	RequestDate time.Time    `json:"request_date"`
-	PickupDate  sql.NullTime `json:"pickup_date"`
-	Status      int32        `json:"status"`
-	CreatedAt   time.Time    `json:"created_at"`
-	TotalWeight string       `json:"total_weight"`
+	ID          int32        json:"id"
+	ProducerID  int32        json:"producer_id"
+	CollectorID int32        json:"collector_id"
+	RequestDate time.Time    json:"request_date"
+	PickupDate  sql.NullTime json:"pickup_date"
+	Status      int32        json:"status"
+	CreatedAt   time.Time    json:"created_at"
+	TotalWeight string       json:"total_weight"
 }
 
 func (q *Queries) GetCollectionStats(ctx context.Context, producerID int32) ([]GetCollectionStatsRow, error) {
@@ -630,15 +630,15 @@ GROUP BY
 `
 
 type GetLatestCollectionRow struct {
-	ID            int32          `json:"id"`
-	ProducerID    int32          `json:"producer_id"`
-	CollectorID   int32          `json:"collector_id"`
-	RequestDate   time.Time      `json:"request_date"`
-	PickupDate    sql.NullTime   `json:"pickup_date"`
-	Status        int32          `json:"status"`
-	CreatedAt     time.Time      `json:"created_at"`
-	CollectorName sql.NullString `json:"collector_name"`
-	TotalWeight   string         `json:"total_weight"`
+	ID            int32          json:"id"
+	ProducerID    int32          json:"producer_id"
+	CollectorID   int32          json:"collector_id"
+	RequestDate   time.Time      json:"request_date"
+	PickupDate    sql.NullTime   json:"pickup_date"
+	Status        int32          json:"status"
+	CreatedAt     time.Time      json:"created_at"
+	CollectorName sql.NullString json:"collector_name"
+	TotalWeight   string         json:"total_weight"
 }
 
 func (q *Queries) GetLatestCollection(ctx context.Context, id int32) (GetLatestCollectionRow, error) {
@@ -699,9 +699,9 @@ GROUP BY
 `
 
 type GetWasteItemsProducerDataRow struct {
-	TotalWeight      string        `json:"total_weight"`
-	WasteName        string        `json:"waste_name"`
-	CollectionStatus sql.NullInt32 `json:"collection_status"`
+	TotalWeight      string        json:"total_weight"
+	WasteName        string        json:"waste_name"
+	CollectionStatus sql.NullInt32 json:"collection_status"
 }
 
 func (q *Queries) GetWasteItemsProducerData(ctx context.Context, producerID int32) ([]GetWasteItemsProducerDataRow, error) {
@@ -733,9 +733,9 @@ insert into collection_requests( producer_id,collector_id,request_date ) values 
 `
 
 type InsertNewCollectionRequestParams struct {
-	ProducerID  int32     `json:"producer_id"`
-	CollectorID int32     `json:"collector_id"`
-	RequestDate time.Time `json:"request_date"`
+	ProducerID  int32     json:"producer_id"
+	CollectorID int32     json:"collector_id"
+	RequestDate time.Time json:"request_date"
 }
 
 // collection_requests.sql
@@ -753,9 +753,9 @@ where id = $3
 `
 
 type UpdateCollectionRequestParams struct {
-	PickupDate sql.NullTime `json:"pickup_date"`
-	Status     int32        `json:"status"`
-	ID         int32        `json:"id"`
+	PickupDate sql.NullTime json:"pickup_date"
+	Status     int32        json:"status"
+	ID         int32        json:"id"
 }
 
 func (q *Queries) UpdateCollectionRequest(ctx context.Context, arg UpdateCollectionRequestParams) error {

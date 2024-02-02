@@ -1,7 +1,7 @@
 -- collection_requests.sql
 
 -- name: InsertNewCollectionRequest :exec
-insert into collection_requests( producer_id,collector_id,request_date ) values ($1, $2, $3) returning *;
+insert into collection_requests( producer_id,collector_id,request_date,location,lat,lng,administrative_level_1_location,first_contact_person ) values ($1, $2, $3, $4, $5, $6, $7, $8) returning *;
 
 -- name: UpdateCollectionRequest :exec
 update collection_requests
@@ -206,3 +206,18 @@ WHERE
     collection_requests.producer_id = $1 AND collection_requests.status = false
 GROUP BY
     collection_requests.id, collector.name;
+
+
+-- name: GetAggregatorNewRequests :many
+SELECT
+    collection_requests.*,
+    producer.name AS producer_name,
+    producer.location AS producer_location
+FROM
+    collection_requests
+LEFT JOIN
+    companies AS producer ON producer.id = collection_requests.producer_id
+WHERE
+    collection_requests.collector_id = $1 AND collection_requests.status = false
+GROUP BY
+    collection_requests.id, producer.name, producer.location;

@@ -224,6 +224,7 @@ func runProgram() {
 	router.POST("cancel_collection_request", requestCollectionController.CancelCollectionRequest)
 	router.POST("update_collection_request", requestCollectionController.UpdateCollectionRequest)
 	router.GET("collections_weight_totals/:id", requestCollectionController.CollectionWeightTotals)
+	router.GET("my_next_collection_date/:id",requestCollectionController.GetTheCollectorForAChampion)
 	//--------------------------------------------------------------------------------------------
 
 	//--------------------------- Request Collections -----------------------------------------------------
@@ -233,6 +234,7 @@ func runProgram() {
 	router.GET("collections_producer_stats/:id", requestCollectionController.GetCollectionStats)
 	router.GET("collections_producer_complete/:id", requestCollectionController.GetAllProducerCompletedCollectionRequests)
 	router.GET("collections_producer_pending/:id", requestCollectionController.GetAllProducerPendingCollectionRequests)
+	router.GET("aggregator_new_collection_requests/:id", requestCollectionController.GetAggregatorNewRequests)
 	//--------------------------------------------------------------------------------------------
 
 	router.Run()

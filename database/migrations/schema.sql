@@ -200,8 +200,14 @@ CREATE TABLE collection_requests (
   collector_id INTEGER NOT NULL,
   FOREIGN Key (collector_id) REFERENCES companies(id),
   request_date TIMESTAMP NOT NULL,
+  location VARCHAR(255) NULL, -- the location of this company ie citadel muthithi road
+  administrative_level_1_location VARCHAR(255) NULL, -- in kenya, this will be county, in uganda it will be a different value , ie Nairobi county
+  lat float NULL,
+  lng float NULL,
   pickup_date TIMESTAMP NULL,
   status INTEGER NOT NULL, --1 pending, 2 confirmed, 3 on the way, 4 cancelled, 5 completed  
+  first_contact_person VARCHAR(255) NOT NULL,
+  second_contact_person VARCHAR(255),
   created_at TIMESTAMP NOT NULL DEFAULT NOW()
 );
 

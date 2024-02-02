@@ -271,12 +271,25 @@ func (q *Queries) GetCollectorsForGreenChampion(ctx context.Context, championID 
 }
 
 const getTheCollectorForAChampion = `-- name: GetTheCollectorForAChampion :one
-select id, champion_id, collector_id, pickup_day, pickup_time, created_at from champion_aggregator_assignments where champion_id=$1
+select champion_aggregator_assignments.id, champion_aggregator_assignments.champion_id, champion_aggregator_assignments.collector_id, champion_aggregator_assignments.pickup_day, champion_aggregator_assignments.pickup_time, champion_aggregator_assignments.created_at, collector.name AS collector_name  from champion_aggregator_assignments
+LEFT JOIN 
+    companies AS collector ON collector.id = champion_aggregator_assignments.collector_id
+where champion_id=$1
 `
 
-func (q *Queries) GetTheCollectorForAChampion(ctx context.Context, championID int32) (ChampionAggregatorAssignment, error) {
+type GetTheCollectorForAChampionRow struct {
+	ID            int32          `json:"id"`
+	ChampionID    int32          `json:"champion_id"`
+	CollectorID   int32          `json:"collector_id"`
+	PickupDay     sql.NullString `json:"pickup_day"`
+	PickupTime    sql.NullString `json:"pickup_time"`
+	CreatedAt     time.Time      `json:"created_at"`
+	CollectorName sql.NullString `json:"collector_name"`
+}
+
+func (q *Queries) GetTheCollectorForAChampion(ctx context.Context, championID int32) (GetTheCollectorForAChampionRow, error) {
 	row := q.db.QueryRowContext(ctx, getTheCollectorForAChampion, championID)
-	var i ChampionAggregatorAssignment
+	var i GetTheCollectorForAChampionRow
 	err := row.Scan(
 		&i.ID,
 		&i.ChampionID,
@@ -284,6 +297,7 @@ func (q *Queries) GetTheCollectorForAChampion(ctx context.Context, championID in
 		&i.PickupDay,
 		&i.PickupTime,
 		&i.CreatedAt,
+		&i.CollectorName,
 	)
 	return i, err
 }
