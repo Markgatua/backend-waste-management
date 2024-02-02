@@ -24,3 +24,12 @@ insert into sale_items(company_id,sale_id,waste_type_id,weight,cost_per_kg,total
 
 -- name: MakeCashPayment :one
 insert into sale_transactions(ref,sale_id,company_id,payment_method,transaction_date) VALUES($1,$2,$3,"CASH",$4) returning *;
+
+-- name: InventoryItemCount :one
+select count(*) from inventory where waste_type_id=$1 and company_id = $2;
+
+-- name: GetInventoryItem :one
+select * from inventory where  waste_type_id=$1 and company_id = $2;
+
+-- name: UpdateInventoryItem :exec
+update inventory set total_weight=$1 where id =$2;

@@ -72,6 +72,7 @@ type Querier interface {
 	GetDuplicateCompaniesWithoutID(ctx context.Context, arg GetDuplicateCompaniesWithoutIDParams) ([]Company, error)
 	GetDuplicateOrganization(ctx context.Context, arg GetDuplicateOrganizationParams) ([]Organization, error)
 	GetDuplicateRoleHasPermission(ctx context.Context, arg GetDuplicateRoleHasPermissionParams) (int64, error)
+	GetInventoryItem(ctx context.Context, arg GetInventoryItemParams) (Inventory, error)
 	GetLatestCollection(ctx context.Context, id int32) (GetLatestCollectionRow, error)
 	GetMainOrganization(ctx context.Context, organizationID string) ([]MainOrganization, error)
 	GetMainOrganizationUser(ctx context.Context, id int32) (User, error)
@@ -108,6 +109,7 @@ type Querier interface {
 	// waste_items.sql
 	InsertWasteItem(ctx context.Context, arg InsertWasteItemParams) (WasteItem, error)
 	InsertWasteType(ctx context.Context, arg InsertWasteTypeParams) (WasteType, error)
+	InventoryItemCount(ctx context.Context, arg InventoryItemCountParams) (int64, error)
 	MakeCashPayment(ctx context.Context, arg MakeCashPaymentParams) (SaleTransaction, error)
 	RemoveAggrigatorsAssignedFromGreenChampions(ctx context.Context, championID int32) error
 	RemovePermissionsFromRole(ctx context.Context, arg RemovePermissionsFromRoleParams) error
@@ -119,6 +121,7 @@ type Querier interface {
 	UpdateCollectionRequest(ctx context.Context, arg UpdateCollectionRequestParams) error
 	UpdateCompany(ctx context.Context, arg UpdateCompanyParams) error
 	UpdateCompanyStatus(ctx context.Context, arg UpdateCompanyStatusParams) error
+	UpdateInventoryItem(ctx context.Context, arg UpdateInventoryItemParams) error
 	// ttnm_organization.sql
 	UpdateMainOrganizationProfile(ctx context.Context, arg UpdateMainOrganizationProfileParams) error
 	UpdateMainOrganizationUser(ctx context.Context, arg UpdateMainOrganizationUserParams) error

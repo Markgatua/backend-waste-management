@@ -167,6 +167,43 @@ func (q *Queries) DeleteSale(ctx context.Context, id int32) error {
 	return err
 }
 
+const getInventoryItem = `-- name: GetInventoryItem :one
+select id, company_id, waste_type_id, total_weight from inventory where  waste_type_id=$1 and company_id = $2
+`
+
+type GetInventoryItemParams struct {
+	WasteTypeID sql.NullInt32 `json:"waste_type_id"`
+	CompanyID   int32         `json:"company_id"`
+}
+
+func (q *Queries) GetInventoryItem(ctx context.Context, arg GetInventoryItemParams) (Inventory, error) {
+	row := q.db.QueryRowContext(ctx, getInventoryItem, arg.WasteTypeID, arg.CompanyID)
+	var i Inventory
+	err := row.Scan(
+		&i.ID,
+		&i.CompanyID,
+		&i.WasteTypeID,
+		&i.TotalWeight,
+	)
+	return i, err
+}
+
+const inventoryItemCount = `-- name: InventoryItemCount :one
+select count(*) from inventory where waste_type_id=$1 and company_id = $2
+`
+
+type InventoryItemCountParams struct {
+	WasteTypeID sql.NullInt32 `json:"waste_type_id"`
+	CompanyID   int32         `json:"company_id"`
+}
+
+func (q *Queries) InventoryItemCount(ctx context.Context, arg InventoryItemCountParams) (int64, error) {
+	row := q.db.QueryRowContext(ctx, inventoryItemCount, arg.WasteTypeID, arg.CompanyID)
+	var count int64
+	err := row.Scan(&count)
+	return count, err
+}
+
 const makeCashPayment = `-- name: MakeCashPayment :one
 insert into sale_transactions(ref,sale_id,company_id,payment_method,transaction_date) VALUES($1,$2,$3,"CASH",$4) returning ref, id, sale_id, company_id, payment_method, checkout_request_id, merchant_request_id, card_mask, msisdn_idnum, transaction_date, receipt_no, amount, mpesa_result_code, mpesa_result_desc, ipay_status, created_at, updated_at
 `
@@ -244,5 +281,19 @@ func (q *Queries) UpdateBuyer(ctx context.Context, arg UpdateBuyerParams) error 
 		arg.Region,
 		arg.ID,
 	)
+	return err
+}
+
+const updateInventoryItem = `-- name: UpdateInventoryItem :exec
+update inventory set total_weight=$1 where id =$2
+`
+
+type UpdateInventoryItemParams struct {
+	TotalWeight string `json:"total_weight"`
+	ID          int32  `json:"id"`
+}
+
+func (q *Queries) UpdateInventoryItem(ctx context.Context, arg UpdateInventoryItemParams) error {
+	_, err := q.db.ExecContext(ctx, updateInventoryItem, arg.TotalWeight, arg.ID)
 	return err
 }

@@ -97,9 +97,10 @@ type EmailVerificationToken struct {
 }
 
 type Inventory struct {
-	CompanyID   int32          `json:"company_id"`
-	WasteTypeID sql.NullInt32  `json:"waste_type_id"`
-	TotalAmount sql.NullString `json:"total_amount"`
+	ID          int32         `json:"id"`
+	CompanyID   int32         `json:"company_id"`
+	WasteTypeID sql.NullInt32 `json:"waste_type_id"`
+	TotalWeight string        `json:"total_weight"`
 }
 
 type InventoryAdjustment struct {

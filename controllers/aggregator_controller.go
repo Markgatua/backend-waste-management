@@ -561,10 +561,39 @@ func SellWasteToBuyerCash(param SellWasteParam, auth *models.User) error {
 	var totalAmount = 0.0
 	var totalWeight = 0.0
 	ref := helpers.Functions{}.GetRandString(6)
-
 	for _, v := range param.WasteItems {
 		totalAmount += v.CostPerKG * v.Weight
 		totalWeight += v.Weight
+	}
+	var inventoryErrors []string
+
+	for _, v := range param.WasteItems {
+		wasteItem, err := gen.REPO.GetOneWasteType(context.Background(), v.ID)
+		if err == nil {
+			inventoryCount, _ := gen.REPO.InventoryItemCount(context.Background(), gen.InventoryItemCountParams{
+				WasteTypeID: sql.NullInt32{Int32: v.ID, Valid: true},
+				CompanyID:   int32(auth.UserCompanyId.Int64),
+			})
+			if inventoryCount == 0 {
+				inventoryErrors = append(inventoryErrors, fmt.Sprint("Waste item ", wasteItem.Name, " does not exists in inventory"))
+			} else {
+				//insert
+				item, _ := gen.REPO.GetInventoryItem(context.Background(), gen.GetInventoryItemParams{
+					WasteTypeID: sql.NullInt32{Int32: v.ID, Valid: true},
+					CompanyID:   int32(auth.UserCompanyId.Int64),
+				})
+				currentQuantity, _ := strconv.ParseFloat(strings.TrimSpace(item.TotalWeight), 64)
+				if currentQuantity-v.Weight < 0 {
+					inventoryErrors = append(inventoryErrors, fmt.Sprint("Not enough items in the inventory for waste item ", wasteItem.Name, " current quantity is ", currentQuantity, " Kgs requested quantity is ", totalWeight, " kgs"))
+				}
+			}
+		} else {
+			inventoryErrors = append(inventoryErrors, "One of the waste types does not exist in the inventory")
+		}
+	}
+
+	if len(inventoryErrors) != 0 {
+		return errors.New(strings.Join(inventoryErrors, "\n"))
 	}
 
 	//create sell
@@ -607,6 +636,24 @@ func SellWasteToBuyerCash(param SellWasteParam, auth *models.User) error {
 		gen.REPO.DeleteSale(context.Background(), sale.ID)
 		return err
 	}
+
+	for _, v := range param.WasteItems {
+		item, _ := gen.REPO.GetInventoryItem(
+			context.Background(), gen.GetInventoryItemParams{
+				WasteTypeID: sql.NullInt32{Int32: v.ID, Valid: true},
+				CompanyID:   int32(auth.UserCompanyId.Int64)})
+
+		currentQuantity, _ := strconv.ParseFloat(strings.TrimSpace(item.TotalWeight), 64)
+
+		var remainingWeight = currentQuantity - v.Weight
+		//update with the remaining weight
+		gen.REPO.UpdateInventoryItem(context.Background(), gen.UpdateInventoryItemParams{
+			TotalWeight: fmt.Sprint(remainingWeight),
+			ID:          item.ID,
+		})
+
+	}
+
 	return nil
 }
 
