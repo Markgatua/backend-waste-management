@@ -289,6 +289,26 @@
         ]
     },
 
+    {
+        "module": "Sales",
+        "key": "sales",
+        "permissions": [
+            {
+                "permission_id": 103,
+                "name": "View sale history",
+                "sub_module": "Sales",
+                "action": "view_sale_history"
+            },
+            {
+                "permission_id": 103,
+                "name": "Sell",
+                "sub_module": "Sales",
+                "action": "sell"
+            }
+        ]
+    },
+
+
 
     {
         "module": "Statistics",
