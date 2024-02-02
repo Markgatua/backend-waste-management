@@ -7,6 +7,8 @@ import (
 	"encoding/hex"
 	"errors"
 	"fmt"
+	jwt "github.com/dgrijalva/jwt-go"
+	"github.com/gin-gonic/gin"
 	"io/ioutil"
 	"math"
 	"math/big"
@@ -16,9 +18,6 @@ import (
 	"ttnmwastemanagementsystem/configs"
 	"ttnmwastemanagementsystem/gen"
 	"ttnmwastemanagementsystem/models"
-
-	jwt "github.com/dgrijalva/jwt-go"
-	"github.com/gin-gonic/gin"
 )
 
 type Functions struct{}
@@ -29,6 +28,17 @@ func (functions Functions) TokenGenerator() string {
 	return fmt.Sprintf("%x", b)
 }
 
+const chars = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"
+
+func (functions Functions) GetRandString(length int) string {
+	ll := len(chars)
+	b := make([]byte, length)
+	rand.Read(b) // generates len(b) random bytes
+	for i := 0; i < length; i++ {
+		b[i] = chars[int(b[i])%ll]
+	}
+	return string(b)
+}
 
 func (functions Functions) NumberTokenGenerator(numberOfDigits int) (int, error) {
 	maxLimit := int64(int(math.Pow10(numberOfDigits)) - 1)
@@ -114,7 +124,7 @@ func ExtractToken(c *gin.Context) string {
 func (functions Functions) ReplaceTemplateWithOrganizationInformation(template string) string {
 
 	organization := models.TtnmOrganizationModel{}
-	err :=  gen.REPO.DB.Get(&organization, "select name, logo_path, website_url from ttnm_organization")
+	err := gen.REPO.DB.Get(&organization, "select name, logo_path, website_url from ttnm_organization")
 	if err != nil {
 		organization.Name = ""
 		organization.LogoPath = ""
@@ -139,38 +149,37 @@ func (functions Functions) ReplaceTemplateWithOrganizationInformation(template s
 }
 
 func (functions Functions) SelectScan(rows *sql.Rows) ([]map[string]interface{}, error) {
-    defer rows.Close()
+	defer rows.Close()
 
-    columns, err := rows.Columns()
-    if err != nil {
-        return nil, err
-    }
-    numColumns := len(columns)
+	columns, err := rows.Columns()
+	if err != nil {
+		return nil, err
+	}
+	numColumns := len(columns)
 
-    values := make([]interface{}, numColumns)
-    for i := range values {
-        values[i] = new(interface{})
-    }
+	values := make([]interface{}, numColumns)
+	for i := range values {
+		values[i] = new(interface{})
+	}
 
-    var results []map[string]interface{}
-    for rows.Next() {
-        if err := rows.Scan(values...); err != nil {
-            return nil, err
-        }
+	var results []map[string]interface{}
+	for rows.Next() {
+		if err := rows.Scan(values...); err != nil {
+			return nil, err
+		}
 
-        dest := make(map[string]interface{}, numColumns)
-        for i, column := range columns {
-            dest[column] = *(values[i].(*interface{}))
-        }
-        results = append(results, dest)
-    }
+		dest := make(map[string]interface{}, numColumns)
+		for i, column := range columns {
+			dest[column] = *(values[i].(*interface{}))
+		}
+		results = append(results, dest)
+	}
 
-    if err := rows.Err(); err != nil {
-        return nil, err
-    }
-    return results, nil
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return results, nil
 }
-
 
 func (functions Functions) CurrentUserFromToken(c *gin.Context) (*models.User, error) {
 	secret := configs.EnvConfigs.JWTSecret

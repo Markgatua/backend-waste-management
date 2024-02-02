@@ -96,6 +96,21 @@ type EmailVerificationToken struct {
 	CreatedAt time.Time `json:"created_at"`
 }
 
+type Inventory struct {
+	CompanyID   int32          `json:"company_id"`
+	WasteTypeID sql.NullInt32  `json:"waste_type_id"`
+	TotalAmount sql.NullString `json:"total_amount"`
+}
+
+type InventoryAdjustment struct {
+	ID                   int32     `json:"id"`
+	AdjustedBy           int32     `json:"adjusted_by"`
+	CreatedAt            time.Time `json:"created_at"`
+	CompanyID            int32     `json:"company_id"`
+	AdjustmentAmount     string    `json:"adjustment_amount"`
+	IsPositiveAdjustment bool      `json:"is_positive_adjustment"`
+}
+
 type MainOrganization struct {
 	ID                     int32     `json:"id"`
 	OrganizationID         string    `json:"organization_id"`
@@ -165,28 +180,28 @@ type RoleHasPermission struct {
 }
 
 type Sale struct {
-	ID                 int32                 `json:"id"`
-	Ref                string                `json:"ref"`
-	CompanyID          int32                 `json:"company_id"`
-	BuyerID            int32                 `json:"buyer_id"`
-	TotalAmountOfWaste sql.NullString        `json:"total_amount_of_waste"`
-	TotalAmount        sql.NullString        `json:"total_amount"`
-	Date               time.Time             `json:"date"`
-	Dump               pqtype.NullRawMessage `json:"dump"`
+	ID          int32                 `json:"id"`
+	Ref         string                `json:"ref"`
+	CompanyID   int32                 `json:"company_id"`
+	BuyerID     int32                 `json:"buyer_id"`
+	TotalWeight sql.NullString        `json:"total_weight"`
+	TotalAmount sql.NullString        `json:"total_amount"`
+	Date        time.Time             `json:"date"`
+	Dump        pqtype.NullRawMessage `json:"dump"`
 }
 
 type SaleItem struct {
-	ID            int32          `json:"id"`
-	CompanyID     int32          `json:"company_id"`
-	SaleID        int32          `json:"sale_id"`
-	WasteTypeID   int32          `json:"waste_type_id"`
-	AmountOfWaste sql.NullString `json:"amount_of_waste"`
-	CostPerKg     sql.NullString `json:"cost_per_kg"`
-	TotalAmount   string         `json:"total_amount"`
+	ID          int32          `json:"id"`
+	CompanyID   int32          `json:"company_id"`
+	SaleID      int32          `json:"sale_id"`
+	WasteTypeID int32          `json:"waste_type_id"`
+	Weight      sql.NullString `json:"weight"`
+	CostPerKg   sql.NullString `json:"cost_per_kg"`
+	TotalAmount string         `json:"total_amount"`
 }
 
 type SaleTransaction struct {
-	Ref               sql.NullString `json:"ref"`
+	Ref               string         `json:"ref"`
 	ID                int32          `json:"id"`
 	SaleID            int32          `json:"sale_id"`
 	CompanyID         int32          `json:"company_id"`

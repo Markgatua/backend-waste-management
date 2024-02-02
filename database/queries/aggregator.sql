@@ -15,10 +15,12 @@ delete from buyers where id = $1;
 
 
 -- name: CreateSale :one
-insert into sales(ref,company_id,buyer_id,total_amount_of_waste,total_amount,dump) VALUES ($1,$2,$3,$4,$5,$6) returning *;
+insert into sales(ref,company_id,buyer_id,total_weight,total_amount,dump) VALUES ($1,$2,$3,$4,$5,$6) returning *;
 
+-- name: DeleteSale :exec
+delete from sales where id=$1;
 -- name: CreateSaleItem :one
-insert into sale_items(company_id,sale_id,waste_type_id,amount_of_waste,cost_per_kg,total_amount) VALUES($1,$2,$3,$4,$5,$6) returning *;
+insert into sale_items(company_id,sale_id,waste_type_id,weight,cost_per_kg,total_amount) VALUES($1,$2,$3,$4,$5,$6) returning *;
 
 -- name: MakeCashPayment :one
 insert into sale_transactions(ref,sale_id,company_id,payment_method,transaction_date) VALUES($1,$2,$3,"CASH",$4) returning *;

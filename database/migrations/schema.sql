@@ -278,7 +278,7 @@ CREATE TABLE sales(
   buyer_id int not null,
   FOREIGN Key (buyer_id) REFERENCES buyers(id),
   FOREIGN Key (company_id) REFERENCES companies(id),
-  total_amount_of_waste DECIMAL NULL, --in kgs
+  total_weight DECIMAL NULL, --in kgs
   total_amount DECIMAL NULL, --ksh
   date TIMESTAMP NOT NULL DEFAULT NOW(),
   dump json NULL
@@ -290,18 +290,18 @@ CREATE TABLE sale_items(
   sale_id INTEGER NOT NULL,
   FOREIGN Key (company_id) REFERENCES companies(id),
   waste_type_id INTEGER NOT NULL,
-  FOREIGN Key (sale_id) REFERENCES sales(id),
+  FOREIGN Key (sale_id) REFERENCES sales(id) on delete cascade,
   FOREIGN Key (waste_type_id) REFERENCES waste_types(id),
-  amount_of_waste DECIMAL NULL,
+  weight DECIMAL NULL,
   cost_per_kg DECIMAL NULL,
   total_amount DECIMAL NOT NULL
 );
 
 CREATE TABLE sale_transactions(
-  ref VARCHAR NULL,
+  ref VARCHAR NOT NULL,
   id SERIAL PRIMARY KEY,
   sale_id INTEGER not NULL,
-  FOREIGN Key (sale_id) REFERENCES sales(id),
+  FOREIGN Key (sale_id) REFERENCES sales(id) on delete cascade,
   company_id int not null,
   FOREIGN Key (company_id) REFERENCES companies(id),
   payment_method VARCHAR NOT NULL,

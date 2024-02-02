@@ -79,16 +79,16 @@ func (q *Queries) CreateBuyer(ctx context.Context, arg CreateBuyerParams) (Buyer
 }
 
 const createSale = `-- name: CreateSale :one
-insert into sales(ref,company_id,buyer_id,total_amount_of_waste,total_amount,dump) VALUES ($1,$2,$3,$4,$5,$6) returning id, ref, company_id, buyer_id, total_amount_of_waste, total_amount, date, dump
+insert into sales(ref,company_id,buyer_id,total_weight,total_amount,dump) VALUES ($1,$2,$3,$4,$5,$6) returning id, ref, company_id, buyer_id, total_weight, total_amount, date, dump
 `
 
 type CreateSaleParams struct {
-	Ref                string                `json:"ref"`
-	CompanyID          int32                 `json:"company_id"`
-	BuyerID            int32                 `json:"buyer_id"`
-	TotalAmountOfWaste sql.NullString        `json:"total_amount_of_waste"`
-	TotalAmount        sql.NullString        `json:"total_amount"`
-	Dump               pqtype.NullRawMessage `json:"dump"`
+	Ref         string                `json:"ref"`
+	CompanyID   int32                 `json:"company_id"`
+	BuyerID     int32                 `json:"buyer_id"`
+	TotalWeight sql.NullString        `json:"total_weight"`
+	TotalAmount sql.NullString        `json:"total_amount"`
+	Dump        pqtype.NullRawMessage `json:"dump"`
 }
 
 func (q *Queries) CreateSale(ctx context.Context, arg CreateSaleParams) (Sale, error) {
@@ -96,7 +96,7 @@ func (q *Queries) CreateSale(ctx context.Context, arg CreateSaleParams) (Sale, e
 		arg.Ref,
 		arg.CompanyID,
 		arg.BuyerID,
-		arg.TotalAmountOfWaste,
+		arg.TotalWeight,
 		arg.TotalAmount,
 		arg.Dump,
 	)
@@ -106,7 +106,7 @@ func (q *Queries) CreateSale(ctx context.Context, arg CreateSaleParams) (Sale, e
 		&i.Ref,
 		&i.CompanyID,
 		&i.BuyerID,
-		&i.TotalAmountOfWaste,
+		&i.TotalWeight,
 		&i.TotalAmount,
 		&i.Date,
 		&i.Dump,
@@ -115,16 +115,16 @@ func (q *Queries) CreateSale(ctx context.Context, arg CreateSaleParams) (Sale, e
 }
 
 const createSaleItem = `-- name: CreateSaleItem :one
-insert into sale_items(company_id,sale_id,waste_type_id,amount_of_waste,cost_per_kg,total_amount) VALUES($1,$2,$3,$4,$5,$6) returning id, company_id, sale_id, waste_type_id, amount_of_waste, cost_per_kg, total_amount
+insert into sale_items(company_id,sale_id,waste_type_id,weight,cost_per_kg,total_amount) VALUES($1,$2,$3,$4,$5,$6) returning id, company_id, sale_id, waste_type_id, weight, cost_per_kg, total_amount
 `
 
 type CreateSaleItemParams struct {
-	CompanyID     int32          `json:"company_id"`
-	SaleID        int32          `json:"sale_id"`
-	WasteTypeID   int32          `json:"waste_type_id"`
-	AmountOfWaste sql.NullString `json:"amount_of_waste"`
-	CostPerKg     sql.NullString `json:"cost_per_kg"`
-	TotalAmount   string         `json:"total_amount"`
+	CompanyID   int32          `json:"company_id"`
+	SaleID      int32          `json:"sale_id"`
+	WasteTypeID int32          `json:"waste_type_id"`
+	Weight      sql.NullString `json:"weight"`
+	CostPerKg   sql.NullString `json:"cost_per_kg"`
+	TotalAmount string         `json:"total_amount"`
 }
 
 func (q *Queries) CreateSaleItem(ctx context.Context, arg CreateSaleItemParams) (SaleItem, error) {
@@ -132,7 +132,7 @@ func (q *Queries) CreateSaleItem(ctx context.Context, arg CreateSaleItemParams) 
 		arg.CompanyID,
 		arg.SaleID,
 		arg.WasteTypeID,
-		arg.AmountOfWaste,
+		arg.Weight,
 		arg.CostPerKg,
 		arg.TotalAmount,
 	)
@@ -142,7 +142,7 @@ func (q *Queries) CreateSaleItem(ctx context.Context, arg CreateSaleItemParams) 
 		&i.CompanyID,
 		&i.SaleID,
 		&i.WasteTypeID,
-		&i.AmountOfWaste,
+		&i.Weight,
 		&i.CostPerKg,
 		&i.TotalAmount,
 	)
@@ -158,15 +158,24 @@ func (q *Queries) DeleteBuyer(ctx context.Context, id int32) error {
 	return err
 }
 
+const deleteSale = `-- name: DeleteSale :exec
+delete from sales where id=$1
+`
+
+func (q *Queries) DeleteSale(ctx context.Context, id int32) error {
+	_, err := q.db.ExecContext(ctx, deleteSale, id)
+	return err
+}
+
 const makeCashPayment = `-- name: MakeCashPayment :one
 insert into sale_transactions(ref,sale_id,company_id,payment_method,transaction_date) VALUES($1,$2,$3,"CASH",$4) returning ref, id, sale_id, company_id, payment_method, checkout_request_id, merchant_request_id, card_mask, msisdn_idnum, transaction_date, receipt_no, amount, mpesa_result_code, mpesa_result_desc, ipay_status, created_at, updated_at
 `
 
 type MakeCashPaymentParams struct {
-	Ref             sql.NullString `json:"ref"`
-	SaleID          int32          `json:"sale_id"`
-	CompanyID       int32          `json:"company_id"`
-	TransactionDate sql.NullTime   `json:"transaction_date"`
+	Ref             string       `json:"ref"`
+	SaleID          int32        `json:"sale_id"`
+	CompanyID       int32        `json:"company_id"`
+	TransactionDate sql.NullTime `json:"transaction_date"`
 }
 
 func (q *Queries) MakeCashPayment(ctx context.Context, arg MakeCashPaymentParams) (SaleTransaction, error) {

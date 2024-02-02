@@ -1,7 +1,9 @@
 package controllers
 
 import (
+	"context"
 	"database/sql"
+	"errors"
 	"fmt"
 	"net/http"
 	"strconv"
@@ -513,10 +515,101 @@ func (aggregatorController AggregatorController) GetBuyers(context *gin.Context)
 	})
 }
 
-func (aggregatorController AggregatorController) SellWasteToBuyer(context *gin.Context) {
-
+type SellWasteItem struct {
+	ID        int32   `json:"id"  binding:"required"`
+	Weight    float64 `json:"weight"  binding:"required"`
+	CostPerKG float64 `json:"cost_per_kg" binding:"required"`
+	Amount    float64 `json:"amount" binding:"amount"`
+}
+type SellWasteParam struct {
+	BuyerID         int32           `json:"buyer_id"  binding:"required"`
+	Date            null.Time       `json:"date"  binding:"required"`
+	SellTotalAmount float64         `json:"sell_total_amount"  binding:"sell_total_amount"` //Allow Partial Payments?
+	WasteItems      []SellWasteItem `json:"waste_items"  binding:"required"`
+	PaymentMethod   int32           `json:"payment_method"  binding:"required"`
 }
 
-func SellWasteToBuyerCash() {
+func (aggregatorController AggregatorController) SellWasteToBuyer(context *gin.Context) {
+	auth, _ := helpers.Functions{}.CurrentUserFromToken(context)
+	var params SellWasteParam
+	err := context.ShouldBindJSON(&params)
+	if err != nil {
+		context.JSON(http.StatusUnprocessableEntity, gin.H{
+			"error":   true,
+			"message": err.Error(),
+		})
+		return
+	}
+	if params.PaymentMethod == 1 {
+		err := SellWasteToBuyerCash(params, auth)
+		if err != nil {
+			context.JSON(http.StatusUnprocessableEntity, gin.H{
+				"error":   true,
+				"message": err.Error(),
+			})
+			return
+		}
+		context.JSON(http.StatusOK, gin.H{
+			"error":   false,
+			"message": "Error selling waste",
+		})
+	}
+}
+
+// for cash payments we automatically add items to the inventory since we assume that the user has paid full amount
+func SellWasteToBuyerCash(param SellWasteParam, auth *models.User) error {
+	var totalAmount = 0.0
+	var totalWeight = 0.0
+	ref := helpers.Functions{}.GetRandString(6)
+
+	for _, v := range param.WasteItems {
+		totalAmount += v.CostPerKG * v.Weight
+		totalWeight += v.Weight
+	}
+
+	//create sell
+	sale, err := gen.REPO.CreateSale(context.Background(), gen.CreateSaleParams{
+		Ref:         ref,
+		CompanyID:   int32(auth.UserCompanyId.Int64),
+		BuyerID:     param.BuyerID,
+		TotalWeight: null.StringFrom(fmt.Sprint(totalWeight)).NullString,
+		TotalAmount: null.StringFrom(fmt.Sprint(totalAmount)).NullString,
+	})
+	if err != nil {
+		return err
+	}
+	//create sell items
+	var errorSavingSaleItem = false
+	for _, v := range param.WasteItems {
+		_, err := gen.REPO.CreateSaleItem(context.Background(), gen.CreateSaleItemParams{
+			CompanyID:   int32(auth.UserCompanyId.Int64),
+			SaleID:      sale.ID,
+			WasteTypeID: v.ID,
+			Weight:      null.StringFrom(fmt.Sprint(v.Weight)).NullString,
+			CostPerKg:   null.StringFrom(fmt.Sprint(v.CostPerKG)).NullString,
+			TotalAmount: fmt.Sprint(v.Weight * v.CostPerKG),
+		})
+		if err != nil {
+			errorSavingSaleItem = true
+		}
+	}
+	if errorSavingSaleItem {
+		gen.REPO.DeleteSale(context.Background(), sale.ID)
+		return errors.New("Error occured")
+	}
+	_, err = gen.REPO.MakeCashPayment(context.Background(), gen.MakeCashPaymentParams{
+		Ref:             helpers.Functions{}.GetRandString(6),
+		SaleID:          sale.ID,
+		CompanyID:       int32(auth.UserCompanyId.Int64),
+		TransactionDate: param.Date.NullTime,
+	})
+	if err != nil {
+		gen.REPO.DeleteSale(context.Background(), sale.ID)
+		return err
+	}
+	return nil
+}
+
+func SellWasteToBuyerCashless() {
 
 }
