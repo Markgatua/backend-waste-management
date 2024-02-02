@@ -160,7 +160,7 @@ func runProgram() {
 
 	
 	//---------------------------Sell-------------------------------------------------------------
-	router.POST("aggregator/sell_waste_to_buyer", middlewares.PermissionBlockerMiddleware("add_aggregator"), controllers.AggregatorController{}.InsertAggregator)
+	router.POST("aggregator/sell_waste_to_buyer", middlewares.PermissionBlockerMiddleware("sell"), controllers.AggregatorController{}.InsertAggregator)
 	//--------------------------------------------------------------------------------------------
 
 	//---------------------------Aggregator ------------------------------------------------------

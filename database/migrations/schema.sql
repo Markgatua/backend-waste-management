@@ -252,6 +252,24 @@ CREATE TABLE buyers(
 );
 CREATE UNIQUE INDEX buyer_unique_company_idx on buyers (LOWER(company));  
 
+CREATE TABLE inventory(
+  company_id int not null,
+  FOREIGN Key (company_id) REFERENCES companies(id),
+  waste_type_id INTEGER NULL,
+  FOREIGN Key (waste_type_id) REFERENCES waste_types(id),
+  total_amount DECIMAL --in kgs
+);
+
+CREATE TABLE inventory_adjustments(
+    id SERIAL PRIMARY KEY,
+    adjusted_by INTEGER not null,
+    created_at TIMESTAMP NOT NULL DEFAULT NOW(),
+    company_id int not null,
+    adjustment_amount DECIMAL not NULL,
+    is_positive_adjustment BOOLEAN not null,
+    FOREIGN Key (company_id) REFERENCES companies(id),
+    FOREIGN Key (adjusted_by) REFERENCES users(id)
+);
 
 CREATE TABLE sales(
   id SERIAL PRIMARY KEY,

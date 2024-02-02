@@ -512,3 +512,11 @@ func (aggregatorController AggregatorController) GetBuyers(context *gin.Context)
 		"message": "Buyer updated successfully",
 	})
 }
+
+func (aggregatorController AggregatorController) SellWasteToBuyer(context *gin.Context) {
+
+}
+
+func SellWasteToBuyerCash() {
+
+}
