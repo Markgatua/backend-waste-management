@@ -23,7 +23,7 @@ delete from sales where id=$1;
 insert into sale_items(company_id,sale_id,waste_type_id,weight,cost_per_kg,total_amount) VALUES($1,$2,$3,$4,$5,$6) returning *;
 
 -- name: MakeCashPayment :one
-insert into sale_transactions(ref,sale_id,company_id,payment_method,transaction_date) VALUES($1,$2,$3,"CASH",$4) returning *;
+insert into sale_transactions(ref,sale_id,company_id,payment_method,amount,transaction_date) VALUES($1,$2,$3,$4,$5,$6) returning *;
 
 -- name: InventoryItemCount :one
 select count(*) from inventory where waste_type_id=$1 and company_id = $2;

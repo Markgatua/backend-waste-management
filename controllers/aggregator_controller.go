@@ -579,8 +579,8 @@ type SellWasteItem struct {
 }
 type SellWasteParam struct {
 	BuyerID         int32           `json:"buyer_id"  binding:"required"`
-	Date            null.Time       `json:"date"  binding:"required"`
-	SellTotalAmount float64         `json:"sell_total_amount"  binding:"sell_total_amount"` //Allow Partial Payments?
+	Date            string          `json:"date"  binding:"required"`
+	SellTotalAmount float64         `json:"sell_total_amount"  binding:"required"` //Allow Partial Payments?
 	WasteItems      []SellWasteItem `json:"waste_items"  binding:"required"`
 	PaymentMethod   int32           `json:"payment_method"  binding:"required"`
 }
@@ -596,8 +596,16 @@ func (aggregatorController AggregatorController) SellWasteToBuyer(context *gin.C
 		})
 		return
 	}
+	date, parseDateError := time.Parse("2006-01-02", params.Date)
+	if parseDateError != nil {
+		context.JSON(http.StatusUnprocessableEntity, gin.H{
+			"error":   true,
+			"message": parseDateError.Error(),
+		})
+		return
+	}
 	if params.PaymentMethod == 1 {
-		err := SellWasteToBuyerCash(params, auth)
+		err := SellWasteToBuyerCash(params, auth, sql.NullTime{Time: date, Valid: true})
 		if err != nil {
 			context.JSON(http.StatusUnprocessableEntity, gin.H{
 				"error":   true,
@@ -607,13 +615,13 @@ func (aggregatorController AggregatorController) SellWasteToBuyer(context *gin.C
 		}
 		context.JSON(http.StatusOK, gin.H{
 			"error":   false,
-			"message": "Error selling waste",
+			"message": "Waste sold successfully",
 		})
 	}
 }
 
 // for cash payments we automatically add items to the inventory since we assume that the user has paid full amount
-func SellWasteToBuyerCash(param SellWasteParam, auth *models.User) error {
+func SellWasteToBuyerCash(param SellWasteParam, auth *models.User, date sql.NullTime) error {
 	var totalAmount = 0.0
 	var totalWeight = 0.0
 	ref := helpers.Functions{}.GetRandString(6)
@@ -685,8 +693,10 @@ func SellWasteToBuyerCash(param SellWasteParam, auth *models.User) error {
 	_, err = gen.REPO.MakeCashPayment(context.Background(), gen.MakeCashPaymentParams{
 		Ref:             helpers.Functions{}.GetRandString(6),
 		SaleID:          sale.ID,
+		PaymentMethod:   "CASH",
+		Amount:          fmt.Sprint(totalAmount),
 		CompanyID:       int32(auth.UserCompanyId.Int64),
-		TransactionDate: param.Date.NullTime,
+		TransactionDate: date,
 	})
 	if err != nil {
 		gen.REPO.DeleteSale(context.Background(), sale.ID)

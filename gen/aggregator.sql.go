@@ -205,13 +205,15 @@ func (q *Queries) InventoryItemCount(ctx context.Context, arg InventoryItemCount
 }
 
 const makeCashPayment = `-- name: MakeCashPayment :one
-insert into sale_transactions(ref,sale_id,company_id,payment_method,transaction_date) VALUES($1,$2,$3,"CASH",$4) returning ref, id, sale_id, company_id, payment_method, checkout_request_id, merchant_request_id, card_mask, msisdn_idnum, transaction_date, receipt_no, amount, mpesa_result_code, mpesa_result_desc, ipay_status, created_at, updated_at
+insert into sale_transactions(ref,sale_id,company_id,payment_method,amount,transaction_date) VALUES($1,$2,$3,$4,$5,$6) returning ref, id, sale_id, company_id, payment_method, checkout_request_id, merchant_request_id, card_mask, msisdn_idnum, transaction_date, receipt_no, amount, mpesa_result_code, mpesa_result_desc, ipay_status, created_at, updated_at
 `
 
 type MakeCashPaymentParams struct {
 	Ref             string       `json:"ref"`
 	SaleID          int32        `json:"sale_id"`
 	CompanyID       int32        `json:"company_id"`
+	PaymentMethod   string       `json:"payment_method"`
+	Amount          string       `json:"amount"`
 	TransactionDate sql.NullTime `json:"transaction_date"`
 }
 
@@ -220,6 +222,8 @@ func (q *Queries) MakeCashPayment(ctx context.Context, arg MakeCashPaymentParams
 		arg.Ref,
 		arg.SaleID,
 		arg.CompanyID,
+		arg.PaymentMethod,
+		arg.Amount,
 		arg.TransactionDate,
 	)
 	var i SaleTransaction
