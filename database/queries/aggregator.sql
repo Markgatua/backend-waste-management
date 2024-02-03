@@ -33,3 +33,6 @@ select * from inventory where  waste_type_id=$1 and company_id = $2;
 
 -- name: UpdateInventoryItem :exec
 update inventory set total_weight=$1 where id =$2;
+
+-- name: InsertToInventory :exec
+insert into inventory(waste_type_id,company_id,total_weight) VALUES($1,$2,$3);

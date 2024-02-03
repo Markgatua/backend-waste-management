@@ -188,6 +188,21 @@ func (q *Queries) GetInventoryItem(ctx context.Context, arg GetInventoryItemPara
 	return i, err
 }
 
+const insertToInventory = `-- name: InsertToInventory :exec
+insert into inventory(waste_type_id,company_id,total_weight) VALUES($1,$2,$3)
+`
+
+type InsertToInventoryParams struct {
+	WasteTypeID sql.NullInt32 `json:"waste_type_id"`
+	CompanyID   int32         `json:"company_id"`
+	TotalWeight string        `json:"total_weight"`
+}
+
+func (q *Queries) InsertToInventory(ctx context.Context, arg InsertToInventoryParams) error {
+	_, err := q.db.ExecContext(ctx, insertToInventory, arg.WasteTypeID, arg.CompanyID, arg.TotalWeight)
+	return err
+}
+
 const inventoryItemCount = `-- name: InventoryItemCount :one
 select count(*) from inventory where waste_type_id=$1 and company_id = $2
 `

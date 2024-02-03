@@ -106,6 +106,7 @@ type Querier interface {
 	InsertOrganization(ctx context.Context, arg InsertOrganizationParams) (Organization, error)
 	// sub_counties.sql
 	InsertSubcounties(ctx context.Context, arg InsertSubcountiesParams) error
+	InsertToInventory(ctx context.Context, arg InsertToInventoryParams) error
 	// waste_items.sql
 	InsertWasteItem(ctx context.Context, arg InsertWasteItemParams) (WasteItem, error)
 	InsertWasteType(ctx context.Context, arg InsertWasteTypeParams) (WasteType, error)

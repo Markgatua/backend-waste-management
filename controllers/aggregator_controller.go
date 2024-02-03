@@ -585,6 +585,110 @@ type SellWasteParam struct {
 	PaymentMethod   int32           `json:"payment_method"  binding:"required"`
 }
 
+func (aggregatorController AggregatorController) MakeInventoryAdjustments(context *gin.Context) {
+	auth, _ := helpers.Functions{}.CurrentUserFromToken(context)
+	type WasteItem struct {
+		ID             int32   `json:"id"  binding:"required"`
+		Adjustment     float64 `json:"adjustment"  binding:"dive"`
+		AdjustmentType string  `json:"adjustment_type"  binding:"required"`
+	}
+	type Param struct {
+		CompanyID  int32       `json:"company_id"  binding:"required"`
+		WasteItems []WasteItem `json:"waste_items"  binding:"required"`
+	}
+	var params Param
+	err := context.ShouldBindJSON(&params)
+	if err != nil {
+		context.JSON(http.StatusUnprocessableEntity, gin.H{
+			"error":   true,
+			"message": err.Error(),
+		})
+		return
+	}
+	var inventoryErrors []string
+	for _, v := range params.WasteItems {
+		wasteItem, err := gen.REPO.GetOneWasteType(context, v.ID)
+		if err == nil {
+			inventoryCount, _ := gen.REPO.InventoryItemCount(context, gen.InventoryItemCountParams{
+				WasteTypeID: sql.NullInt32{Int32: v.ID, Valid: true},
+				CompanyID:   int32(auth.UserCompanyId.Int64),
+			})
+			if inventoryCount == 0 {
+				if v.AdjustmentType == "negative" {
+					inventoryErrors = append(inventoryErrors, fmt.Sprint("Waste item ", wasteItem.Name, " does not exists in inventory"))
+				}
+			} else {
+				//insert
+				item, _ := gen.REPO.GetInventoryItem(context, gen.GetInventoryItemParams{
+					WasteTypeID: sql.NullInt32{Int32: v.ID, Valid: true},
+					CompanyID:   int32(auth.UserCompanyId.Int64),
+				})
+
+				currentQuantity, _ := strconv.ParseFloat(strings.TrimSpace(item.TotalWeight), 64)
+				if v.AdjustmentType == "negative" {
+					if currentQuantity-v.Adjustment < 0 {
+						inventoryErrors = append(inventoryErrors, fmt.Sprint("Not enough items in the inventory for waste item ", wasteItem.Name, " current quantity is ", currentQuantity, " Kgs requested quantity is ", totalWeight, " kgs"))
+					}
+				}
+
+			}
+		} else {
+			inventoryErrors = append(inventoryErrors, "One of the waste types does not exist in the inventory")
+		}
+	}
+
+	if len(inventoryErrors) != 0 {
+		context.JSON(http.StatusUnprocessableEntity, gin.H{
+			"error":   true,
+			"message": strings.Join(inventoryErrors, "\n"),
+		})
+		return
+	}
+
+	for _, v := range params.WasteItems {
+		if err == nil {
+			inventoryCount, _ := gen.REPO.InventoryItemCount(context, gen.InventoryItemCountParams{
+				WasteTypeID: sql.NullInt32{Int32: v.ID, Valid: true},
+				CompanyID:   int32(auth.UserCompanyId.Int64),
+			})
+			if inventoryCount == 0 {
+				//do insert
+				gen.REPO.InsertToInventory(context, gen.InsertToInventoryParams{
+					WasteTypeID: sql.NullInt32{Int32: v.ID, Valid: true},
+					CompanyID:   int32(auth.RoleId.Int64),
+					TotalWeight: fmt.Sprint(v.Adjustment),
+				})
+			} else {
+				//insert
+				item, _ := gen.REPO.GetInventoryItem(context, gen.GetInventoryItemParams{
+					WasteTypeID: sql.NullInt32{Int32: v.ID, Valid: true},
+					CompanyID:   int32(auth.UserCompanyId.Int64),
+				})
+
+				currentQuantity, _ := strconv.ParseFloat(strings.TrimSpace(item.TotalWeight), 64)
+				if v.AdjustmentType == "negative" {
+					remainingWeight := currentQuantity - v.Adjustment
+					gen.REPO.UpdateInventoryItem(context, gen.UpdateInventoryItemParams{
+						TotalWeight: fmt.Sprint(remainingWeight),
+						ID:          v.ID,
+					})
+				} else if v.AdjustmentType == "positive" {
+					remainingWeight := currentQuantity + v.Adjustment
+					gen.REPO.UpdateInventoryItem(context, gen.UpdateInventoryItemParams{
+						TotalWeight: fmt.Sprint(remainingWeight),
+						ID:          v.ID,
+					})
+				}
+
+			}
+		}
+	}
+	context.JSON(http.StatusOK, gin.H{
+		"error":   false,
+		"message": "Inventory updated successfully",
+	})
+}
+
 func (aggregatorController AggregatorController) SellWasteToBuyer(context *gin.Context) {
 	auth, _ := helpers.Functions{}.CurrentUserFromToken(context)
 	var params SellWasteParam
@@ -745,7 +849,7 @@ func (aggregatorController AggregatorController) GetSales(context *gin.Context) 
 	limitOffset := ""
 
 	if search != "" {
-		searchQuery = " and (q.first_name ilike " + "'%" + search + "%'" + " or q.company_name ilike " + "'%" + search + "%'" +" or q.last_name ilike "+"'%"+search+"%'"+")"
+		searchQuery = " and (q.first_name ilike " + "'%" + search + "%'" + " or q.company_name ilike " + "'%" + search + "%'" + " or q.last_name ilike " + "'%" + search + "%'" + ")"
 	}
 	if itemsPerPage != "" && page != "" {
 		limitOffset = " LIMIT " + itemsPerPage + " OFFSET " + page
