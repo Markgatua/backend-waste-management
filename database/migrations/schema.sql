@@ -250,7 +250,7 @@ CREATE TABLE buyers(
   updated_at TIMESTAMP NOT NULL DEFAULT NOW(),
   FOREIGN Key (company_id) REFERENCES companies(id)
 );
-CREATE UNIQUE INDEX buyer_unique_company_idx on buyers (LOWER(company));  
+CREATE UNIQUE INDEX buyer_unique_company_namex on buyers (LOWER(company));  
 
 CREATE TABLE inventory(
       id SERIAL PRIMARY KEY,

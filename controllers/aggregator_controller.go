@@ -11,6 +11,7 @@ import (
 	"time"
 	"ttnmwastemanagementsystem/gen"
 	"ttnmwastemanagementsystem/helpers"
+	"ttnmwastemanagementsystem/logger"
 	"ttnmwastemanagementsystem/models"
 	"ttnmwastemanagementsystem/utils"
 
@@ -355,9 +356,10 @@ func (aggregatorController AggregatorController) UpdateAggregator(context *gin.C
 func (aggregatorController AggregatorController) AddBuyer(context *gin.Context) {
 	auth, _ := helpers.Functions{}.CurrentUserFromToken(context)
 	type Param struct {
-		FirstName   string          `json:"first_name"  binding:"required"`
-		LastName    string          `json:"last_name"  binding:"required"`
-		Company     string          `json:"company"  binding:"required"`
+		FirstName string `json:"first_name"  binding:"required"`
+		LastName  string `json:"last_name"  binding:"required"`
+		Company   string `json:"company"  binding:"required"`
+		//CompanyID   int32           `json:"company_id"  binding:"required"`
 		Location    models.Location `json:"location" binding:"required"`
 		CallingCode string          `json:"calling_code" binding:"required"`
 		Phone       string          `json:"phone" binding:"required"`
@@ -370,6 +372,25 @@ func (aggregatorController AggregatorController) AddBuyer(context *gin.Context) 
 		context.JSON(http.StatusUnprocessableEntity, gin.H{
 			"error":   true,
 			"message": err.Error(),
+		})
+		return
+	}
+
+	var duplicateBuyerCount int
+	err = gen.REPO.DB.Get(&duplicateBuyerCount, gen.REPO.DB.Rebind("SELECT count(*) FROM buyers where company_id=? and LOWER(company)=? and LOWER(first_name)=? and LOWER(last_name)=?"),
+		auth.UserCompanyId.Int64, strings.ToLower(params.Company), strings.ToLower(params.FirstName), strings.ToLower(params.LastName))
+
+	if err != nil {
+		context.JSON(http.StatusUnprocessableEntity, gin.H{
+			"error":   true,
+			"message": err.Error(),
+		})
+		return
+	}
+	if duplicateBuyerCount > 0 {
+		context.JSON(http.StatusUnprocessableEntity, gin.H{
+			"error":   true,
+			"message": "Duplicate buyer",
 		})
 		return
 	}
@@ -428,7 +449,7 @@ func (aggregatorController AggregatorController) UpdateBuyer(context *gin.Contex
 	}
 
 	var duplicateBuyerCount int
-	err = gen.REPO.DB.Get(&duplicateBuyerCount, "SELECT count(*) FROM buyers where company_id=? and lower(comapny)=? and lower(FirstName)=? and lower(LastName)=? where id!=?",
+	err = gen.REPO.DB.Get(&duplicateBuyerCount, gen.REPO.DB.Rebind("SELECT count(*) FROM buyers where company_id=? and LOWER(company)=? and LOWER(first_name)=? and LOWER(last_name)=? and id!=?"),
 		auth.UserCompanyId.Int64, strings.ToLower(params.Company), strings.ToLower(params.FirstName), strings.ToLower(params.LastName), params.BuyerID)
 
 	if err != nil {
@@ -492,17 +513,51 @@ func (aggregatorController AggregatorController) DeleteBuyer(context *gin.Contex
 	}
 	context.JSON(http.StatusOK, gin.H{
 		"error":   false,
-		"message": "Buyer updated successfully",
+		"message": "Buyer deleted successfully",
 	})
 }
 
 func (aggregatorController AggregatorController) GetBuyers(context *gin.Context) {
-	id, _ := context.Params.Get("id")
-	var id32 int32
-	fmt.Sscan(id, &id32)
+	search := context.Query("s")
+	itemsPerPage := context.Query("ipp")
+	auth, _ := helpers.Functions{}.CurrentUserFromToken(context)
+	page := context.Query("p")
+	//sortBy := context.Query("sort_by")
+	//orderBy := context.Query("order_by")
+	companyID := context.Query("cid")
 
-	err := gen.REPO.DeleteBuyer(context, id32)
+	searchQuery := ""
+	companyQuery := ""
+	limitOffset := ""
 
+	if search != "" {
+		searchQuery = " and (first_name ilike " + "'%" + search + "%'" + " or last_name ilike " + "'%" + search + "%'" + "" + " or company ilike " + "'%" + search + "%')"
+	}
+	if itemsPerPage != "" && page != "" {
+		limitOffset = " LIMIT " + itemsPerPage + " OFFSET " + page
+	}
+	if companyID == "" {
+		companyQuery = fmt.Sprint(" and where company_id=", auth.UserCompanyId.Int64)
+	} else {
+		companyQuery = " and company_id=" + companyID
+	}
+	query := `
+		select 
+		buyers.id,
+		buyers.first_name,
+		buyers.last_name,
+		buyers.company,
+		buyers.location,
+		buyers.is_active,
+		buyers.administrative_level_1_location,
+		buyers.calling_code,
+		buyers.phone
+		from buyers where created_at is not null
+	 ` + searchQuery + companyQuery + limitOffset
+
+	logger.Log("AggregatorController/GetBuyers", query, logger.LOG_LEVEL_INFO)
+
+	results, err := utils.Select(gen.REPO.DB, query)
 	if err != nil {
 		context.JSON(http.StatusUnprocessableEntity, gin.H{
 			"error":   true,
@@ -512,7 +567,7 @@ func (aggregatorController AggregatorController) GetBuyers(context *gin.Context)
 	}
 	context.JSON(http.StatusOK, gin.H{
 		"error":   false,
-		"message": "Buyer updated successfully",
+		"content": results,
 	})
 }
 
