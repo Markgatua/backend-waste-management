@@ -161,6 +161,8 @@ func runProgram() {
 	//---------------------------Sell-------------------------------------------------------------
 	router.POST("aggregator/sell_waste_to_buyer", middlewares.PermissionBlockerMiddleware("sell"), controllers.AggregatorController{}.SellWasteToBuyer)
 	router.GET("aggregator/sales", middlewares.PermissionBlockerMiddleware("view_sale_history"), controllers.AggregatorController{}.GetSales)
+	router.POST("aggregator/make_inventory_adjustment", middlewares.PermissionBlockerMiddleware("make_inventory_adjustment"), controllers.AggregatorController{}.MakeInventoryAdjustments)
+
 	//router.DELETE("aggregator/sales/:id", middlewares.PermissionBlockerMiddleware("view_sale_history"), controllers.AggregatorController{}.GetSales)
 
 	//--------------------------------------------------------------------------------------------

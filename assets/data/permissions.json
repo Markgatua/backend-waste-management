@@ -308,6 +308,28 @@
         ]
     },
 
+    {
+        "module": "Inventory",
+        "key": "inventory",
+        "permissions": [
+            {
+                "permission_id": 103,
+                "name": "View inventory",
+                "sub_module": "inventory",
+                "action": "view_inventory"
+            },
+            {
+                "permission_id": 103,
+                "name": "Make adjustments",
+                "sub_module": "make_adjustments",
+                "action": "make_inventory_adjustment"
+            }
+        ]
+    },
+
+
+
+
 
 
     {

@@ -593,7 +593,7 @@ func (aggregatorController AggregatorController) MakeInventoryAdjustments(contex
 		AdjustmentType string  `json:"adjustment_type"  binding:"required"`
 	}
 	type Param struct {
-		CompanyID  int32       `json:"company_id"  binding:"required"`
+		// CompanyID  int32       `json:"company_id"  binding:"required"`
 		WasteItems []WasteItem `json:"waste_items"  binding:"required"`
 	}
 	var params Param
@@ -624,7 +624,7 @@ func (aggregatorController AggregatorController) MakeInventoryAdjustments(contex
 					})
 					currentQuantity, _ := strconv.ParseFloat(strings.TrimSpace(item.TotalWeight), 64)
 					if currentQuantity-v.Adjustment < 0 {
-						inventoryErrors = append(inventoryErrors, fmt.Sprint("Invalid new total weight for waste ", wasteItem.Name, " new total weight will be ",currentQuantity-v.Adjustment))
+						inventoryErrors = append(inventoryErrors, fmt.Sprint("Invalid new total weight for waste ", wasteItem.Name, " new total weight will be ", currentQuantity-v.Adjustment))
 					}
 				}
 			} else {
@@ -649,11 +649,14 @@ func (aggregatorController AggregatorController) MakeInventoryAdjustments(contex
 			})
 			if inventoryCount == 0 {
 				//do insert
-				gen.REPO.InsertToInventory(context, gen.InsertToInventoryParams{
+				err = gen.REPO.InsertToInventory(context, gen.InsertToInventoryParams{
 					WasteTypeID: sql.NullInt32{Int32: v.ID, Valid: true},
-					CompanyID:   int32(auth.RoleId.Int64),
+					CompanyID:   int32(auth.UserCompanyId.Int64),
 					TotalWeight: fmt.Sprint(v.Adjustment),
 				})
+				if err != nil {
+					logger.Log("Aggregator/MakeAdjustment", err.Error(), logger.LOG_LEVEL_ERROR)
+				}
 			} else {
 				//insert
 				item, _ := gen.REPO.GetInventoryItem(context, gen.GetInventoryItemParams{
@@ -664,16 +667,26 @@ func (aggregatorController AggregatorController) MakeInventoryAdjustments(contex
 				currentQuantity, _ := strconv.ParseFloat(strings.TrimSpace(item.TotalWeight), 64)
 				if v.AdjustmentType == "negative" {
 					remainingWeight := currentQuantity - v.Adjustment
-					gen.REPO.UpdateInventoryItem(context, gen.UpdateInventoryItemParams{
+					logger.Log("Aggregator/MakeAdjustment", fmt.Sprint("[Negative adjustment] remaining weight ",remainingWeight), logger.LOG_LEVEL_INFO)
+
+					err = gen.REPO.UpdateInventoryItem(context, gen.UpdateInventoryItemParams{
 						TotalWeight: fmt.Sprint(remainingWeight),
-						ID:          v.ID,
+						ID:          item.ID,
 					})
+
+					if err != nil {
+						logger.Log("Aggregator/MakeAdjustment", err.Error(), logger.LOG_LEVEL_ERROR)
+					}
 				} else if v.AdjustmentType == "positive" {
 					remainingWeight := currentQuantity + v.Adjustment
-					gen.REPO.UpdateInventoryItem(context, gen.UpdateInventoryItemParams{
+				    logger.Log("Aggregator/MakeAdjustment", fmt.Sprint("[positive adjustment] remaining weight ",remainingWeight,"-",v.ID), logger.LOG_LEVEL_INFO)
+					err = gen.REPO.UpdateInventoryItem(context, gen.UpdateInventoryItemParams{
 						TotalWeight: fmt.Sprint(remainingWeight),
-						ID:          v.ID,
+						ID:          item.ID,
 					})
+					if err != nil {
+						logger.Log("Aggregator/MakeAdjustment", err.Error(), logger.LOG_LEVEL_ERROR)
+					}
 				}
 
 			}
