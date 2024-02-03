@@ -747,11 +747,9 @@ func (aggregatorController AggregatorController) GetSales(context *gin.Context) 
 	if search != "" {
 		searchQuery = " and (q.first_name ilike " + "'%" + search + "%'" + " or q.company_name ilike " + "'%" + search + "%'" +" or q.last_name ilike "+"'%"+search+"%'"+")"
 	}
-
 	if itemsPerPage != "" && page != "" {
 		limitOffset = " LIMIT " + itemsPerPage + " OFFSET " + page
 	}
-
 	if companyID == "" {
 		companyQuery = fmt.Sprint(" and  q.company_id=", auth.UserCompanyId.Int64)
 	} else {
@@ -760,7 +758,6 @@ func (aggregatorController AggregatorController) GetSales(context *gin.Context) 
 	if dateRangeStart != "" && dateRangeEnd != "" {
 		dateRangeQuery = " and cast(q.sale_date as date)>='" + dateRangeStart + "' and cast(q.sale_date as date)<='" + dateRangeEnd + "'"
 	}
-
 	query := `
 	 select * from 
 	 (
