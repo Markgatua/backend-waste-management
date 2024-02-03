@@ -282,8 +282,39 @@
             },
             {
                 "permission_id": 103,
-                "name": "Edit Green Champion",
-                "sub_module": "Green Champion",
+                "name": "Edit Buyer",
+                "sub_module": "Buyer",
+                "action": "edit_buyer"
+            }
+        ]
+    },
+
+    {
+        "module": "Waste supplier",
+        "key": "supplier",
+        "permissions": [
+            {
+                "permission_id": 103,
+                "name": "Delete supplier",
+                "sub_module": "Supplier",
+                "action": "delete_supplier"
+            },
+            {
+                "permission_id": 103,
+                "name": "View supplier",
+                "sub_module": "Supplier",
+                "action": "view_supplier"
+            },
+            {
+                "permission_id": 103,
+                "name": "Add supplier",
+                "sub_module": "Supplier",
+                "action": "add_supplier"
+            },
+            {
+                "permission_id": 103,
+                "name": "Edit supplier",
+                "sub_module": "Supplier",
                 "action": "edit_buyer"
             }
         ]
@@ -304,6 +335,25 @@
                 "name": "Sell",
                 "sub_module": "Sales",
                 "action": "sell"
+            }
+        ]
+    },
+
+    {
+        "module": "Purchases",
+        "key": "purchases",
+        "permissions": [
+            {
+                "permission_id": 103,
+                "name": "View purchase history",
+                "sub_module": "Purchases",
+                "action": "view_purchase_history"
+            },
+            {
+                "permission_id": 103,
+                "name": "Purchase",
+                "sub_module": "Purchase",
+                "action": "purchase"
             }
         ]
     },

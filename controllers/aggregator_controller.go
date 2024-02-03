@@ -905,7 +905,7 @@ type PurchaseWasteItem struct {
 	Amount    float64 `json:"amount" binding:"amount"`
 }
 type PurchaseWasteParam struct {
-	SupplierID          int32               `json:"buyer_id"  binding:"required"`
+	SupplierID          int32               `json:"supplier_id"  binding:"required"`
 	Date                string              `json:"date"  binding:"required"`
 	PurchaseTotalAmount float64             `json:"purchase_total_amount"  binding:"required"` //Allow Partial Payments?
 	PurchaseItems       []PurchaseWasteItem `json:"waste_items"  binding:"required"`
@@ -1302,11 +1302,11 @@ func (aggregatorController AggregatorController) GetPurchases(context *gin.Conte
 		suppliers.last_name,
 		suppliers.company as supplier_company,
 		companies.name as company_name
-		from sales 
+		from purchases
 
 		inner join suppliers on suppliers.id=purchases.supplier_id
 		inner join companies on companies.id = purchases.company_id
-	 ) as q where q.sale_date is not null` + dateRangeQuery + searchQuery + companyQuery + limitOffset
+	 ) as q where q.purchase_date is not null` + dateRangeQuery + searchQuery + companyQuery + limitOffset
 
 	logger.Log("AggregatorController/GetPurchases", query, logger.LOG_LEVEL_INFO)
 	results, err := utils.Select(gen.REPO.DB, query)

@@ -148,6 +148,13 @@ func runProgram() {
 	router.DELETE("buyer/delete/:id", middlewares.PermissionBlockerMiddleware("delete_buyer"), controllers.AggregatorController{}.DeleteBuyer)
 	//-------------------------------------------------------------------------------------------
 
+	//---------------------------suppliers----------------------------------------------------
+	router.POST("supplier/add", middlewares.PermissionBlockerMiddleware("add_supplier"), controllers.AggregatorController{}.AddSupplier)
+	router.PUT("supplier/update", middlewares.PermissionBlockerMiddleware("edit_supplier"), controllers.AggregatorController{}.UpdateSupplier)
+	router.GET("suppliers", middlewares.PermissionBlockerMiddleware("view_supplier"), controllers.AggregatorController{}.GetSuppliers)
+	router.DELETE("supplier/delete/:id", middlewares.PermissionBlockerMiddleware("delete_supplier"), controllers.AggregatorController{}.DeleteSupplier)
+	//-------------------------------------------------------------------------------------------
+
 	//---------------------------organization----------------------------------------------------
 	router.POST("organization/add", middlewares.PermissionBlockerMiddleware("add_organization"), organzationController.InsertOrganization)
 	router.PUT("organization/update", middlewares.PermissionBlockerMiddleware("edit_organization"), organzationController.UpdateOrganization)
@@ -161,11 +168,16 @@ func runProgram() {
 	//---------------------------Sell-------------------------------------------------------------
 	router.POST("aggregator/sell_waste_to_buyer", middlewares.PermissionBlockerMiddleware("sell"), controllers.AggregatorController{}.SellWasteToBuyer)
 	router.GET("aggregator/sales", middlewares.PermissionBlockerMiddleware("view_sale_history"), controllers.AggregatorController{}.GetSales)
-	router.POST("aggregator/make_inventory_adjustment", middlewares.PermissionBlockerMiddleware("make_inventory_adjustment"), controllers.AggregatorController{}.MakeInventoryAdjustments)
-
-	//router.DELETE("aggregator/sales/:id", middlewares.PermissionBlockerMiddleware("view_sale_history"), controllers.AggregatorController{}.GetSales)
-
 	//--------------------------------------------------------------------------------------------
+
+	//---------------------------Purchases-------------------------------------------------------------
+	router.POST("aggregator/purchase_waste_from_supplier", middlewares.PermissionBlockerMiddleware("purchase"), controllers.AggregatorController{}.PurchaseWasteFromSupplier)
+	router.GET("aggregator/purchases", middlewares.PermissionBlockerMiddleware("view_purchase_history"), controllers.AggregatorController{}.GetPurchases)
+	//--------------------------------------------------------------------------------------------
+
+	//----------------------------inventory-------------------------------------------------------------
+	router.POST("aggregator/make_inventory_adjustment", middlewares.PermissionBlockerMiddleware("make_inventory_adjustment"), controllers.AggregatorController{}.MakeInventoryAdjustments)
+	//--------------------------------------------------------------------------------------------------
 
 	//---------------------------Aggregator ------------------------------------------------------
 	router.POST("aggregator/add", middlewares.PermissionBlockerMiddleware("add_aggregator"), controllers.AggregatorController{}.InsertAggregator)
