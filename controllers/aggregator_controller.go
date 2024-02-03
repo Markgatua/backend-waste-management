@@ -12,6 +12,7 @@ import (
 	"ttnmwastemanagementsystem/gen"
 	"ttnmwastemanagementsystem/helpers"
 	"ttnmwastemanagementsystem/models"
+	"ttnmwastemanagementsystem/utils"
 
 	"github.com/gin-gonic/gin"
 	"github.com/guregu/null"
@@ -669,21 +670,58 @@ func (aggregatorController AggregatorController) GetSales(context *gin.Context) 
 	page := context.Query("p")
 	//sortBy := context.Query("sort_by")
 	//orderBy := context.Query("order_by")
-	roleID := context.Query("role_id")
+	companyID := context.Query("cid")
+	dateRangeStart := context.Query("std")
+	dateRangeEnd := context.Query("end")
 
 	searchQuery := ""
+	companyQuery := ""
+	dateRangeQuery := ""
+
 	if search != "" {
-		searchQuery = " and WHERE to_tsvector(body) @@ to_tsquery('" + search + "')"
+		searchQuery = " where q.buyer_name like " + "%" + search + "%" + " or where q.company_name like " + "%" + search + "%" + ""
 	}
 	limitOffset := " LIMIT " + itemsPerPage + " OFFSET " + page
-	roleIDQuery := ""
-	if roleID != "" {
-		roleIDQuery = " and where users.role_id=" + roleID
+
+	if companyID == "" {
+		companyQuery = fmt.Sprint(" and where q.company_id=", auth.UserCompanyId.Int64)
+	} else {
+		companyQuery = " and where q.company_id=" + companyID
 	}
-	companyQuery := fmt.Sprint(" and where users.user_company_id=", auth.UserCompanyId.Int64)
+	if dateRangeStart != "" && dateRangeEnd != "" {
+		dateRangeQuery = " and q.sale_date>=" + dateRangeStart + " 00:00:00::timestamp and q.sale_date<" + dateRangeEnd + " 00:00:00::timestamp"
+	}
 
-	query := `select users.id, users.first_name, users.last_name, users.email, users.avatar_url, users.calling_code, users.phone, users.is_active, roles.name as role_name,
-    roles.id as role_id from users inner join roles on users.role_id = roles.id where users.email not ilike 'superadmin@admin.com'
-    and users.is_main_organization_user = false ` + companyQuery + roleIDQuery + searchQuery + limitOffset
+	query := `
+	 select * from 
+	 (
+		select 
+		sales.id,
+		sales.ref,
+		sales.company_id,
+		sales.buyer_id,
+		sales.total_weight,
+		sales.total_amount,
+		sales.date as sale_date,
+		buyers.name as buyer_name,
+		buyers.company as buyer_company,
+		companies.name as company_name
+		from sales 
 
+		inner join buyers on buyers.id=sales.buyer_id
+		inner join companies on companies.id = sales.company_id
+	 ) as q ` + dateRangeQuery + searchQuery + companyQuery + limitOffset
+
+	results, err := utils.Select(gen.REPO.DB, query)
+	if err != nil {
+		context.JSON(http.StatusUnprocessableEntity, gin.H{
+			"error":   true,
+			"message": err.Error(),
+		})
+		return
+	}
+	context.JSON(http.StatusOK, gin.H{
+		"error":   false,
+		"content": results,
+	})
 }
