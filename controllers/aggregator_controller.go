@@ -607,33 +607,29 @@ func (aggregatorController AggregatorController) MakeInventoryAdjustments(contex
 	}
 	var inventoryErrors []string
 	for _, v := range params.WasteItems {
-		wasteItem, err := gen.REPO.GetOneWasteType(context, v.ID)
-		if err == nil {
-			inventoryCount, _ := gen.REPO.InventoryItemCount(context, gen.InventoryItemCountParams{
-				WasteTypeID: sql.NullInt32{Int32: v.ID, Valid: true},
-				CompanyID:   int32(auth.UserCompanyId.Int64),
-			})
-			if inventoryCount == 0 {
-				if v.AdjustmentType == "negative" {
-					inventoryErrors = append(inventoryErrors, fmt.Sprint("Waste item ", wasteItem.Name, " does not exists in inventory"))
-				}
-			} else {
-				//insert
-				item, _ := gen.REPO.GetInventoryItem(context, gen.GetInventoryItemParams{
+		if v.AdjustmentType == "negative" {
+			wasteItem, err := gen.REPO.GetOneWasteType(context, v.ID)
+			if err == nil {
+				inventoryCount, _ := gen.REPO.InventoryItemCount(context, gen.InventoryItemCountParams{
 					WasteTypeID: sql.NullInt32{Int32: v.ID, Valid: true},
 					CompanyID:   int32(auth.UserCompanyId.Int64),
 				})
-
-				currentQuantity, _ := strconv.ParseFloat(strings.TrimSpace(item.TotalWeight), 64)
-				if v.AdjustmentType == "negative" {
+				if inventoryCount == 0 {
+					inventoryErrors = append(inventoryErrors, fmt.Sprint("Waste item ", wasteItem.Name, " does not exists in inventory"))
+				} else {
+					//insert
+					item, _ := gen.REPO.GetInventoryItem(context, gen.GetInventoryItemParams{
+						WasteTypeID: sql.NullInt32{Int32: v.ID, Valid: true},
+						CompanyID:   int32(auth.UserCompanyId.Int64),
+					})
+					currentQuantity, _ := strconv.ParseFloat(strings.TrimSpace(item.TotalWeight), 64)
 					if currentQuantity-v.Adjustment < 0 {
-						inventoryErrors = append(inventoryErrors, fmt.Sprint("Not enough items in the inventory for waste item ", wasteItem.Name, " current quantity is ", currentQuantity, " Kgs requested quantity is ", totalWeight, " kgs"))
+						inventoryErrors = append(inventoryErrors, fmt.Sprint("Invalid new total weight for waste ", wasteItem.Name, " new total weight will be ",currentQuantity-v.Adjustment))
 					}
 				}
-
+			} else {
+				inventoryErrors = append(inventoryErrors, "Error getting waste type")
 			}
-		} else {
-			inventoryErrors = append(inventoryErrors, "One of the waste types does not exist in the inventory")
 		}
 	}
 
@@ -685,7 +681,7 @@ func (aggregatorController AggregatorController) MakeInventoryAdjustments(contex
 	}
 	context.JSON(http.StatusOK, gin.H{
 		"error":   false,
-		"message": "Inventory updated successfully",
+		"message": "Inventory adjusted successfully",
 	})
 }
 
