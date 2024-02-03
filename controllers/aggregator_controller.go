@@ -744,14 +744,14 @@ func (aggregatorController AggregatorController) GetSales(context *gin.Context) 
 	dateRangeQuery := ""
 
 	if search != "" {
-		searchQuery = " where q.buyer_name like " + "%" + search + "%" + " or where q.company_name like " + "%" + search + "%" + ""
+		searchQuery = " and (q.buyer_name ilike " + "'%" + search + "%'" + " or q.company_name ilike " + "'%" + search + "%'" + ")"
 	}
 	limitOffset := " LIMIT " + itemsPerPage + " OFFSET " + page
 
 	if companyID == "" {
-		companyQuery = fmt.Sprint(" and where q.company_id=", auth.UserCompanyId.Int64)
+		companyQuery = fmt.Sprint(" and  q.company_id=", auth.UserCompanyId.Int64)
 	} else {
-		companyQuery = " and where q.company_id=" + companyID
+		companyQuery = " and  q.company_id=" + companyID
 	}
 	if dateRangeStart != "" && dateRangeEnd != "" {
 		dateRangeQuery = " and q.sale_date>=" + dateRangeStart + " 00:00:00::timestamp and q.sale_date<" + dateRangeEnd + " 00:00:00::timestamp"
@@ -775,8 +775,9 @@ func (aggregatorController AggregatorController) GetSales(context *gin.Context) 
 
 		inner join buyers on buyers.id=sales.buyer_id
 		inner join companies on companies.id = sales.company_id
-	 ) as q ` + dateRangeQuery + searchQuery + companyQuery + limitOffset
+	 ) as q where q.sale_date is not null` + dateRangeQuery + searchQuery + companyQuery + limitOffset
 
+	logger.Log("AggregatorController/GetSales",query,logger.LOG_LEVEL_INFO)
 	results, err := utils.Select(gen.REPO.DB, query)
 	if err != nil {
 		context.JSON(http.StatusUnprocessableEntity, gin.H{
