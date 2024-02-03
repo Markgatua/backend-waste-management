@@ -305,7 +305,7 @@ CREATE TABLE sales(
   dump json NULL
 );
 
-CREATE TABLE buys(
+CREATE TABLE purchases(
   id SERIAL PRIMARY KEY,
   ref VARCHAR not null,
   company_id int not null,
@@ -318,13 +318,13 @@ CREATE TABLE buys(
   dump json NULL
 );
 
-CREATE TABLE buy_items(
+CREATE TABLE purchase_items(
   id SERIAL PRIMARY KEY,
   company_id INTEGER NOT NULL,
-  buy_id INTEGER NOT NULL,
+  purchase_id INTEGER NOT NULL,
   FOREIGN Key (company_id) REFERENCES companies(id),
   waste_type_id INTEGER NOT NULL,
-  FOREIGN Key (buy_id) REFERENCES buys(id) on delete cascade,
+  FOREIGN Key (purchase_id) REFERENCES purchases(id) on delete cascade,
   FOREIGN Key (waste_type_id) REFERENCES waste_types(id),
   weight DECIMAL NULL,
   cost_per_kg DECIMAL NULL,
@@ -344,11 +344,11 @@ CREATE TABLE sale_items(
   total_amount DECIMAL NOT NULL
 );
 
-CREATE TABLE buy_transactions(
+CREATE TABLE purchase_transactions(
   ref VARCHAR NOT NULL,
   id SERIAL PRIMARY KEY,
-  buy_id INTEGER not NULL,
-  FOREIGN Key (buy_id) REFERENCES buys(id) on delete cascade,
+  purchase_id INTEGER not NULL,
+  FOREIGN Key (purchase_id) REFERENCES purchases(id) on delete cascade,
   company_id int not null,
   FOREIGN Key (company_id) REFERENCES companies(id),
   payment_method VARCHAR NOT NULL,

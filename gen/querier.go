@@ -20,12 +20,15 @@ type Querier interface {
 	CollectionWeightTotals(ctx context.Context, producerID int32) (CollectionWeightTotalsRow, error)
 	ConfirmCollectionRequest(ctx context.Context, id int32) error
 	CreateBuyer(ctx context.Context, arg CreateBuyerParams) (Buyer, error)
+	CreateBuys(ctx context.Context, arg CreateBuysParams) (Purchase, error)
 	CreateCountry(ctx context.Context, arg CreateCountryParams) error
 	CreateMainOrganizationAdmin(ctx context.Context, arg CreateMainOrganizationAdminParams) error
 	CreatePermission(ctx context.Context, arg CreatePermissionParams) (Permission, error)
+	CreatePurchaseItem(ctx context.Context, arg CreatePurchaseItemParams) (PurchaseItem, error)
 	CreateRole(ctx context.Context, arg CreateRoleParams) (Role, error)
 	CreateSale(ctx context.Context, arg CreateSaleParams) (Sale, error)
 	CreateSaleItem(ctx context.Context, arg CreateSaleItemParams) (SaleItem, error)
+	CreateSupplier(ctx context.Context, arg CreateSupplierParams) (Supplier, error)
 	DeactivateRole(ctx context.Context, roleID int32) error
 	DeleteBuyer(ctx context.Context, id int32) error
 	DeleteChampionCollector(ctx context.Context, id int32) error
@@ -33,8 +36,10 @@ type Querier interface {
 	DeleteOrganization(ctx context.Context, id int32) error
 	DeletePermissionByActions(ctx context.Context, actions []string) error
 	DeletePermissionByIds(ctx context.Context, permissionIds []int32) error
+	DeletePurchase(ctx context.Context, id int32) error
 	DeleteRole(ctx context.Context, id int32) error
 	DeleteSale(ctx context.Context, id int32) error
+	DeleteSupplier(ctx context.Context, id int32) error
 	DuplicateCounties(ctx context.Context, name string) (int64, error)
 	// companies.sql
 	GetAllAggregators(ctx context.Context) ([]GetAllAggregatorsRow, error)
@@ -112,6 +117,7 @@ type Querier interface {
 	InsertWasteType(ctx context.Context, arg InsertWasteTypeParams) (WasteType, error)
 	InventoryItemCount(ctx context.Context, arg InventoryItemCountParams) (int64, error)
 	MakeCashPayment(ctx context.Context, arg MakeCashPaymentParams) (SaleTransaction, error)
+	MakePurchaseCashPayment(ctx context.Context, arg MakePurchaseCashPaymentParams) (PurchaseTransaction, error)
 	RemoveAggrigatorsAssignedFromGreenChampions(ctx context.Context, championID int32) error
 	RemovePermissionsFromRole(ctx context.Context, arg RemovePermissionsFromRoleParams) error
 	RemoveRolePermissions(ctx context.Context, roleID int32) error
@@ -130,6 +136,7 @@ type Querier interface {
 	UpdateOrganization(ctx context.Context, arg UpdateOrganizationParams) error
 	UpdateOrganizationIsActive(ctx context.Context, arg UpdateOrganizationIsActiveParams) error
 	UpdateRole(ctx context.Context, arg UpdateRoleParams) error
+	UpdateSupplier(ctx context.Context, arg UpdateSupplierParams) error
 	UpdateUserFirstNameLastNameEmailRoleAndUserType(ctx context.Context, arg UpdateUserFirstNameLastNameEmailRoleAndUserTypeParams) error
 	UpdateUserFirstNameLastNameEmailRoleUserTypeAndPassword(ctx context.Context, arg UpdateUserFirstNameLastNameEmailRoleUserTypeAndPasswordParams) error
 	UpdateUserIsActive(ctx context.Context, arg UpdateUserIsActiveParams) error

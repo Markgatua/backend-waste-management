@@ -78,6 +78,77 @@ func (q *Queries) CreateBuyer(ctx context.Context, arg CreateBuyerParams) (Buyer
 	return i, err
 }
 
+const createBuys = `-- name: CreateBuys :one
+insert into purchases(ref,company_id,supplier_id,total_weight,total_amount,dump) VALUES ($1,$2,$3,$4,$5,$6) returning id, ref, company_id, supplier_id, total_weight, total_amount, date, dump
+`
+
+type CreateBuysParams struct {
+	Ref         string                `json:"ref"`
+	CompanyID   int32                 `json:"company_id"`
+	SupplierID  int32                 `json:"supplier_id"`
+	TotalWeight sql.NullString        `json:"total_weight"`
+	TotalAmount sql.NullString        `json:"total_amount"`
+	Dump        pqtype.NullRawMessage `json:"dump"`
+}
+
+func (q *Queries) CreateBuys(ctx context.Context, arg CreateBuysParams) (Purchase, error) {
+	row := q.db.QueryRowContext(ctx, createBuys,
+		arg.Ref,
+		arg.CompanyID,
+		arg.SupplierID,
+		arg.TotalWeight,
+		arg.TotalAmount,
+		arg.Dump,
+	)
+	var i Purchase
+	err := row.Scan(
+		&i.ID,
+		&i.Ref,
+		&i.CompanyID,
+		&i.SupplierID,
+		&i.TotalWeight,
+		&i.TotalAmount,
+		&i.Date,
+		&i.Dump,
+	)
+	return i, err
+}
+
+const createPurchaseItem = `-- name: CreatePurchaseItem :one
+insert into purchase_items(company_id,purchase_id,waste_type_id,weight,cost_per_kg,total_amount) VALUES($1,$2,$3,$4,$5,$6) returning id, company_id, purchase_id, waste_type_id, weight, cost_per_kg, total_amount
+`
+
+type CreatePurchaseItemParams struct {
+	CompanyID   int32          `json:"company_id"`
+	PurchaseID  int32          `json:"purchase_id"`
+	WasteTypeID int32          `json:"waste_type_id"`
+	Weight      sql.NullString `json:"weight"`
+	CostPerKg   sql.NullString `json:"cost_per_kg"`
+	TotalAmount string         `json:"total_amount"`
+}
+
+func (q *Queries) CreatePurchaseItem(ctx context.Context, arg CreatePurchaseItemParams) (PurchaseItem, error) {
+	row := q.db.QueryRowContext(ctx, createPurchaseItem,
+		arg.CompanyID,
+		arg.PurchaseID,
+		arg.WasteTypeID,
+		arg.Weight,
+		arg.CostPerKg,
+		arg.TotalAmount,
+	)
+	var i PurchaseItem
+	err := row.Scan(
+		&i.ID,
+		&i.CompanyID,
+		&i.PurchaseID,
+		&i.WasteTypeID,
+		&i.Weight,
+		&i.CostPerKg,
+		&i.TotalAmount,
+	)
+	return i, err
+}
+
 const createSale = `-- name: CreateSale :one
 insert into sales(ref,company_id,buyer_id,total_weight,total_amount,dump) VALUES ($1,$2,$3,$4,$5,$6) returning id, ref, company_id, buyer_id, total_weight, total_amount, date, dump
 `
@@ -149,6 +220,71 @@ func (q *Queries) CreateSaleItem(ctx context.Context, arg CreateSaleItemParams) 
 	return i, err
 }
 
+const createSupplier = `-- name: CreateSupplier :one
+insert into
+    suppliers (
+        company_id, company, first_name, last_name, calling_code, phone, administrative_level_1_location, location, is_active, lat, lng, created_at, updated_at,region
+    )
+values (
+        $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13,$14
+    ) returning id, company_id, company, first_name, last_name, is_active, region, calling_code, location, administrative_level_1_location, lat, lng, phone, created_at, updated_at
+`
+
+type CreateSupplierParams struct {
+	CompanyID                    int32           `json:"company_id"`
+	Company                      sql.NullString  `json:"company"`
+	FirstName                    string          `json:"first_name"`
+	LastName                     string          `json:"last_name"`
+	CallingCode                  sql.NullString  `json:"calling_code"`
+	Phone                        sql.NullString  `json:"phone"`
+	AdministrativeLevel1Location sql.NullString  `json:"administrative_level_1_location"`
+	Location                     sql.NullString  `json:"location"`
+	IsActive                     bool            `json:"is_active"`
+	Lat                          sql.NullFloat64 `json:"lat"`
+	Lng                          sql.NullFloat64 `json:"lng"`
+	CreatedAt                    time.Time       `json:"created_at"`
+	UpdatedAt                    time.Time       `json:"updated_at"`
+	Region                       sql.NullString  `json:"region"`
+}
+
+func (q *Queries) CreateSupplier(ctx context.Context, arg CreateSupplierParams) (Supplier, error) {
+	row := q.db.QueryRowContext(ctx, createSupplier,
+		arg.CompanyID,
+		arg.Company,
+		arg.FirstName,
+		arg.LastName,
+		arg.CallingCode,
+		arg.Phone,
+		arg.AdministrativeLevel1Location,
+		arg.Location,
+		arg.IsActive,
+		arg.Lat,
+		arg.Lng,
+		arg.CreatedAt,
+		arg.UpdatedAt,
+		arg.Region,
+	)
+	var i Supplier
+	err := row.Scan(
+		&i.ID,
+		&i.CompanyID,
+		&i.Company,
+		&i.FirstName,
+		&i.LastName,
+		&i.IsActive,
+		&i.Region,
+		&i.CallingCode,
+		&i.Location,
+		&i.AdministrativeLevel1Location,
+		&i.Lat,
+		&i.Lng,
+		&i.Phone,
+		&i.CreatedAt,
+		&i.UpdatedAt,
+	)
+	return i, err
+}
+
 const deleteBuyer = `-- name: DeleteBuyer :exec
 delete from buyers where id = $1
 `
@@ -158,12 +294,30 @@ func (q *Queries) DeleteBuyer(ctx context.Context, id int32) error {
 	return err
 }
 
+const deletePurchase = `-- name: DeletePurchase :exec
+delete from purchases where id=$1
+`
+
+func (q *Queries) DeletePurchase(ctx context.Context, id int32) error {
+	_, err := q.db.ExecContext(ctx, deletePurchase, id)
+	return err
+}
+
 const deleteSale = `-- name: DeleteSale :exec
 delete from sales where id=$1
 `
 
 func (q *Queries) DeleteSale(ctx context.Context, id int32) error {
 	_, err := q.db.ExecContext(ctx, deleteSale, id)
+	return err
+}
+
+const deleteSupplier = `-- name: DeleteSupplier :exec
+delete from suppliers where id = $1
+`
+
+func (q *Queries) DeleteSupplier(ctx context.Context, id int32) error {
+	_, err := q.db.ExecContext(ctx, deleteSupplier, id)
 	return err
 }
 
@@ -264,6 +418,51 @@ func (q *Queries) MakeCashPayment(ctx context.Context, arg MakeCashPaymentParams
 	return i, err
 }
 
+const makePurchaseCashPayment = `-- name: MakePurchaseCashPayment :one
+insert into purchase_transactions(ref,purchase_id,company_id,payment_method,amount,transaction_date) VALUES($1,$2,$3,$4,$5,$6) returning ref, id, purchase_id, company_id, payment_method, checkout_request_id, merchant_request_id, card_mask, msisdn_idnum, transaction_date, receipt_no, amount, mpesa_result_code, mpesa_result_desc, ipay_status, created_at, updated_at
+`
+
+type MakePurchaseCashPaymentParams struct {
+	Ref             string       `json:"ref"`
+	PurchaseID      int32        `json:"purchase_id"`
+	CompanyID       int32        `json:"company_id"`
+	PaymentMethod   string       `json:"payment_method"`
+	Amount          string       `json:"amount"`
+	TransactionDate sql.NullTime `json:"transaction_date"`
+}
+
+func (q *Queries) MakePurchaseCashPayment(ctx context.Context, arg MakePurchaseCashPaymentParams) (PurchaseTransaction, error) {
+	row := q.db.QueryRowContext(ctx, makePurchaseCashPayment,
+		arg.Ref,
+		arg.PurchaseID,
+		arg.CompanyID,
+		arg.PaymentMethod,
+		arg.Amount,
+		arg.TransactionDate,
+	)
+	var i PurchaseTransaction
+	err := row.Scan(
+		&i.Ref,
+		&i.ID,
+		&i.PurchaseID,
+		&i.CompanyID,
+		&i.PaymentMethod,
+		&i.CheckoutRequestID,
+		&i.MerchantRequestID,
+		&i.CardMask,
+		&i.MsisdnIdnum,
+		&i.TransactionDate,
+		&i.ReceiptNo,
+		&i.Amount,
+		&i.MpesaResultCode,
+		&i.MpesaResultDesc,
+		&i.IpayStatus,
+		&i.CreatedAt,
+		&i.UpdatedAt,
+	)
+	return i, err
+}
+
 const updateBuyer = `-- name: UpdateBuyer :exec
 update buyers set company_id=$1,company=$2,first_name=$3,last_name=$4,calling_code=$5,phone=$6,administrative_level_1_location=$7,location=$8,is_active=$9,lat=$10,lng=$11 ,region=$12 where id=$13
 `
@@ -314,5 +513,44 @@ type UpdateInventoryItemParams struct {
 
 func (q *Queries) UpdateInventoryItem(ctx context.Context, arg UpdateInventoryItemParams) error {
 	_, err := q.db.ExecContext(ctx, updateInventoryItem, arg.TotalWeight, arg.ID)
+	return err
+}
+
+const updateSupplier = `-- name: UpdateSupplier :exec
+update suppliers set company_id=$1,company=$2,first_name=$3,last_name=$4,calling_code=$5,phone=$6,administrative_level_1_location=$7,location=$8,is_active=$9,lat=$10,lng=$11 ,region=$12 where id=$13
+`
+
+type UpdateSupplierParams struct {
+	CompanyID                    int32           `json:"company_id"`
+	Company                      sql.NullString  `json:"company"`
+	FirstName                    string          `json:"first_name"`
+	LastName                     string          `json:"last_name"`
+	CallingCode                  sql.NullString  `json:"calling_code"`
+	Phone                        sql.NullString  `json:"phone"`
+	AdministrativeLevel1Location sql.NullString  `json:"administrative_level_1_location"`
+	Location                     sql.NullString  `json:"location"`
+	IsActive                     bool            `json:"is_active"`
+	Lat                          sql.NullFloat64 `json:"lat"`
+	Lng                          sql.NullFloat64 `json:"lng"`
+	Region                       sql.NullString  `json:"region"`
+	ID                           int32           `json:"id"`
+}
+
+func (q *Queries) UpdateSupplier(ctx context.Context, arg UpdateSupplierParams) error {
+	_, err := q.db.ExecContext(ctx, updateSupplier,
+		arg.CompanyID,
+		arg.Company,
+		arg.FirstName,
+		arg.LastName,
+		arg.CallingCode,
+		arg.Phone,
+		arg.AdministrativeLevel1Location,
+		arg.Location,
+		arg.IsActive,
+		arg.Lat,
+		arg.Lng,
+		arg.Region,
+		arg.ID,
+	)
 	return err
 }

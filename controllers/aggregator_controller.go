@@ -425,6 +425,149 @@ func (aggregatorController AggregatorController) AddBuyer(context *gin.Context) 
 	})
 }
 
+func (aggregatorController AggregatorController) AddSupplier(context *gin.Context) {
+	auth, _ := helpers.Functions{}.CurrentUserFromToken(context)
+	type Param struct {
+		FirstName string `json:"first_name"  binding:"required"`
+		LastName  string `json:"last_name"  binding:"required"`
+		Company   string `json:"company"  binding:"required"`
+		//CompanyID   int32           `json:"company_id"  binding:"required"`
+		Location    models.Location `json:"location" binding:"required"`
+		CallingCode string          `json:"calling_code" binding:"required"`
+		Phone       string          `json:"phone" binding:"required"`
+		Region      string          `json:"region"`
+		IsActive    *bool           `json:"is_active" binding:"required"`
+	}
+	var params Param
+	err := context.ShouldBindJSON(&params)
+	if err != nil {
+		context.JSON(http.StatusUnprocessableEntity, gin.H{
+			"error":   true,
+			"message": err.Error(),
+		})
+		return
+	}
+
+	var duplicateBuyerCount int
+	err = gen.REPO.DB.Get(&duplicateBuyerCount, gen.REPO.DB.Rebind("SELECT count(*) FROM suppliers where company_id=? and LOWER(company)=? and LOWER(first_name)=? and LOWER(last_name)=?"),
+		auth.UserCompanyId.Int64, strings.ToLower(params.Company), strings.ToLower(params.FirstName), strings.ToLower(params.LastName))
+
+	if err != nil {
+		context.JSON(http.StatusUnprocessableEntity, gin.H{
+			"error":   true,
+			"message": err.Error(),
+		})
+		return
+	}
+	if duplicateBuyerCount > 0 {
+		context.JSON(http.StatusUnprocessableEntity, gin.H{
+			"error":   true,
+			"message": "Duplicate supplier",
+		})
+		return
+	}
+
+	supplier, err := gen.REPO.CreateSupplier(context, gen.CreateSupplierParams{
+		Lat:                          null.FloatFrom(params.Location.LatLng.Lat).NullFloat64,
+		Lng:                          null.FloatFrom(params.Location.LatLng.Lng).NullFloat64,
+		Region:                       null.StringFrom(params.Region).NullString,
+		IsActive:                     *params.IsActive,
+		Company:                      null.StringFrom(params.Company).NullString,
+		CallingCode:                  null.StringFrom(params.CallingCode).NullString,
+		Phone:                        null.StringFrom(params.Phone).NullString,
+		Location:                     null.StringFrom(params.Location.Location).NullString,
+		CompanyID:                    int32(auth.UserCompanyId.Int64),
+		CreatedAt:                    time.Now(),
+		FirstName:                    params.FirstName,
+		LastName:                     params.LastName,
+		UpdatedAt:                    time.Now(),
+		AdministrativeLevel1Location: null.StringFrom(params.Location.AdministrativeAreaLevel1).NullString,
+	})
+
+	if err != nil {
+		context.JSON(http.StatusUnprocessableEntity, gin.H{
+			"error":   true,
+			"message": err.Error(),
+		})
+		return
+	}
+	context.JSON(http.StatusOK, gin.H{
+		"error":   false,
+		"content": supplier,
+	})
+}
+
+func (aggregatorController AggregatorController) UpdateSupplier(context *gin.Context) {
+	auth, _ := helpers.Functions{}.CurrentUserFromToken(context)
+	type Param struct {
+		FirstName   string          `json:"first_name"  binding:"required"`
+		LastName    string          `json:"last_name"  binding:"required"`
+		Company     string          `json:"company"  binding:"required"`
+		Location    models.Location `json:"location" binding:"required"`
+		CallingCode string          `json:"calling_code" binding:"required"`
+		Phone       string          `json:"phone" binding:"required"`
+		Region      string          `json:"region"`
+		SupplierID  int32           `json:"supplier_id" binding:"required"`
+		IsActive    *bool           `json:"is_active" binding:"required"`
+	}
+	var params Param
+	err := context.ShouldBindJSON(&params)
+	if err != nil {
+		context.JSON(http.StatusUnprocessableEntity, gin.H{
+			"error":   true,
+			"message": err.Error(),
+		})
+		return
+	}
+
+	var duplicateBuyerCount int
+	err = gen.REPO.DB.Get(&duplicateBuyerCount, gen.REPO.DB.Rebind("SELECT count(*) FROM suppliers where company_id=? and LOWER(company)=? and LOWER(first_name)=? and LOWER(last_name)=? and id!=?"),
+		auth.UserCompanyId.Int64, strings.ToLower(params.Company), strings.ToLower(params.FirstName), strings.ToLower(params.LastName), params.SupplierID)
+
+	if err != nil {
+		context.JSON(http.StatusUnprocessableEntity, gin.H{
+			"error":   true,
+			"message": err.Error(),
+		})
+		return
+	}
+	if duplicateBuyerCount > 0 {
+		context.JSON(http.StatusUnprocessableEntity, gin.H{
+			"error":   true,
+			"message": "Duplicate supplier",
+		})
+		return
+	}
+
+	err = gen.REPO.UpdateSupplier(context, gen.UpdateSupplierParams{
+		Lat:                          null.FloatFrom(params.Location.LatLng.Lat).NullFloat64,
+		Lng:                          null.FloatFrom(params.Location.LatLng.Lng).NullFloat64,
+		Region:                       null.StringFrom(params.Region).NullString,
+		IsActive:                     *params.IsActive,
+		Company:                      null.StringFrom(params.Company).NullString,
+		CallingCode:                  null.StringFrom(params.CallingCode).NullString,
+		Phone:                        null.StringFrom(params.Phone).NullString,
+		Location:                     null.StringFrom(params.Location.Location).NullString,
+		CompanyID:                    int32(auth.UserCompanyId.Int64),
+		FirstName:                    params.FirstName,
+		LastName:                     params.LastName,
+		ID:                           params.SupplierID,
+		AdministrativeLevel1Location: null.StringFrom(params.Location.AdministrativeAreaLevel1).NullString,
+	})
+
+	if err != nil {
+		context.JSON(http.StatusUnprocessableEntity, gin.H{
+			"error":   true,
+			"message": err.Error(),
+		})
+		return
+	}
+	context.JSON(http.StatusOK, gin.H{
+		"error":   false,
+		"message": "Supplier updated successfully",
+	})
+}
+
 func (aggregatorController AggregatorController) UpdateBuyer(context *gin.Context) {
 	auth, _ := helpers.Functions{}.CurrentUserFromToken(context)
 	type Param struct {
@@ -517,6 +660,26 @@ func (aggregatorController AggregatorController) DeleteBuyer(context *gin.Contex
 	})
 }
 
+func (aggregatorController AggregatorController) DeleteSupplier(context *gin.Context) {
+	id, _ := context.Params.Get("id")
+	var id32 int32
+	fmt.Sscan(id, &id32)
+
+	err := gen.REPO.DeleteSupplier(context, id32)
+
+	if err != nil {
+		context.JSON(http.StatusUnprocessableEntity, gin.H{
+			"error":   true,
+			"message": err.Error(),
+		})
+		return
+	}
+	context.JSON(http.StatusOK, gin.H{
+		"error":   false,
+		"message": "Supplier deleted successfully",
+	})
+}
+
 func (aggregatorController AggregatorController) GetBuyers(context *gin.Context) {
 	search := context.Query("s")
 	itemsPerPage := context.Query("ipp")
@@ -570,6 +733,61 @@ func (aggregatorController AggregatorController) GetBuyers(context *gin.Context)
 		"content": results,
 	})
 }
+
+func (aggregatorController AggregatorController) GetSuppliers(context *gin.Context) {
+	search := context.Query("s")
+	itemsPerPage := context.Query("ipp")
+	auth, _ := helpers.Functions{}.CurrentUserFromToken(context)
+	page := context.Query("p")
+	//sortBy := context.Query("sort_by")
+	//orderBy := context.Query("order_by")
+	companyID := context.Query("cid")
+
+	searchQuery := ""
+	companyQuery := ""
+	limitOffset := ""
+
+	if search != "" {
+		searchQuery = " and (first_name ilike " + "'%" + search + "%'" + " or last_name ilike " + "'%" + search + "%'" + "" + " or company ilike " + "'%" + search + "%')"
+	}
+	if itemsPerPage != "" && page != "" {
+		limitOffset = " LIMIT " + itemsPerPage + " OFFSET " + page
+	}
+	if companyID == "" {
+		companyQuery = fmt.Sprint(" and where company_id=", auth.UserCompanyId.Int64)
+	} else {
+		companyQuery = " and company_id=" + companyID
+	}
+	query := `
+		select 
+		suppliers.id,
+		suppliers.first_name,
+		suppliers.last_name,
+		suppliers.company,
+		suppliers.location,
+		suppliers.is_active,
+		suppliers.administrative_level_1_location,
+		suppliers.calling_code,
+		suppliers.phone
+		from suppliers where created_at is not null
+	 ` + searchQuery + companyQuery + limitOffset
+
+	logger.Log("AggregatorController/GetSuppliers", query, logger.LOG_LEVEL_INFO)
+
+	results, err := utils.Select(gen.REPO.DB, query)
+	if err != nil {
+		context.JSON(http.StatusUnprocessableEntity, gin.H{
+			"error":   true,
+			"message": err.Error(),
+		})
+		return
+	}
+	context.JSON(http.StatusOK, gin.H{
+		"error":   false,
+		"content": results,
+	})
+}
+
 
 type SellWasteItem struct {
 	ID        int32   `json:"id"  binding:"required"`
@@ -665,7 +883,7 @@ func (aggregatorController AggregatorController) MakeInventoryAdjustments(contex
 				currentQuantity, _ := strconv.ParseFloat(strings.TrimSpace(item.TotalWeight), 64)
 				if v.AdjustmentType == "negative" {
 					remainingWeight := currentQuantity - v.Adjustment
-					logger.Log("Aggregator/MakeAdjustment", fmt.Sprint("[Negative adjustment] remaining weight ",remainingWeight), logger.LOG_LEVEL_INFO)
+					logger.Log("Aggregator/MakeAdjustment", fmt.Sprint("[Negative adjustment] remaining weight ", remainingWeight), logger.LOG_LEVEL_INFO)
 
 					err = gen.REPO.UpdateInventoryItem(context, gen.UpdateInventoryItemParams{
 						TotalWeight: fmt.Sprint(remainingWeight),
@@ -677,7 +895,7 @@ func (aggregatorController AggregatorController) MakeInventoryAdjustments(contex
 					}
 				} else if v.AdjustmentType == "positive" {
 					remainingWeight := currentQuantity + v.Adjustment
-				    logger.Log("Aggregator/MakeAdjustment", fmt.Sprint("[positive adjustment] remaining weight ",remainingWeight,"-",v.ID), logger.LOG_LEVEL_INFO)
+					logger.Log("Aggregator/MakeAdjustment", fmt.Sprint("[positive adjustment] remaining weight ", remainingWeight, "-", v.ID), logger.LOG_LEVEL_INFO)
 					err = gen.REPO.UpdateInventoryItem(context, gen.UpdateInventoryItemParams{
 						TotalWeight: fmt.Sprint(remainingWeight),
 						ID:          item.ID,

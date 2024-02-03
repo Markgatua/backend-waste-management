@@ -165,6 +165,47 @@ type PhoneVerificationToken struct {
 	CreatedAt   time.Time `json:"created_at"`
 }
 
+type Purchase struct {
+	ID          int32                 `json:"id"`
+	Ref         string                `json:"ref"`
+	CompanyID   int32                 `json:"company_id"`
+	SupplierID  int32                 `json:"supplier_id"`
+	TotalWeight sql.NullString        `json:"total_weight"`
+	TotalAmount sql.NullString        `json:"total_amount"`
+	Date        time.Time             `json:"date"`
+	Dump        pqtype.NullRawMessage `json:"dump"`
+}
+
+type PurchaseItem struct {
+	ID          int32          `json:"id"`
+	CompanyID   int32          `json:"company_id"`
+	PurchaseID  int32          `json:"purchase_id"`
+	WasteTypeID int32          `json:"waste_type_id"`
+	Weight      sql.NullString `json:"weight"`
+	CostPerKg   sql.NullString `json:"cost_per_kg"`
+	TotalAmount string         `json:"total_amount"`
+}
+
+type PurchaseTransaction struct {
+	Ref               string         `json:"ref"`
+	ID                int32          `json:"id"`
+	PurchaseID        int32          `json:"purchase_id"`
+	CompanyID         int32          `json:"company_id"`
+	PaymentMethod     string         `json:"payment_method"`
+	CheckoutRequestID sql.NullString `json:"checkout_request_id"`
+	MerchantRequestID sql.NullString `json:"merchant_request_id"`
+	CardMask          sql.NullString `json:"card_mask"`
+	MsisdnIdnum       sql.NullString `json:"msisdn_idnum"`
+	TransactionDate   sql.NullTime   `json:"transaction_date"`
+	ReceiptNo         sql.NullString `json:"receipt_no"`
+	Amount            string         `json:"amount"`
+	MpesaResultCode   sql.NullString `json:"mpesa_result_code"`
+	MpesaResultDesc   sql.NullString `json:"mpesa_result_desc"`
+	IpayStatus        sql.NullString `json:"ipay_status"`
+	CreatedAt         time.Time      `json:"created_at"`
+	UpdatedAt         time.Time      `json:"updated_at"`
+}
+
 type Role struct {
 	ID          int32          `json:"id"`
 	Name        string         `json:"name"`
@@ -225,6 +266,24 @@ type SubCounty struct {
 	ID       int32  `json:"id"`
 	Name     string `json:"name"`
 	CountyID int32  `json:"county_id"`
+}
+
+type Supplier struct {
+	ID                           int32           `json:"id"`
+	CompanyID                    int32           `json:"company_id"`
+	Company                      sql.NullString  `json:"company"`
+	FirstName                    string          `json:"first_name"`
+	LastName                     string          `json:"last_name"`
+	IsActive                     bool            `json:"is_active"`
+	Region                       sql.NullString  `json:"region"`
+	CallingCode                  sql.NullString  `json:"calling_code"`
+	Location                     sql.NullString  `json:"location"`
+	AdministrativeLevel1Location sql.NullString  `json:"administrative_level_1_location"`
+	Lat                          sql.NullFloat64 `json:"lat"`
+	Lng                          sql.NullFloat64 `json:"lng"`
+	Phone                        sql.NullString  `json:"phone"`
+	CreatedAt                    time.Time       `json:"created_at"`
+	UpdatedAt                    time.Time       `json:"updated_at"`
 }
 
 type Upload struct {
