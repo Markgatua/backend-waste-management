@@ -78,11 +78,11 @@ func (q *Queries) CreateBuyer(ctx context.Context, arg CreateBuyerParams) (Buyer
 	return i, err
 }
 
-const createBuys = `-- name: CreateBuys :one
+const createPurchase = `-- name: CreatePurchase :one
 insert into purchases(ref,company_id,supplier_id,total_weight,total_amount,dump) VALUES ($1,$2,$3,$4,$5,$6) returning id, ref, company_id, supplier_id, total_weight, total_amount, date, dump
 `
 
-type CreateBuysParams struct {
+type CreatePurchaseParams struct {
 	Ref         string                `json:"ref"`
 	CompanyID   int32                 `json:"company_id"`
 	SupplierID  int32                 `json:"supplier_id"`
@@ -91,8 +91,8 @@ type CreateBuysParams struct {
 	Dump        pqtype.NullRawMessage `json:"dump"`
 }
 
-func (q *Queries) CreateBuys(ctx context.Context, arg CreateBuysParams) (Purchase, error) {
-	row := q.db.QueryRowContext(ctx, createBuys,
+func (q *Queries) CreatePurchase(ctx context.Context, arg CreatePurchaseParams) (Purchase, error) {
+	row := q.db.QueryRowContext(ctx, createPurchase,
 		arg.Ref,
 		arg.CompanyID,
 		arg.SupplierID,

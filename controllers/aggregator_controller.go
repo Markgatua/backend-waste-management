@@ -788,21 +788,6 @@ func (aggregatorController AggregatorController) GetSuppliers(context *gin.Conte
 	})
 }
 
-
-type SellWasteItem struct {
-	ID        int32   `json:"id"  binding:"required"`
-	Weight    float64 `json:"weight"  binding:"required"`
-	CostPerKG float64 `json:"cost_per_kg" binding:"required"`
-	Amount    float64 `json:"amount" binding:"amount"`
-}
-type SellWasteParam struct {
-	BuyerID         int32           `json:"buyer_id"  binding:"required"`
-	Date            string          `json:"date"  binding:"required"`
-	SellTotalAmount float64         `json:"sell_total_amount"  binding:"required"` //Allow Partial Payments?
-	WasteItems      []SellWasteItem `json:"waste_items"  binding:"required"`
-	PaymentMethod   int32           `json:"payment_method"  binding:"required"`
-}
-
 func (aggregatorController AggregatorController) MakeInventoryAdjustments(context *gin.Context) {
 	auth, _ := helpers.Functions{}.CurrentUserFromToken(context)
 	type WasteItem struct {
@@ -911,6 +896,153 @@ func (aggregatorController AggregatorController) MakeInventoryAdjustments(contex
 		"error":   false,
 		"message": "Inventory adjusted successfully",
 	})
+}
+
+type PurchaseWasteItem struct {
+	ID        int32   `json:"id"  binding:"required"`
+	Weight    float64 `json:"weight"  binding:"required"`
+	CostPerKG float64 `json:"cost_per_kg" binding:"required"`
+	Amount    float64 `json:"amount" binding:"amount"`
+}
+type PurchaseWasteParam struct {
+	SupplierID          int32               `json:"buyer_id"  binding:"required"`
+	Date                string              `json:"date"  binding:"required"`
+	PurchaseTotalAmount float64             `json:"purchase_total_amount"  binding:"required"` //Allow Partial Payments?
+	PurchaseItems       []PurchaseWasteItem `json:"waste_items"  binding:"required"`
+	PaymentMethod       int32               `json:"payment_method"  binding:"required"`
+}
+
+func (aggregatorController AggregatorController) PurchaseWasteFromSupplier(context *gin.Context) {
+	auth, _ := helpers.Functions{}.CurrentUserFromToken(context)
+	var params PurchaseWasteParam
+	err := context.ShouldBindJSON(&params)
+	if err != nil {
+		context.JSON(http.StatusUnprocessableEntity, gin.H{
+			"error":   true,
+			"message": err.Error(),
+		})
+		return
+	}
+	date, parseDateError := time.Parse("2006-01-02", params.Date)
+	if parseDateError != nil {
+		context.JSON(http.StatusUnprocessableEntity, gin.H{
+			"error":   true,
+			"message": parseDateError.Error(),
+		})
+		return
+	}
+	if params.PaymentMethod == 1 {
+		err := PurchaseWasteFromSupplierCash(params, auth, sql.NullTime{Time: date, Valid: true})
+		if err != nil {
+			context.JSON(http.StatusUnprocessableEntity, gin.H{
+				"error":   true,
+				"message": err.Error(),
+			})
+			return
+		}
+		context.JSON(http.StatusOK, gin.H{
+			"error":   false,
+			"message": "Waste purchased successfully",
+		})
+	}
+}
+
+// for cash payments we automatically add items to the inventory since we assume that the user has paid full amount
+func PurchaseWasteFromSupplierCash(param PurchaseWasteParam, auth *models.User, date sql.NullTime) error {
+	var totalAmount = 0.0
+	var totalWeight = 0.0
+	ref := helpers.Functions{}.GetRandString(6)
+	for _, v := range param.PurchaseItems {
+		totalAmount += v.Amount // v.CostPerKG * v.Weight
+		totalWeight += v.Weight
+	}
+
+	//create sell
+	purchase, err := gen.REPO.CreatePurchase(context.Background(), gen.CreatePurchaseParams{
+		Ref:         ref,
+		CompanyID:   int32(auth.UserCompanyId.Int64),
+		SupplierID:  param.SupplierID,
+		TotalWeight: null.StringFrom(fmt.Sprint(totalWeight)).NullString,
+		TotalAmount: null.StringFrom(fmt.Sprint(totalAmount)).NullString,
+	})
+	if err != nil {
+		return err
+	}
+	//create sell items
+	var errorSavingPurchaseItem = false
+	for _, v := range param.PurchaseItems {
+		_, err := gen.REPO.CreatePurchaseItem(context.Background(), gen.CreatePurchaseItemParams{
+			CompanyID:   int32(auth.UserCompanyId.Int64),
+			PurchaseID:  purchase.ID,
+			WasteTypeID: v.ID,
+			Weight:      null.StringFrom(fmt.Sprint(v.Weight)).NullString,
+			CostPerKg:   null.StringFrom(fmt.Sprint(v.CostPerKG)).NullString,
+			TotalAmount: fmt.Sprint(v.Weight * v.CostPerKG),
+		})
+		if err != nil {
+			errorSavingPurchaseItem = true
+		}
+	}
+	if errorSavingPurchaseItem {
+		gen.REPO.DeletePurchase(context.Background(), purchase.ID)
+		return errors.New("Error occured")
+	}
+	_, err = gen.REPO.MakePurchaseCashPayment(context.Background(), gen.MakePurchaseCashPaymentParams{
+		Ref:             helpers.Functions{}.GetRandString(6),
+		PurchaseID:      purchase.ID,
+		PaymentMethod:   "CASH",
+		Amount:          fmt.Sprint(totalAmount),
+		CompanyID:       int32(auth.UserCompanyId.Int64),
+		TransactionDate: date,
+	})
+	if err != nil {
+		gen.REPO.DeletePurchase(context.Background(), purchase.ID)
+		return err
+	}
+
+	//var errorSavingInventory = false
+	for _, v := range param.PurchaseItems {
+		item, err := gen.REPO.GetInventoryItem(
+			context.Background(), gen.GetInventoryItemParams{
+				WasteTypeID: sql.NullInt32{Int32: v.ID, Valid: true},
+				CompanyID:   int32(auth.UserCompanyId.Int64)})
+
+		if err != nil && err == sql.ErrNoRows {
+			gen.REPO.InsertToInventory(context.Background(), gen.InsertToInventoryParams{
+				TotalWeight: fmt.Sprint(v.Weight),
+				CompanyID:   int32(auth.UserCompanyId.Int64),
+				WasteTypeID: sql.NullInt32{Int32: v.ID, Valid: true},
+			})
+		} else if err != nil && err != sql.ErrNoRows {
+			//errorSavingInventory = true
+			logger.Log("AggregatorController/PurchaseWasteFromSupplierCash", fmt.Sprint("Error saving to inventory :: ", err.Error()), logger.LOG_LEVEL_ERROR)
+		} else {
+			currentQuantity, _ := strconv.ParseFloat(strings.TrimSpace(item.TotalWeight), 64)
+
+			var remainingWeight = currentQuantity + v.Weight
+			//update with the remaining weight
+			gen.REPO.UpdateInventoryItem(context.Background(), gen.UpdateInventoryItemParams{
+				TotalWeight: fmt.Sprint(remainingWeight),
+				ID:          item.ID,
+			})
+		}
+	}
+
+	return nil
+}
+
+type SellWasteItem struct {
+	ID        int32   `json:"id"  binding:"required"`
+	Weight    float64 `json:"weight"  binding:"required"`
+	CostPerKG float64 `json:"cost_per_kg" binding:"required"`
+	Amount    float64 `json:"amount" binding:"amount"`
+}
+type SellWasteParam struct {
+	BuyerID         int32           `json:"buyer_id"  binding:"required"`
+	Date            string          `json:"date"  binding:"required"`
+	SellTotalAmount float64         `json:"sell_total_amount"  binding:"required"` //Allow Partial Payments?
+	WasteItems      []SellWasteItem `json:"waste_items"  binding:"required"`
+	PaymentMethod   int32           `json:"payment_method"  binding:"required"`
 }
 
 func (aggregatorController AggregatorController) SellWasteToBuyer(context *gin.Context) {
@@ -1108,6 +1240,75 @@ func (aggregatorController AggregatorController) GetSales(context *gin.Context) 
 	 ) as q where q.sale_date is not null` + dateRangeQuery + searchQuery + companyQuery + limitOffset
 
 	logger.Log("AggregatorController/GetSales", query, logger.LOG_LEVEL_INFO)
+	results, err := utils.Select(gen.REPO.DB, query)
+	if err != nil {
+		context.JSON(http.StatusUnprocessableEntity, gin.H{
+			"error":   true,
+			"message": err.Error(),
+		})
+		return
+	}
+	context.JSON(http.StatusOK, gin.H{
+		"error":   false,
+		"content": results,
+	})
+}
+
+
+
+func (aggregatorController AggregatorController) GetPurchases(context *gin.Context) {
+	auth, _ := helpers.Functions{}.CurrentUserFromToken(context)
+
+	search := context.Query("s")
+	itemsPerPage := context.Query("ipp")
+	page := context.Query("p")
+	//sortBy := context.Query("sort_by")
+	//orderBy := context.Query("order_by")
+	companyID := context.Query("cid")
+	dateRangeStart := context.Query("sd")
+	dateRangeEnd := context.Query("ed")
+
+	searchQuery := ""
+	companyQuery := ""
+	dateRangeQuery := ""
+	limitOffset := ""
+
+	if search != "" {
+		searchQuery = " and (q.first_name ilike " + "'%" + search + "%'" + " or q.company_name ilike " + "'%" + search + "%'" + " or q.last_name ilike " + "'%" + search + "%'" + ")"
+	}
+	if itemsPerPage != "" && page != "" {
+		limitOffset = " LIMIT " + itemsPerPage + " OFFSET " + page
+	}
+	if companyID == "" {
+		companyQuery = fmt.Sprint(" and  q.company_id=", auth.UserCompanyId.Int64)
+	} else {
+		companyQuery = " and  q.company_id=" + companyID
+	}
+	if dateRangeStart != "" && dateRangeEnd != "" {
+		dateRangeQuery = " and cast(q.purchase_date as date)>='" + dateRangeStart + "' and cast(q.purchase_date as date)<='" + dateRangeEnd + "'"
+	}
+	query := `
+	 select * from 
+	 (
+		select 
+		purchases.id,
+		purchases.ref,
+		purchases.company_id,
+		purchases.supplier_id,
+		purchases.total_weight,
+		purchases.total_amount,
+		purchases.date as purchase_date,
+		suppliers.first_name,
+		suppliers.last_name,
+		suppliers.company as supplier_company,
+		companies.name as company_name
+		from sales 
+
+		inner join suppliers on suppliers.id=purchases.supplier_id
+		inner join companies on companies.id = purchases.company_id
+	 ) as q where q.sale_date is not null` + dateRangeQuery + searchQuery + companyQuery + limitOffset
+
+	logger.Log("AggregatorController/GetPurchases", query, logger.LOG_LEVEL_INFO)
 	results, err := utils.Select(gen.REPO.DB, query)
 	if err != nil {
 		context.JSON(http.StatusUnprocessableEntity, gin.H{

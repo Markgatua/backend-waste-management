@@ -20,10 +20,10 @@ type Querier interface {
 	CollectionWeightTotals(ctx context.Context, producerID int32) (CollectionWeightTotalsRow, error)
 	ConfirmCollectionRequest(ctx context.Context, id int32) error
 	CreateBuyer(ctx context.Context, arg CreateBuyerParams) (Buyer, error)
-	CreateBuys(ctx context.Context, arg CreateBuysParams) (Purchase, error)
 	CreateCountry(ctx context.Context, arg CreateCountryParams) error
 	CreateMainOrganizationAdmin(ctx context.Context, arg CreateMainOrganizationAdminParams) error
 	CreatePermission(ctx context.Context, arg CreatePermissionParams) (Permission, error)
+	CreatePurchase(ctx context.Context, arg CreatePurchaseParams) (Purchase, error)
 	CreatePurchaseItem(ctx context.Context, arg CreatePurchaseItemParams) (PurchaseItem, error)
 	CreateRole(ctx context.Context, arg CreateRoleParams) (Role, error)
 	CreateSale(ctx context.Context, arg CreateSaleParams) (Sale, error)

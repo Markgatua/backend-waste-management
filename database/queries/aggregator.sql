@@ -33,7 +33,7 @@ delete from suppliers where id = $1;
 -- name: CreateSale :one
 insert into sales(ref,company_id,buyer_id,total_weight,total_amount,dump) VALUES ($1,$2,$3,$4,$5,$6) returning *;
 
--- name: CreateBuys :one
+-- name: CreatePurchase :one
 insert into purchases(ref,company_id,supplier_id,total_weight,total_amount,dump) VALUES ($1,$2,$3,$4,$5,$6) returning *;
 
 
