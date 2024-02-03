@@ -281,7 +281,7 @@ CREATE TABLE sales(
   FOREIGN Key (company_id) REFERENCES companies(id),
   total_weight DECIMAL NULL, --in kgs
   total_amount DECIMAL NULL, --ksh
-  date TIMESTAMP NOT NULL DEFAULT NOW(),
+  date TIMESTAMP without time zone NOT NULL DEFAULT NOW(),
   dump json NULL
 );
 

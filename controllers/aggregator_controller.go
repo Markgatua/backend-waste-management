@@ -758,7 +758,7 @@ func (aggregatorController AggregatorController) GetSales(context *gin.Context) 
 		companyQuery = " and  q.company_id=" + companyID
 	}
 	if dateRangeStart != "" && dateRangeEnd != "" {
-		dateRangeQuery = " and q.sale_date>=" + dateRangeStart + " 00:00:00'::timestamp and q.sale_date<" + dateRangeEnd + " 00:00:00'::timestamp"
+		dateRangeQuery = " and cast(q.sale_date as date)>='" + dateRangeStart + "' and cast(q.sale_date as date)<='" + dateRangeEnd + "'"
 	}
 
 	query := `
