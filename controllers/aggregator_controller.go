@@ -736,8 +736,8 @@ func (aggregatorController AggregatorController) GetSales(context *gin.Context) 
 	//sortBy := context.Query("sort_by")
 	//orderBy := context.Query("order_by")
 	companyID := context.Query("cid")
-	dateRangeStart := context.Query("std")
-	dateRangeEnd := context.Query("end")
+	dateRangeStart := context.Query("sd")
+	dateRangeEnd := context.Query("ed")
 
 	searchQuery := ""
 	companyQuery := ""
@@ -758,7 +758,7 @@ func (aggregatorController AggregatorController) GetSales(context *gin.Context) 
 		companyQuery = " and  q.company_id=" + companyID
 	}
 	if dateRangeStart != "" && dateRangeEnd != "" {
-		dateRangeQuery = " and q.sale_date>=" + dateRangeStart + " 00:00:00::timestamp and q.sale_date<" + dateRangeEnd + " 00:00:00::timestamp"
+		dateRangeQuery = " and q.sale_date>=" + dateRangeStart + " 00:00:00'::timestamp and q.sale_date<" + dateRangeEnd + " 00:00:00'::timestamp"
 	}
 
 	query := `
