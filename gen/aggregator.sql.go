@@ -13,6 +13,22 @@ import (
 	"github.com/sqlc-dev/pqtype"
 )
 
+const createAggregatorWasteType = `-- name: CreateAggregatorWasteType :one
+insert into aggregator_waste_types(aggregator_id,waste_id) VALUES ($1,$2) returning id, aggregator_id, waste_id
+`
+
+type CreateAggregatorWasteTypeParams struct {
+	AggregatorID int32 `json:"aggregator_id"`
+	WasteID      int32 `json:"waste_id"`
+}
+
+func (q *Queries) CreateAggregatorWasteType(ctx context.Context, arg CreateAggregatorWasteTypeParams) (AggregatorWasteType, error) {
+	row := q.db.QueryRowContext(ctx, createAggregatorWasteType, arg.AggregatorID, arg.WasteID)
+	var i AggregatorWasteType
+	err := row.Scan(&i.ID, &i.AggregatorID, &i.WasteID)
+	return i, err
+}
+
 const createBuyer = `-- name: CreateBuyer :one
 insert into
     buyers (
@@ -285,6 +301,15 @@ func (q *Queries) CreateSupplier(ctx context.Context, arg CreateSupplierParams) 
 	return i, err
 }
 
+const deleteAggregatorWasteTypes = `-- name: DeleteAggregatorWasteTypes :exec
+delete from aggregator_waste_types where aggregator_id =$1
+`
+
+func (q *Queries) DeleteAggregatorWasteTypes(ctx context.Context, aggregatorID int32) error {
+	_, err := q.db.ExecContext(ctx, deleteAggregatorWasteTypes, aggregatorID)
+	return err
+}
+
 const deleteBuyer = `-- name: DeleteBuyer :exec
 delete from buyers where id = $1
 `
@@ -319,6 +344,33 @@ delete from suppliers where id = $1
 func (q *Queries) DeleteSupplier(ctx context.Context, id int32) error {
 	_, err := q.db.ExecContext(ctx, deleteSupplier, id)
 	return err
+}
+
+const getAggregatorWasteTypes = `-- name: GetAggregatorWasteTypes :many
+select id, aggregator_id, waste_id from aggregator_waste_types where aggregator_id = $1
+`
+
+func (q *Queries) GetAggregatorWasteTypes(ctx context.Context, aggregatorID int32) ([]AggregatorWasteType, error) {
+	rows, err := q.db.QueryContext(ctx, getAggregatorWasteTypes, aggregatorID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	items := []AggregatorWasteType{}
+	for rows.Next() {
+		var i AggregatorWasteType
+		if err := rows.Scan(&i.ID, &i.AggregatorID, &i.WasteID); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
 }
 
 const getInventoryItem = `-- name: GetInventoryItem :one

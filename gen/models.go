@@ -11,6 +11,12 @@ import (
 	"github.com/sqlc-dev/pqtype"
 )
 
+type AggregatorWasteType struct {
+	ID           int32 `json:"id"`
+	AggregatorID int32 `json:"aggregator_id"`
+	WasteID      int32 `json:"waste_id"`
+}
+
 type Buyer struct {
 	ID                           int32           `json:"id"`
 	CompanyID                    int32           `json:"company_id"`

@@ -216,6 +216,9 @@ CREATE TABLE waste_items (
   weight DECIMAL NOT NULL
 );
 
+CREATE UNIQUE INDEX waste_types_unique_name_idx on waste_types (LOWER(name));  
+
+
 CREATE TABLE notifications (
   id SERIAL PRIMARY KEY,
   user_id INTEGER NOT NULL,
@@ -226,8 +229,15 @@ CREATE TABLE notifications (
   created_at TIMESTAMP NOT NULL DEFAULT NOW()
 );
 
-CREATE UNIQUE INDEX waste_types_unique_name_idx on waste_types (LOWER(name));  
-
+-- CREATE TABLE "aggregator_waste_types"
+CREATE TABLE aggregator_waste_types(
+  id SERIAL PRIMARY KEY,
+  aggregator_id INTEGER NOT NULL,
+  waste_id INTEGER NOT NULL,
+  FOREIGN Key (aggregator_id) REFERENCES companies(id),
+  FOREIGN Key (waste_id) REFERENCES waste_types(id),
+  UNIQUE(aggregator_id,waste_id)
+);
 
 
 
@@ -270,6 +280,7 @@ CREATE TABLE suppliers(
   updated_at TIMESTAMP NOT NULL DEFAULT NOW(),
   FOREIGN Key (company_id) REFERENCES companies(id)
 );
+
 
 
 CREATE TABLE inventory(

@@ -19,6 +19,7 @@ type Querier interface {
 	CheckSubCountiesDuplicate(ctx context.Context, name string) (int64, error)
 	CollectionWeightTotals(ctx context.Context, producerID int32) (CollectionWeightTotalsRow, error)
 	ConfirmCollectionRequest(ctx context.Context, id int32) error
+	CreateAggregatorWasteType(ctx context.Context, arg CreateAggregatorWasteTypeParams) (AggregatorWasteType, error)
 	CreateBuyer(ctx context.Context, arg CreateBuyerParams) (Buyer, error)
 	CreateCountry(ctx context.Context, arg CreateCountryParams) error
 	CreateMainOrganizationAdmin(ctx context.Context, arg CreateMainOrganizationAdminParams) error
@@ -30,6 +31,7 @@ type Querier interface {
 	CreateSaleItem(ctx context.Context, arg CreateSaleItemParams) (SaleItem, error)
 	CreateSupplier(ctx context.Context, arg CreateSupplierParams) (Supplier, error)
 	DeactivateRole(ctx context.Context, roleID int32) error
+	DeleteAggregatorWasteTypes(ctx context.Context, aggregatorID int32) error
 	DeleteBuyer(ctx context.Context, id int32) error
 	DeleteChampionCollector(ctx context.Context, id int32) error
 	DeleteCompany(ctx context.Context, id int32) error
@@ -41,6 +43,7 @@ type Querier interface {
 	DeleteSale(ctx context.Context, id int32) error
 	DeleteSupplier(ctx context.Context, id int32) error
 	DuplicateCounties(ctx context.Context, name string) (int64, error)
+	GetAggregatorWasteTypes(ctx context.Context, aggregatorID int32) ([]AggregatorWasteType, error)
 	// companies.sql
 	GetAllAggregators(ctx context.Context) ([]GetAllAggregatorsRow, error)
 	GetAllCancelledCollectionRequests(ctx context.Context) ([]GetAllCancelledCollectionRequestsRow, error)

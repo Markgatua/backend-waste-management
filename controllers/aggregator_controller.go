@@ -54,6 +54,85 @@ type UpdateAggregatorStatusParams struct {
 	IsActive *bool `json:"status"  binding:"required"`
 }
 
+func (controller AggregatorController) SetWasteTypes(context *gin.Context) {
+	auth, _ := helpers.Functions{}.CurrentUserFromToken(context)
+	type Params struct {
+		//AggregatorID int32   `json:"aggregator_id"`
+		WasteTypeIDS []int32 `json:"waste_type_ids"`
+	}
+	var AggregatorID int32 = int32(auth.UserCompanyId.Int64)
+	var params Params
+	err := context.ShouldBindJSON(&params)
+	if err != nil {
+		context.JSON(http.StatusUnprocessableEntity, gin.H{
+			"error":   true,
+			"message": err.Error(),
+		})
+		return
+	}
+	err = gen.REPO.DeleteAggregatorWasteTypes(context, AggregatorID)
+	if err != nil {
+		context.JSON(http.StatusUnprocessableEntity, gin.H{
+			"error":   true,
+			"message": err.Error(),
+		})
+		return
+	}
+
+	for _, v := range params.WasteTypeIDS {
+		gen.REPO.CreateAggregatorWasteType(context,gen.CreateAggregatorWasteTypeParams{
+			AggregatorID: AggregatorID,
+			WasteID: v,
+		})
+	}
+	context.JSON(http.StatusOK, gin.H{
+		"error":   true,
+		"content": "Waste types set for aggregator",
+	})
+}
+
+func (controller AggregatorController) GetWasteTypes(context *gin.Context) {
+	auth, _ := helpers.Functions{}.CurrentUserFromToken(context)
+
+	type GetAllWasteTypesRow struct {
+		ID         int32          `json:"id"`
+		Name       string         `json:"name"`
+		IsActive   bool           `json:"is_active"`
+		IsSelected bool           `json:"is_selected"`
+		ParentID   sql.NullInt32  `json:"parent_id"`
+		CreatedAt  time.Time      `json:"created_at"`
+		FilePath   sql.NullString `json:"file_path"`
+	}
+
+	var results []GetAllWasteTypesRow
+
+	wasteTypes, _ := gen.REPO.GetAllWasteTypes(context)
+	aggregatorWasteTypes, _ := gen.REPO.GetAggregatorWasteTypes(context, int32(auth.UserCompanyId.Int64))
+
+	for _, v := range wasteTypes {
+		isSelected := false
+		for _, x := range aggregatorWasteTypes {
+			if v.ID == x.WasteID {
+				isSelected = true
+			}
+		}
+		item := GetAllWasteTypesRow{}
+		item.CreatedAt = v.CreatedAt
+		item.FilePath = v.FilePath
+		item.ID = v.ID
+		item.IsActive = v.IsActive
+		item.Name = v.Name
+		item.ParentID = v.ParentID
+		item.IsSelected = isSelected
+
+		results = append(results, item)
+	}
+	context.JSON(http.StatusOK, gin.H{
+		"error":   true,
+		"content": results,
+	})
+}
+
 func (controller AggregatorController) InsertAggregator(context *gin.Context) {
 	var params CreateAggregatorParams
 	err := context.ShouldBindJSON(&params)
@@ -1253,8 +1332,6 @@ func (aggregatorController AggregatorController) GetSales(context *gin.Context) 
 		"content": results,
 	})
 }
-
-
 
 func (aggregatorController AggregatorController) GetPurchases(context *gin.Context) {
 	auth, _ := helpers.Functions{}.CurrentUserFromToken(context)

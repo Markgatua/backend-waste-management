@@ -190,6 +190,8 @@ func runProgram() {
 	router.POST("aggregator/add/user", middlewares.PermissionBlockerMiddleware("add_user"), authController.AddAggregatorUser)
 	router.PUT("aggregator/update/user", middlewares.PermissionBlockerMiddleware("edit_user"), authController.UpdateAggregatorUser)
 
+	router.GET("aggregator/waste_types", middlewares.PermissionBlockerMiddleware("view_waste_type"), controllers.AggregatorController{}.GetWasteTypes)
+	router.POST("aggregator/waste_types/create", middlewares.PermissionBlockerMiddleware("create_waste_type"), controllers.AggregatorController{}.SetWasteTypes)
 	//-------------------------------------------------------------------------------------------
 
 	//---------------------------Green champion ------------------------------------------------------
@@ -232,10 +234,10 @@ func runProgram() {
 	//-------------------------------------------------------------------------------------------
 
 	//--------------------------- wastegroups-----------------------------------------------------
-	router.POST("settings/wastetypes/create", wasteTypesController.InsertWasteGroup)
+	router.POST("settings/wastetypes/create", middlewares.PermissionBlockerMiddleware("create_waste_type"),wasteTypesController.InsertWasteGroup)
 	router.PUT("settings/wastetypes/update", middlewares.PermissionBlockerMiddleware("update_waste_type"), wasteTypesController.UpdateWasteType)
-	router.GET("settings/wastetypes/all", wasteTypesController.GetAllWasteTypes)
-	router.GET("settings/wastetypes/user", wasteTypesController.GetUsersWasteGroups)
+	router.GET("settings/wastetypes/all",middlewares.PermissionBlockerMiddleware("view_waste_type"), wasteTypesController.GetAllWasteTypes)
+	router.GET("settings/wastetypes/user",middlewares.PermissionBlockerMiddleware("view_waste_type"), wasteTypesController.GetUsersWasteGroups)
 	router.GET("settings/wastetypes/wastegroup/:id", middlewares.PermissionBlockerMiddleware("view_waste_type"), wasteTypesController.GetOneWasteGroup)
 	//--------------------------------------------------------------------------------------------
 

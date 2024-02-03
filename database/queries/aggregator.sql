@@ -71,3 +71,13 @@ update inventory set total_weight=$1 where id =$2;
 
 -- name: InsertToInventory :exec
 insert into inventory(waste_type_id,company_id,total_weight) VALUES($1,$2,$3);
+
+-- name: DeleteAggregatorWasteTypes :exec
+delete from aggregator_waste_types where aggregator_id =$1;
+
+-- name: CreateAggregatorWasteType :one
+insert into aggregator_waste_types(aggregator_id,waste_id) VALUES ($1,$2) returning *;
+
+
+-- name: GetAggregatorWasteTypes :many
+select * from aggregator_waste_types where aggregator_id = $1;
