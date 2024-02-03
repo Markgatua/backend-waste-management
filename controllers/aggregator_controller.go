@@ -632,7 +632,6 @@ func (aggregatorController AggregatorController) MakeInventoryAdjustments(contex
 			}
 		}
 	}
-
 	if len(inventoryErrors) != 0 {
 		context.JSON(http.StatusUnprocessableEntity, gin.H{
 			"error":   true,
@@ -640,7 +639,6 @@ func (aggregatorController AggregatorController) MakeInventoryAdjustments(contex
 		})
 		return
 	}
-
 	for _, v := range params.WasteItems {
 		if err == nil {
 			inventoryCount, _ := gen.REPO.InventoryItemCount(context, gen.InventoryItemCountParams{
@@ -688,7 +686,6 @@ func (aggregatorController AggregatorController) MakeInventoryAdjustments(contex
 						logger.Log("Aggregator/MakeAdjustment", err.Error(), logger.LOG_LEVEL_ERROR)
 					}
 				}
-
 			}
 		}
 	}
