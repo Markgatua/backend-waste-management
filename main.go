@@ -52,7 +52,7 @@ func runProgram() {
 	usersController := controllers.UsersController{}
 	wasteTypesController := controllers.WasteTypesController{}
 	organzationController := controllers.OrgnizationController{}
-	//geoController := controllers.GeoController{}
+	geoController := controllers.GeoController{}
 	championCollectorController := controllers.ChampionCollectorController{}
 	// rolesController := controllers.RolesController{}
 	// rolespermissions := controllers.RoleAndPermissionsController{}
@@ -138,7 +138,7 @@ func runProgram() {
 	router.GET("/company/users/:id", usersController.GetCompanyUsers)
 
 	//---------------------------countries-------------------------------------------------------
-	//router.GET("countries", geoController.GetAllCountries)
+	router.GET("countries", geoController.GetAllCountries)
 	//-------------------------------------------------------------------------------------------
 
 	//---------------------------buyer----------------------------------------------------

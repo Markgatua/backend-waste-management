@@ -907,7 +907,7 @@ func (aggregatorController AggregatorController) GetBuyers(context *gin.Context)
 		limitOffset = " LIMIT " + itemsPerPage + " OFFSET " + page
 	}
 	if companyID == "" {
-		companyQuery = fmt.Sprint(" and where company_id=", auth.UserCompanyId.Int64)
+		companyQuery = fmt.Sprint(" and company_id=", auth.UserCompanyId.Int64)
 	} else {
 		companyQuery = " and company_id=" + companyID
 	}
@@ -927,18 +927,24 @@ func (aggregatorController AggregatorController) GetBuyers(context *gin.Context)
 		from buyers where created_at is not null
 	 ` + searchQuery + companyQuery + limitOffset
 
+	var totalCount = 0;
+
+	gen.REPO.DB.Get(&totalCount,"select count(*) from buyers where created_at is not null"+companyQuery)
+
 	logger.Log("AggregatorController/GetBuyers", query, logger.LOG_LEVEL_INFO)
 
 	results, err := utils.Select(gen.REPO.DB, query)
+
 	if err != nil {
 		context.JSON(http.StatusUnprocessableEntity, gin.H{
-			"error":   true,
-			"message": err.Error(),
+			"error":       true,
+			"message":     err.Error(),
 		})
 		return
 	}
 	context.JSON(http.StatusOK, gin.H{
 		"error":   false,
+		"total_count": totalCount,
 		"content": results,
 	})
 }
