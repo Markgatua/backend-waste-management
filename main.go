@@ -145,6 +145,8 @@ func runProgram() {
 	router.POST("buyer/add", middlewares.PermissionBlockerMiddleware("add_buyer"), controllers.AggregatorController{}.AddBuyer)
 	router.PUT("buyer/update", middlewares.PermissionBlockerMiddleware("edit_buyer"), controllers.AggregatorController{}.UpdateBuyer)
 	router.GET("buyers", middlewares.PermissionBlockerMiddleware("view_buyer"), controllers.AggregatorController{}.GetBuyers)
+	router.PUT("/buyer/set_active_inactive_status", middlewares.PermissionBlockerMiddleware("edit_buyer"), controllers.AggregatorController{}.SetBuyerActiveInActiveStatus)
+
 	router.DELETE("buyer/delete/:id", middlewares.PermissionBlockerMiddleware("delete_buyer"), controllers.AggregatorController{}.DeleteBuyer)
 	//-------------------------------------------------------------------------------------------
 

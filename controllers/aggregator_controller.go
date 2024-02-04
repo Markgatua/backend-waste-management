@@ -183,7 +183,7 @@ func (controller AggregatorController) GetWasteTypes(context *gin.Context) {
 		}
 
 		context.JSON(http.StatusOK, gin.H{
-			"error":   false,
+			"error":       false,
 			"waste_types": results,
 		})
 	} else {
@@ -216,7 +216,7 @@ func (controller AggregatorController) GetWasteTypes(context *gin.Context) {
 		}
 
 		context.JSON(http.StatusOK, gin.H{
-			"error":   false,
+			"error":       false,
 			"waste_types": results,
 		})
 	}
@@ -564,10 +564,20 @@ func (aggregatorController AggregatorController) AddBuyer(context *gin.Context) 
 		return
 	}
 
+	country, err := gen.REPO.GetCountryByName(context, params.Location.Country)
+	if err != nil {
+		context.JSON(http.StatusUnprocessableEntity, gin.H{
+			"error":   true,
+			"message": "Error getting country",
+		})
+		return
+	}
+
 	buyer, err := gen.REPO.CreateBuyer(context, gen.CreateBuyerParams{
 		Lat:                          null.FloatFrom(params.Location.LatLng.Lat).NullFloat64,
 		Lng:                          null.FloatFrom(params.Location.LatLng.Lng).NullFloat64,
 		Region:                       null.StringFrom(params.Region).NullString,
+		CountryID:                    sql.NullInt32{Int32: country.ID, Valid: true},
 		IsActive:                     *params.IsActive,
 		Company:                      null.StringFrom(params.Company).NullString,
 		CallingCode:                  null.StringFrom(params.CallingCode).NullString,
@@ -635,12 +645,21 @@ func (aggregatorController AggregatorController) AddSupplier(context *gin.Contex
 		})
 		return
 	}
+	country, err := gen.REPO.GetCountryByName(context, params.Location.Country)
+	if err != nil {
+		context.JSON(http.StatusUnprocessableEntity, gin.H{
+			"error":   true,
+			"message": "Error getting country",
+		})
+		return
+	}
 
 	supplier, err := gen.REPO.CreateSupplier(context, gen.CreateSupplierParams{
 		Lat:                          null.FloatFrom(params.Location.LatLng.Lat).NullFloat64,
 		Lng:                          null.FloatFrom(params.Location.LatLng.Lng).NullFloat64,
 		Region:                       null.StringFrom(params.Region).NullString,
 		IsActive:                     *params.IsActive,
+		CountryID:                    sql.NullInt32{Int32: country.ID, Valid: true},
 		Company:                      null.StringFrom(params.Company).NullString,
 		CallingCode:                  null.StringFrom(params.CallingCode).NullString,
 		Phone:                        null.StringFrom(params.Phone).NullString,
@@ -708,11 +727,21 @@ func (aggregatorController AggregatorController) UpdateSupplier(context *gin.Con
 		return
 	}
 
+	country, err := gen.REPO.GetCountryByName(context, params.Location.Country)
+	if err != nil {
+		context.JSON(http.StatusUnprocessableEntity, gin.H{
+			"error":   true,
+			"message": "Error getting country",
+		})
+		return
+	}
+
 	err = gen.REPO.UpdateSupplier(context, gen.UpdateSupplierParams{
 		Lat:                          null.FloatFrom(params.Location.LatLng.Lat).NullFloat64,
 		Lng:                          null.FloatFrom(params.Location.LatLng.Lng).NullFloat64,
 		Region:                       null.StringFrom(params.Region).NullString,
 		IsActive:                     *params.IsActive,
+		CountryID:                    sql.NullInt32{Int32: country.ID, Valid: true},
 		Company:                      null.StringFrom(params.Company).NullString,
 		CallingCode:                  null.StringFrom(params.CallingCode).NullString,
 		Phone:                        null.StringFrom(params.Phone).NullString,
@@ -779,12 +808,21 @@ func (aggregatorController AggregatorController) UpdateBuyer(context *gin.Contex
 		return
 	}
 
+	country, err := gen.REPO.GetCountryByName(context, params.Location.Country)
+	if err != nil {
+		context.JSON(http.StatusUnprocessableEntity, gin.H{
+			"error":   true,
+			"message": "Error getting country",
+		})
+		return
+	}
 	err = gen.REPO.UpdateBuyer(context, gen.UpdateBuyerParams{
 		Lat:                          null.FloatFrom(params.Location.LatLng.Lat).NullFloat64,
 		Lng:                          null.FloatFrom(params.Location.LatLng.Lng).NullFloat64,
 		Region:                       null.StringFrom(params.Region).NullString,
 		IsActive:                     *params.IsActive,
 		Company:                      null.StringFrom(params.Company).NullString,
+		CountryID:                    sql.NullInt32{Int32: country.ID, Valid: true},
 		CallingCode:                  null.StringFrom(params.CallingCode).NullString,
 		Phone:                        null.StringFrom(params.Phone).NullString,
 		Location:                     null.StringFrom(params.Location.Location).NullString,
@@ -881,6 +919,8 @@ func (aggregatorController AggregatorController) GetBuyers(context *gin.Context)
 		buyers.company,
 		buyers.location,
 		buyers.is_active,
+		buyers.lat,
+		buyers.lng,
 		buyers.administrative_level_1_location,
 		buyers.calling_code,
 		buyers.phone
@@ -1245,6 +1285,38 @@ func (aggregatorController AggregatorController) SellWasteToBuyer(context *gin.C
 		context.JSON(http.StatusOK, gin.H{
 			"error":   false,
 			"message": "Waste sold successfully",
+		})
+	}
+}
+
+func (controller AggregatorController) SetBuyerActiveInActiveStatus(context *gin.Context) {
+	type Param struct {
+		ID       int32 `json:"id" binding:"required"`
+		IsActive *bool `json:"is_active" binding:"required"`
+	}
+	var param Param
+	err := context.ShouldBindJSON(&param)
+	if err != nil {
+		context.JSON(http.StatusUnprocessableEntity, gin.H{
+			"error":   true,
+			"message": err.Error(),
+		})
+		return
+	}
+
+	err = gen.REPO.SetBuyerActiveInactiveStatus(context, gen.SetBuyerActiveInactiveStatusParams{
+		IsActive: *param.IsActive,
+		ID:       int32(param.ID),
+	})
+	if err != nil {
+		context.JSON(http.StatusUnprocessableEntity, gin.H{
+			"error":   true,
+			"message": "Error setting buyer status",
+		})
+	} else {
+		context.JSON(http.StatusOK, gin.H{
+			"error":   false,
+			"message": "Updated buyer status",
 		})
 	}
 }

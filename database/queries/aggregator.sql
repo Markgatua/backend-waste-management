@@ -1,34 +1,40 @@
 -- name: CreateBuyer :one
 insert into
     buyers (
-        company_id, company, first_name, last_name, calling_code, phone, administrative_level_1_location, location, is_active, lat, lng, created_at, updated_at,region
+        company_id, company, first_name, last_name, calling_code, phone, administrative_level_1_location, location, is_active, lat, lng, created_at, updated_at,region,country_id
     )
 values (
-        $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13,$14
+        $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13,$14,$15
     ) returning *;
 
 -- name: CreateSupplier :one
 insert into
     suppliers (
-        company_id, company, first_name, last_name, calling_code, phone, administrative_level_1_location, location, is_active, lat, lng, created_at, updated_at,region
+        company_id, company, first_name, last_name, calling_code, phone, administrative_level_1_location, location, is_active, lat, lng, created_at, updated_at,region,country_id
     )
 values (
-        $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13,$14
+        $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13,$14,$15
     ) returning *;
 
 -- name: UpdateBuyer :exec
-update buyers set company_id=$1,company=$2,first_name=$3,last_name=$4,calling_code=$5,phone=$6,administrative_level_1_location=$7,location=$8,is_active=$9,lat=$10,lng=$11 ,region=$12 where id=$13;
+update buyers set company_id=$1,company=$2,first_name=$3,last_name=$4,calling_code=$5,phone=$6,administrative_level_1_location=$7,location=$8,is_active=$9,lat=$10,lng=$11 ,region=$12 ,country_id=$13 where id=$14;
 
 
 -- name: UpdateSupplier :exec
-update suppliers set company_id=$1,company=$2,first_name=$3,last_name=$4,calling_code=$5,phone=$6,administrative_level_1_location=$7,location=$8,is_active=$9,lat=$10,lng=$11 ,region=$12 where id=$13;
+update suppliers set company_id=$1,company=$2,first_name=$3,last_name=$4,calling_code=$5,phone=$6,administrative_level_1_location=$7,location=$8,is_active=$9,lat=$10,lng=$11 ,region=$12,country_id=$13 where id=$14;
 
 
 -- name: DeleteBuyer :exec
 delete from buyers where id = $1;
 
+-- name: SetBuyerActiveInactiveStatus :exec
+update buyers set is_active=$1 where id=$2;
+
 -- name: DeleteSupplier :exec
 delete from suppliers where id = $1;
+
+-- name: SetSupplierActiveInactiveStatus :exec
+update suppliers set is_active=$1 where id=$2;
 
 -- name: CreateSale :one
 insert into sales(ref,company_id,buyer_id,total_weight,total_amount,dump) VALUES ($1,$2,$3,$4,$5,$6) returning *;

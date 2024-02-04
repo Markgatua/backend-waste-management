@@ -21,6 +21,7 @@ type Buyer struct {
 	ID                           int32           `json:"id"`
 	CompanyID                    int32           `json:"company_id"`
 	Company                      sql.NullString  `json:"company"`
+	CountryID                    sql.NullInt32   `json:"country_id"`
 	FirstName                    string          `json:"first_name"`
 	LastName                     string          `json:"last_name"`
 	IsActive                     bool            `json:"is_active"`
@@ -279,6 +280,7 @@ type Supplier struct {
 	CompanyID                    int32           `json:"company_id"`
 	Company                      sql.NullString  `json:"company"`
 	FirstName                    string          `json:"first_name"`
+	CountryID                    sql.NullInt32   `json:"country_id"`
 	LastName                     string          `json:"last_name"`
 	IsActive                     bool            `json:"is_active"`
 	Region                       sql.NullString  `json:"region"`

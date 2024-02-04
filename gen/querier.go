@@ -126,6 +126,8 @@ type Querier interface {
 	RemoveRolePermissions(ctx context.Context, roleID int32) error
 	RevokePermission(ctx context.Context, arg RevokePermissionParams) error
 	RoleExists(ctx context.Context, name string) (int64, error)
+	SetBuyerActiveInactiveStatus(ctx context.Context, arg SetBuyerActiveInactiveStatusParams) error
+	SetSupplierActiveInactiveStatus(ctx context.Context, arg SetSupplierActiveInactiveStatusParams) error
 	UpdateBuyer(ctx context.Context, arg UpdateBuyerParams) error
 	UpdateChampionCollector(ctx context.Context, arg UpdateChampionCollectorParams) error
 	UpdateCollectionRequest(ctx context.Context, arg UpdateCollectionRequestParams) error

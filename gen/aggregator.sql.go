@@ -32,11 +32,11 @@ func (q *Queries) CreateAggregatorWasteType(ctx context.Context, arg CreateAggre
 const createBuyer = `-- name: CreateBuyer :one
 insert into
     buyers (
-        company_id, company, first_name, last_name, calling_code, phone, administrative_level_1_location, location, is_active, lat, lng, created_at, updated_at,region
+        company_id, company, first_name, last_name, calling_code, phone, administrative_level_1_location, location, is_active, lat, lng, created_at, updated_at,region,country_id
     )
 values (
-        $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13,$14
-    ) returning id, company_id, company, first_name, last_name, is_active, region, calling_code, location, administrative_level_1_location, lat, lng, phone, created_at, updated_at
+        $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13,$14,$15
+    ) returning id, company_id, company, country_id, first_name, last_name, is_active, region, calling_code, location, administrative_level_1_location, lat, lng, phone, created_at, updated_at
 `
 
 type CreateBuyerParams struct {
@@ -54,6 +54,7 @@ type CreateBuyerParams struct {
 	CreatedAt                    time.Time       `json:"created_at"`
 	UpdatedAt                    time.Time       `json:"updated_at"`
 	Region                       sql.NullString  `json:"region"`
+	CountryID                    sql.NullInt32   `json:"country_id"`
 }
 
 func (q *Queries) CreateBuyer(ctx context.Context, arg CreateBuyerParams) (Buyer, error) {
@@ -72,12 +73,14 @@ func (q *Queries) CreateBuyer(ctx context.Context, arg CreateBuyerParams) (Buyer
 		arg.CreatedAt,
 		arg.UpdatedAt,
 		arg.Region,
+		arg.CountryID,
 	)
 	var i Buyer
 	err := row.Scan(
 		&i.ID,
 		&i.CompanyID,
 		&i.Company,
+		&i.CountryID,
 		&i.FirstName,
 		&i.LastName,
 		&i.IsActive,
@@ -239,11 +242,11 @@ func (q *Queries) CreateSaleItem(ctx context.Context, arg CreateSaleItemParams) 
 const createSupplier = `-- name: CreateSupplier :one
 insert into
     suppliers (
-        company_id, company, first_name, last_name, calling_code, phone, administrative_level_1_location, location, is_active, lat, lng, created_at, updated_at,region
+        company_id, company, first_name, last_name, calling_code, phone, administrative_level_1_location, location, is_active, lat, lng, created_at, updated_at,region,country_id
     )
 values (
-        $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13,$14
-    ) returning id, company_id, company, first_name, last_name, is_active, region, calling_code, location, administrative_level_1_location, lat, lng, phone, created_at, updated_at
+        $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13,$14,$15
+    ) returning id, company_id, company, first_name, country_id, last_name, is_active, region, calling_code, location, administrative_level_1_location, lat, lng, phone, created_at, updated_at
 `
 
 type CreateSupplierParams struct {
@@ -261,6 +264,7 @@ type CreateSupplierParams struct {
 	CreatedAt                    time.Time       `json:"created_at"`
 	UpdatedAt                    time.Time       `json:"updated_at"`
 	Region                       sql.NullString  `json:"region"`
+	CountryID                    sql.NullInt32   `json:"country_id"`
 }
 
 func (q *Queries) CreateSupplier(ctx context.Context, arg CreateSupplierParams) (Supplier, error) {
@@ -279,6 +283,7 @@ func (q *Queries) CreateSupplier(ctx context.Context, arg CreateSupplierParams) 
 		arg.CreatedAt,
 		arg.UpdatedAt,
 		arg.Region,
+		arg.CountryID,
 	)
 	var i Supplier
 	err := row.Scan(
@@ -286,6 +291,7 @@ func (q *Queries) CreateSupplier(ctx context.Context, arg CreateSupplierParams) 
 		&i.CompanyID,
 		&i.Company,
 		&i.FirstName,
+		&i.CountryID,
 		&i.LastName,
 		&i.IsActive,
 		&i.Region,
@@ -515,8 +521,36 @@ func (q *Queries) MakePurchaseCashPayment(ctx context.Context, arg MakePurchaseC
 	return i, err
 }
 
+const setBuyerActiveInactiveStatus = `-- name: SetBuyerActiveInactiveStatus :exec
+update buyers set is_active=$1 where id=$2
+`
+
+type SetBuyerActiveInactiveStatusParams struct {
+	IsActive bool  `json:"is_active"`
+	ID       int32 `json:"id"`
+}
+
+func (q *Queries) SetBuyerActiveInactiveStatus(ctx context.Context, arg SetBuyerActiveInactiveStatusParams) error {
+	_, err := q.db.ExecContext(ctx, setBuyerActiveInactiveStatus, arg.IsActive, arg.ID)
+	return err
+}
+
+const setSupplierActiveInactiveStatus = `-- name: SetSupplierActiveInactiveStatus :exec
+update suppliers set is_active=$1 where id=$2
+`
+
+type SetSupplierActiveInactiveStatusParams struct {
+	IsActive bool  `json:"is_active"`
+	ID       int32 `json:"id"`
+}
+
+func (q *Queries) SetSupplierActiveInactiveStatus(ctx context.Context, arg SetSupplierActiveInactiveStatusParams) error {
+	_, err := q.db.ExecContext(ctx, setSupplierActiveInactiveStatus, arg.IsActive, arg.ID)
+	return err
+}
+
 const updateBuyer = `-- name: UpdateBuyer :exec
-update buyers set company_id=$1,company=$2,first_name=$3,last_name=$4,calling_code=$5,phone=$6,administrative_level_1_location=$7,location=$8,is_active=$9,lat=$10,lng=$11 ,region=$12 where id=$13
+update buyers set company_id=$1,company=$2,first_name=$3,last_name=$4,calling_code=$5,phone=$6,administrative_level_1_location=$7,location=$8,is_active=$9,lat=$10,lng=$11 ,region=$12 ,country_id=$13 where id=$14
 `
 
 type UpdateBuyerParams struct {
@@ -532,6 +566,7 @@ type UpdateBuyerParams struct {
 	Lat                          sql.NullFloat64 `json:"lat"`
 	Lng                          sql.NullFloat64 `json:"lng"`
 	Region                       sql.NullString  `json:"region"`
+	CountryID                    sql.NullInt32   `json:"country_id"`
 	ID                           int32           `json:"id"`
 }
 
@@ -549,6 +584,7 @@ func (q *Queries) UpdateBuyer(ctx context.Context, arg UpdateBuyerParams) error 
 		arg.Lat,
 		arg.Lng,
 		arg.Region,
+		arg.CountryID,
 		arg.ID,
 	)
 	return err
@@ -569,7 +605,7 @@ func (q *Queries) UpdateInventoryItem(ctx context.Context, arg UpdateInventoryIt
 }
 
 const updateSupplier = `-- name: UpdateSupplier :exec
-update suppliers set company_id=$1,company=$2,first_name=$3,last_name=$4,calling_code=$5,phone=$6,administrative_level_1_location=$7,location=$8,is_active=$9,lat=$10,lng=$11 ,region=$12 where id=$13
+update suppliers set company_id=$1,company=$2,first_name=$3,last_name=$4,calling_code=$5,phone=$6,administrative_level_1_location=$7,location=$8,is_active=$9,lat=$10,lng=$11 ,region=$12,country_id=$13 where id=$14
 `
 
 type UpdateSupplierParams struct {
@@ -585,6 +621,7 @@ type UpdateSupplierParams struct {
 	Lat                          sql.NullFloat64 `json:"lat"`
 	Lng                          sql.NullFloat64 `json:"lng"`
 	Region                       sql.NullString  `json:"region"`
+	CountryID                    sql.NullInt32   `json:"country_id"`
 	ID                           int32           `json:"id"`
 }
 
@@ -602,6 +639,7 @@ func (q *Queries) UpdateSupplier(ctx context.Context, arg UpdateSupplierParams) 
 		arg.Lat,
 		arg.Lng,
 		arg.Region,
+		arg.CountryID,
 		arg.ID,
 	)
 	return err
