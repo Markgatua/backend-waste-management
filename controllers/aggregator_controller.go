@@ -86,7 +86,7 @@ func (controller AggregatorController) SetWasteTypes(context *gin.Context) {
 		})
 	}
 	context.JSON(http.StatusOK, gin.H{
-		"error":   true,
+		"error":   false,
 		"message": "Waste types set for aggregator",
 	})
 }
