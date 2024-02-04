@@ -183,8 +183,8 @@ func (controller AggregatorController) GetWasteTypes(context *gin.Context) {
 		}
 
 		context.JSON(http.StatusOK, gin.H{
-			"error":   true,
-			"content": results,
+			"error":   false,
+			"waste_types": results,
 		})
 	} else {
 		wasteTypes, err := gen.REPO.GetChildrenWasteTypes(context, sql.NullInt32{Int32: int32(parentWasteTypeFilter_), Valid: true})
@@ -216,8 +216,8 @@ func (controller AggregatorController) GetWasteTypes(context *gin.Context) {
 		}
 
 		context.JSON(http.StatusOK, gin.H{
-			"error":   true,
-			"content": results,
+			"error":   false,
+			"waste_types": results,
 		})
 	}
 
