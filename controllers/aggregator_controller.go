@@ -80,9 +80,9 @@ func (controller AggregatorController) SetWasteTypes(context *gin.Context) {
 	}
 
 	for _, v := range params.WasteTypeIDS {
-		gen.REPO.CreateAggregatorWasteType(context,gen.CreateAggregatorWasteTypeParams{
+		gen.REPO.CreateAggregatorWasteType(context, gen.CreateAggregatorWasteTypeParams{
 			AggregatorID: AggregatorID,
-			WasteID: v,
+			WasteID:      v,
 		})
 	}
 	context.JSON(http.StatusOK, gin.H{
@@ -92,7 +92,21 @@ func (controller AggregatorController) SetWasteTypes(context *gin.Context) {
 }
 
 func (controller AggregatorController) GetWasteTypes(context *gin.Context) {
+
+	parentID := context.Query("p")
+	parentWasteTypeFilter_, _ := strconv.ParseUint(parentID, 10, 32)
+
 	auth, _ := helpers.Functions{}.CurrentUserFromToken(context)
+
+	type Result struct {
+		ID        int32          `json:"id"`
+		Name      string         `json:"name"`
+		IsActive  bool           `json:"is_active"`
+		ParentID  sql.NullInt32  `json:"parent_id"`
+		CreatedAt time.Time      `json:"created_at"`
+		FilePath  sql.NullString `json:"file_path"`
+		Parent    *Result        `json:"parent"`
+	}
 
 	type GetAllWasteTypesRow struct {
 		ID         int32          `json:"id"`
@@ -100,37 +114,113 @@ func (controller AggregatorController) GetWasteTypes(context *gin.Context) {
 		IsActive   bool           `json:"is_active"`
 		IsSelected bool           `json:"is_selected"`
 		ParentID   sql.NullInt32  `json:"parent_id"`
+		Parent     *Result        `json:"parent"`
 		CreatedAt  time.Time      `json:"created_at"`
 		FilePath   sql.NullString `json:"file_path"`
 	}
 
 	var results []GetAllWasteTypesRow
 
-	wasteTypes, _ := gen.REPO.GetAllWasteTypes(context)
-	aggregatorWasteTypes, _ := gen.REPO.GetAggregatorWasteTypes(context, int32(auth.UserCompanyId.Int64))
-
-	for _, v := range wasteTypes {
-		isSelected := false
-		for _, x := range aggregatorWasteTypes {
-			if v.ID == x.WasteID {
-				isSelected = true
-			}
+	if parentWasteTypeFilter_ <= 0 {
+		wasteTypes, err := gen.REPO.GetAllWasteTypes(context)
+		if err != nil {
+			context.JSON(http.StatusUnprocessableEntity, gin.H{
+				"error":   true,
+				"message": err.Error(),
+			})
+			return
 		}
-		item := GetAllWasteTypesRow{}
-		item.CreatedAt = v.CreatedAt
-		item.FilePath = v.FilePath
-		item.ID = v.ID
-		item.IsActive = v.IsActive
-		item.Name = v.Name
-		item.ParentID = v.ParentID
-		item.IsSelected = isSelected
 
-		results = append(results, item)
+		var parentsFilter []Result
+
+		for _, v := range wasteTypes {
+			result := Result{}
+			result.Name = v.Name
+			result.ID = v.ID
+			result.IsActive = v.IsActive
+			result.ParentID = v.ParentID
+			result.CreatedAt = v.CreatedAt
+			result.FilePath = v.FilePath
+
+			fmt.Print(v.ParentID)
+			if v.ParentID.Valid {
+				one, err := gen.REPO.GetOneWasteType(context, v.ParentID.Int32)
+				if err == nil {
+					result_ := Result{}
+					result_.ID = one.ID
+					result_.Name = one.Name
+					result_.IsActive = one.IsActive
+					result_.ParentID = one.ParentID
+					result_.CreatedAt = one.CreatedAt
+					result_.FilePath = one.FilePath
+
+					result.Parent = &result_
+				}
+			} else {
+				result.Parent = nil
+			}
+			parentsFilter = append(parentsFilter, result)
+		}
+
+		aggregatorWasteTypes, _ := gen.REPO.GetAggregatorWasteTypes(context, int32(auth.UserCompanyId.Int64))
+		for _, v := range parentsFilter {
+			isSelected := false
+			for _, x := range aggregatorWasteTypes {
+				if v.ID == x.WasteID {
+					isSelected = true
+				}
+			}
+			item := GetAllWasteTypesRow{}
+			item.CreatedAt = v.CreatedAt
+			item.FilePath = v.FilePath
+			item.ID = v.ID
+			item.IsActive = v.IsActive
+			item.Parent = v.Parent
+			item.Name = v.Name
+			item.ParentID = v.ParentID
+			item.IsSelected = isSelected
+			results = append(results, item)
+		}
+
+		context.JSON(http.StatusOK, gin.H{
+			"error":   true,
+			"content": results,
+		})
+	} else {
+		wasteTypes, err := gen.REPO.GetChildrenWasteTypes(context, sql.NullInt32{Int32: int32(parentWasteTypeFilter_), Valid: true})
+		if err != nil {
+			context.JSON(http.StatusUnprocessableEntity, gin.H{
+				"error":   true,
+				"message": err.Error(),
+			})
+			return
+		}
+		aggregatorWasteTypes, _ := gen.REPO.GetAggregatorWasteTypes(context, int32(auth.UserCompanyId.Int64))
+
+		for _, v := range wasteTypes {
+			isSelected := false
+			for _, x := range aggregatorWasteTypes {
+				if v.ID == x.WasteID {
+					isSelected = true
+				}
+			}
+			item := GetAllWasteTypesRow{}
+			item.CreatedAt = v.CreatedAt
+			item.FilePath = v.FilePath
+			item.ID = v.ID
+			item.IsActive = v.IsActive
+			item.Name = v.Name
+			item.ParentID = v.ParentID
+			item.IsSelected = isSelected
+			results = append(results, item)
+		}
+
+		context.JSON(http.StatusOK, gin.H{
+			"error":   true,
+			"content": results,
+		})
 	}
-	context.JSON(http.StatusOK, gin.H{
-		"error":   true,
-		"content": results,
-	})
+
 }
 
 func (controller AggregatorController) InsertAggregator(context *gin.Context) {
