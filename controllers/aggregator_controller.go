@@ -926,12 +926,15 @@ func (aggregatorController AggregatorController) GetBuyers(context *gin.Context)
 		buyers.company,
 		buyers.location,
 		buyers.is_active,
+		countries.name as country_name,
 		buyers.lat,
 		buyers.lng,
 		buyers.administrative_level_1_location,
 		buyers.calling_code,
 		buyers.phone
-		from buyers where created_at is not null
+		from buyers 
+		inner join countries on countries.id = buyers.country_id
+		where created_at is not null
 	 ` + searchQuery + companyQuery +" order by created_at "+ limitOffset
 
 	var totalCount = 0
@@ -993,10 +996,14 @@ func (aggregatorController AggregatorController) GetSuppliers(context *gin.Conte
 		suppliers.company,
 		suppliers.location,
 		suppliers.is_active,
+		countries.name as country_name,
 		suppliers.administrative_level_1_location,
 		suppliers.calling_code,
 		suppliers.phone
-		from suppliers where created_at is not null
+		from suppliers
+		inner join countries on countries.id = suppliers.country_id
+
+		where created_at is not null
 	 ` + searchQuery + companyQuery + " order by created_at " + limitOffset
 
 	logger.Log("AggregatorController/GetSuppliers", query, logger.LOG_LEVEL_INFO)
