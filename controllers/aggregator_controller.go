@@ -904,7 +904,14 @@ func (aggregatorController AggregatorController) GetBuyers(context *gin.Context)
 		searchQuery = " and (first_name ilike " + "'%" + search + "%'" + " or last_name ilike " + "'%" + search + "%'" + "" + " or company ilike " + "'%" + search + "%')"
 	}
 	if itemsPerPage != "" && page != "" {
-		limitOffset = " LIMIT " + itemsPerPage + " OFFSET " + page
+		itemsPerPage, _ := strconv.Atoi(context.Query("ipp"))
+		page, _ := strconv.Atoi(context.Query("p"))
+
+		offset:=(page - 1) * itemsPerPage
+
+		limitOffset = fmt.Sprint(" LIMIT ", itemsPerPage, " OFFSET ",offset)
+
+		//limitOffset = " LIMIT " + itemsPerPage + " OFFSET " + page
 	}
 	if companyID == "" {
 		companyQuery = fmt.Sprint(" and company_id=", auth.UserCompanyId.Int64)
@@ -925,11 +932,11 @@ func (aggregatorController AggregatorController) GetBuyers(context *gin.Context)
 		buyers.calling_code,
 		buyers.phone
 		from buyers where created_at is not null
-	 ` + searchQuery + companyQuery + limitOffset
+	 ` + searchQuery + companyQuery +" order by created_at "+ limitOffset
 
-	var totalCount = 0;
+	var totalCount = 0
 
-	gen.REPO.DB.Get(&totalCount,"select count(*) from buyers where created_at is not null"+companyQuery)
+	gen.REPO.DB.Get(&totalCount, "select count(*) from buyers where created_at is not null"+companyQuery)
 
 	logger.Log("AggregatorController/GetBuyers", query, logger.LOG_LEVEL_INFO)
 
@@ -937,15 +944,15 @@ func (aggregatorController AggregatorController) GetBuyers(context *gin.Context)
 
 	if err != nil {
 		context.JSON(http.StatusUnprocessableEntity, gin.H{
-			"error":       true,
-			"message":     err.Error(),
+			"error":   true,
+			"message": err.Error(),
 		})
 		return
 	}
 	context.JSON(http.StatusOK, gin.H{
-		"error":   false,
+		"error":       false,
 		"total_count": totalCount,
-		"content": results,
+		"content":     results,
 	})
 }
 
@@ -966,7 +973,12 @@ func (aggregatorController AggregatorController) GetSuppliers(context *gin.Conte
 		searchQuery = " and (first_name ilike " + "'%" + search + "%'" + " or last_name ilike " + "'%" + search + "%'" + "" + " or company ilike " + "'%" + search + "%')"
 	}
 	if itemsPerPage != "" && page != "" {
-		limitOffset = " LIMIT " + itemsPerPage + " OFFSET " + page
+		itemsPerPage, _ := strconv.Atoi(context.Query("ipp"))
+		page, _ := strconv.Atoi(context.Query("p"))
+
+		offset:=(page - 1) * itemsPerPage
+
+		limitOffset = fmt.Sprint(" LIMIT ", itemsPerPage, " OFFSET ", offset)
 	}
 	if companyID == "" {
 		companyQuery = fmt.Sprint(" and where company_id=", auth.UserCompanyId.Int64)
@@ -985,7 +997,7 @@ func (aggregatorController AggregatorController) GetSuppliers(context *gin.Conte
 		suppliers.calling_code,
 		suppliers.phone
 		from suppliers where created_at is not null
-	 ` + searchQuery + companyQuery + limitOffset
+	 ` + searchQuery + companyQuery + " order by created_at " + limitOffset
 
 	logger.Log("AggregatorController/GetSuppliers", query, logger.LOG_LEVEL_INFO)
 
