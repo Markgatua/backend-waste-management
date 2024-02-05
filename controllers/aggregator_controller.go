@@ -1523,7 +1523,7 @@ func (aggregatorController AggregatorController) GetSales(context *gin.Context) 
 	for _, v := range results {
 		id,_:=v["id"]
 		//fmt.Println(id)
-		items, _ := utils.Select(gen.REPO.DB, fmt.Sprint("select * from sale_items where sale_items.sale_id=",id))
+		items, _ := utils.Select(gen.REPO.DB, fmt.Sprint("select *,waste_types.name as waste_name from sale_items join waste_types on waste_types.id=sale_items.waste_type_id where sale_items.sale_id=",id))
 		//fmt.Println(items)
 		v["items"]=items
 	}
