@@ -26,6 +26,7 @@ type InsertNewCollectionRequestParams struct {
 	RequestDate    time.Time `json:"request_date"  binding:"required"`
 	Location       models.Location `json:"location" binding:"required"`
 	ContactPerson  string `json:"contact_person"  binding:"required"`
+	Status 			int32 `json:"status"  binding:"required"`
 }
 
 type InsertNewNotificationRequestParams struct {
@@ -78,6 +79,7 @@ func (requestCollectionController RequestCollectionController) InsertNewCollecti
 		Lat: null.FloatFrom(params.Location.LatLng.Lat).NullFloat64,
 		Lng: null.FloatFrom(params.Location.LatLng.Lng).NullFloat64,
 		FirstContactPerson: params.ContactPerson,
+		Status: params.Status,
 	})
 
 	fmt.Println(insertError);
