@@ -42,6 +42,7 @@ type CollectionRequest struct {
 	ProducerID                   int32           `json:"producer_id"`
 	CollectorID                  int32           `json:"collector_id"`
 	RequestDate                  time.Time       `json:"request_date"`
+	PickupTimeStampID            int32           `json:"pickup_time_stamp_id"`
 	Location                     sql.NullString  `json:"location"`
 	AdministrativeLevel1Location sql.NullString  `json:"administrative_level_1_location"`
 	Lat                          sql.NullFloat64 `json:"lat"`
@@ -158,6 +159,12 @@ type PhoneVerificationToken struct {
 	CallingCode string    `json:"calling_code"`
 	Phone       string    `json:"phone"`
 	CreatedAt   time.Time `json:"created_at"`
+}
+
+type PickupTimeStamp struct {
+	ID        int32  `json:"id"`
+	Stamp     string `json:"stamp"`
+	TimeRange string `json:"time_range"`
 }
 
 type Role struct {

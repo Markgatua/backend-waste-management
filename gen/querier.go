@@ -31,6 +31,7 @@ type Querier interface {
 	DeletePermissionByIds(ctx context.Context, permissionIds []int32) error
 	DeleteRole(ctx context.Context, id int32) error
 	DuplicateCounties(ctx context.Context, name string) (int64, error)
+	DuplicatePickupTimeStamp(ctx context.Context, stamp string) (int64, error)
 	GetAggregatorNewRequests(ctx context.Context, collectorID int32) ([]GetAggregatorNewRequestsRow, error)
 	// companies.sql
 	GetAllAggregators(ctx context.Context) ([]GetAllAggregatorsRow, error)
@@ -79,6 +80,7 @@ type Querier interface {
 	GetOrganizationCount(ctx context.Context) ([]GetOrganizationCountRow, error)
 	GetOrganizationCountWithNameAndCountry(ctx context.Context, arg GetOrganizationCountWithNameAndCountryParams) ([]Organization, error)
 	GetPermissionsForRoleID(ctx context.Context, roleID int32) ([]GetPermissionsForRoleIDRow, error)
+	GetPickupTimeStamps(ctx context.Context) ([]PickupTimeStamp, error)
 	GetProducerLatestCollectionId(ctx context.Context, producerID int32) (CollectionRequest, error)
 	GetRole(ctx context.Context, id int32) (Role, error)
 	// role_has_permissions.sql
@@ -99,6 +101,8 @@ type Querier interface {
 	// notifications.sql
 	InsertNewNotificationRequest(ctx context.Context, arg InsertNewNotificationRequestParams) error
 	InsertOrganization(ctx context.Context, arg InsertOrganizationParams) (Organization, error)
+	// pickup_time_stamps.sql
+	InsertPickupTimeStsmp(ctx context.Context, arg InsertPickupTimeStsmpParams) error
 	// sub_counties.sql
 	InsertSubcounties(ctx context.Context, arg InsertSubcountiesParams) error
 	// waste_items.sql
@@ -119,6 +123,7 @@ type Querier interface {
 	UpdateNotificationStatus(ctx context.Context, arg UpdateNotificationStatusParams) error
 	UpdateOrganization(ctx context.Context, arg UpdateOrganizationParams) error
 	UpdateOrganizationIsActive(ctx context.Context, arg UpdateOrganizationIsActiveParams) error
+	UpdatePickupTimeStamp(ctx context.Context, arg UpdatePickupTimeStampParams) error
 	UpdateRole(ctx context.Context, arg UpdateRoleParams) error
 	UpdateUserFirstNameLastNameEmailRoleAndUserType(ctx context.Context, arg UpdateUserFirstNameLastNameEmailRoleAndUserTypeParams) error
 	UpdateUserFirstNameLastNameEmailRoleUserTypeAndPassword(ctx context.Context, arg UpdateUserFirstNameLastNameEmailRoleUserTypeAndPasswordParams) error

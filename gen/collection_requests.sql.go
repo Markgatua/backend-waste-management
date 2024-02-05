@@ -50,7 +50,7 @@ func (q *Queries) ConfirmCollectionRequest(ctx context.Context, id int32) error 
 
 const getAggregatorNewRequests = `-- name: GetAggregatorNewRequests :many
 SELECT
-    collection_requests.id, collection_requests.producer_id, collection_requests.collector_id, collection_requests.request_date, collection_requests.location, collection_requests.administrative_level_1_location, collection_requests.lat, collection_requests.lng, collection_requests.pickup_date, collection_requests.status, collection_requests.first_contact_person, collection_requests.second_contact_person, collection_requests.created_at,
+    collection_requests.id, collection_requests.producer_id, collection_requests.collector_id, collection_requests.request_date, collection_requests.pickup_time_stamp_id, collection_requests.location, collection_requests.administrative_level_1_location, collection_requests.lat, collection_requests.lng, collection_requests.pickup_date, collection_requests.status, collection_requests.first_contact_person, collection_requests.second_contact_person, collection_requests.created_at,
     producer.name AS producer_name,
     producer.location AS producer_location
 FROM
@@ -68,6 +68,7 @@ type GetAggregatorNewRequestsRow struct {
 	ProducerID                   int32           `json:"producer_id"`
 	CollectorID                  int32           `json:"collector_id"`
 	RequestDate                  time.Time       `json:"request_date"`
+	PickupTimeStampID            int32           `json:"pickup_time_stamp_id"`
 	Location                     sql.NullString  `json:"location"`
 	AdministrativeLevel1Location sql.NullString  `json:"administrative_level_1_location"`
 	Lat                          sql.NullFloat64 `json:"lat"`
@@ -95,6 +96,7 @@ func (q *Queries) GetAggregatorNewRequests(ctx context.Context, collectorID int3
 			&i.ProducerID,
 			&i.CollectorID,
 			&i.RequestDate,
+			&i.PickupTimeStampID,
 			&i.Location,
 			&i.AdministrativeLevel1Location,
 			&i.Lat,
@@ -122,7 +124,7 @@ func (q *Queries) GetAggregatorNewRequests(ctx context.Context, collectorID int3
 
 const getAllCancelledCollectionRequests = `-- name: GetAllCancelledCollectionRequests :many
 SELECT 
-    collection_requests.id, collection_requests.producer_id, collection_requests.collector_id, collection_requests.request_date, collection_requests.location, collection_requests.administrative_level_1_location, collection_requests.lat, collection_requests.lng, collection_requests.pickup_date, collection_requests.status, collection_requests.first_contact_person, collection_requests.second_contact_person, collection_requests.created_at,
+    collection_requests.id, collection_requests.producer_id, collection_requests.collector_id, collection_requests.request_date, collection_requests.pickup_time_stamp_id, collection_requests.location, collection_requests.administrative_level_1_location, collection_requests.lat, collection_requests.lng, collection_requests.pickup_date, collection_requests.status, collection_requests.first_contact_person, collection_requests.second_contact_person, collection_requests.created_at,
     champion.name AS aggregator_name,
     collector.name AS champion_name,
     secondcollector.name as second_collector_name
@@ -142,6 +144,7 @@ type GetAllCancelledCollectionRequestsRow struct {
 	ProducerID                   int32           `json:"producer_id"`
 	CollectorID                  int32           `json:"collector_id"`
 	RequestDate                  time.Time       `json:"request_date"`
+	PickupTimeStampID            int32           `json:"pickup_time_stamp_id"`
 	Location                     sql.NullString  `json:"location"`
 	AdministrativeLevel1Location sql.NullString  `json:"administrative_level_1_location"`
 	Lat                          sql.NullFloat64 `json:"lat"`
@@ -170,6 +173,7 @@ func (q *Queries) GetAllCancelledCollectionRequests(ctx context.Context) ([]GetA
 			&i.ProducerID,
 			&i.CollectorID,
 			&i.RequestDate,
+			&i.PickupTimeStampID,
 			&i.Location,
 			&i.AdministrativeLevel1Location,
 			&i.Lat,
@@ -198,7 +202,7 @@ func (q *Queries) GetAllCancelledCollectionRequests(ctx context.Context) ([]GetA
 
 const getAllCollectionRequests = `-- name: GetAllCollectionRequests :many
 SELECT 
-    collection_requests.id, collection_requests.producer_id, collection_requests.collector_id, collection_requests.request_date, collection_requests.location, collection_requests.administrative_level_1_location, collection_requests.lat, collection_requests.lng, collection_requests.pickup_date, collection_requests.status, collection_requests.first_contact_person, collection_requests.second_contact_person, collection_requests.created_at,
+    collection_requests.id, collection_requests.producer_id, collection_requests.collector_id, collection_requests.request_date, collection_requests.pickup_time_stamp_id, collection_requests.location, collection_requests.administrative_level_1_location, collection_requests.lat, collection_requests.lng, collection_requests.pickup_date, collection_requests.status, collection_requests.first_contact_person, collection_requests.second_contact_person, collection_requests.created_at,
     champion.name AS aggregator_name,
     collector.name AS champion_name,
     secondcollector.name as second_collector_name
@@ -217,6 +221,7 @@ type GetAllCollectionRequestsRow struct {
 	ProducerID                   int32           `json:"producer_id"`
 	CollectorID                  int32           `json:"collector_id"`
 	RequestDate                  time.Time       `json:"request_date"`
+	PickupTimeStampID            int32           `json:"pickup_time_stamp_id"`
 	Location                     sql.NullString  `json:"location"`
 	AdministrativeLevel1Location sql.NullString  `json:"administrative_level_1_location"`
 	Lat                          sql.NullFloat64 `json:"lat"`
@@ -245,6 +250,7 @@ func (q *Queries) GetAllCollectionRequests(ctx context.Context) ([]GetAllCollect
 			&i.ProducerID,
 			&i.CollectorID,
 			&i.RequestDate,
+			&i.PickupTimeStampID,
 			&i.Location,
 			&i.AdministrativeLevel1Location,
 			&i.Lat,
@@ -273,7 +279,7 @@ func (q *Queries) GetAllCollectionRequests(ctx context.Context) ([]GetAllCollect
 
 const getAllCollectionRequestsForACollector = `-- name: GetAllCollectionRequestsForACollector :many
 SELECT 
-    collection_requests.id, collection_requests.producer_id, collection_requests.collector_id, collection_requests.request_date, collection_requests.location, collection_requests.administrative_level_1_location, collection_requests.lat, collection_requests.lng, collection_requests.pickup_date, collection_requests.status, collection_requests.first_contact_person, collection_requests.second_contact_person, collection_requests.created_at,
+    collection_requests.id, collection_requests.producer_id, collection_requests.collector_id, collection_requests.request_date, collection_requests.pickup_time_stamp_id, collection_requests.location, collection_requests.administrative_level_1_location, collection_requests.lat, collection_requests.lng, collection_requests.pickup_date, collection_requests.status, collection_requests.first_contact_person, collection_requests.second_contact_person, collection_requests.created_at,
     champion.name AS aggregator_name,
     collector.name AS champion_name,
     secondcollector.name as second_collector_name
@@ -293,6 +299,7 @@ type GetAllCollectionRequestsForACollectorRow struct {
 	ProducerID                   int32           `json:"producer_id"`
 	CollectorID                  int32           `json:"collector_id"`
 	RequestDate                  time.Time       `json:"request_date"`
+	PickupTimeStampID            int32           `json:"pickup_time_stamp_id"`
 	Location                     sql.NullString  `json:"location"`
 	AdministrativeLevel1Location sql.NullString  `json:"administrative_level_1_location"`
 	Lat                          sql.NullFloat64 `json:"lat"`
@@ -321,6 +328,7 @@ func (q *Queries) GetAllCollectionRequestsForACollector(ctx context.Context, col
 			&i.ProducerID,
 			&i.CollectorID,
 			&i.RequestDate,
+			&i.PickupTimeStampID,
 			&i.Location,
 			&i.AdministrativeLevel1Location,
 			&i.Lat,
@@ -349,7 +357,7 @@ func (q *Queries) GetAllCollectionRequestsForACollector(ctx context.Context, col
 
 const getAllCompletedCollectionRequests = `-- name: GetAllCompletedCollectionRequests :many
 SELECT 
-    collection_requests.id, collection_requests.producer_id, collection_requests.collector_id, collection_requests.request_date, collection_requests.location, collection_requests.administrative_level_1_location, collection_requests.lat, collection_requests.lng, collection_requests.pickup_date, collection_requests.status, collection_requests.first_contact_person, collection_requests.second_contact_person, collection_requests.created_at,
+    collection_requests.id, collection_requests.producer_id, collection_requests.collector_id, collection_requests.request_date, collection_requests.pickup_time_stamp_id, collection_requests.location, collection_requests.administrative_level_1_location, collection_requests.lat, collection_requests.lng, collection_requests.pickup_date, collection_requests.status, collection_requests.first_contact_person, collection_requests.second_contact_person, collection_requests.created_at,
     champion.name AS aggregator_name,
     collector.name AS champion_name,
     secondcollector.name as second_collector_name
@@ -369,6 +377,7 @@ type GetAllCompletedCollectionRequestsRow struct {
 	ProducerID                   int32           `json:"producer_id"`
 	CollectorID                  int32           `json:"collector_id"`
 	RequestDate                  time.Time       `json:"request_date"`
+	PickupTimeStampID            int32           `json:"pickup_time_stamp_id"`
 	Location                     sql.NullString  `json:"location"`
 	AdministrativeLevel1Location sql.NullString  `json:"administrative_level_1_location"`
 	Lat                          sql.NullFloat64 `json:"lat"`
@@ -397,6 +406,7 @@ func (q *Queries) GetAllCompletedCollectionRequests(ctx context.Context, status 
 			&i.ProducerID,
 			&i.CollectorID,
 			&i.RequestDate,
+			&i.PickupTimeStampID,
 			&i.Location,
 			&i.AdministrativeLevel1Location,
 			&i.Lat,
@@ -425,7 +435,7 @@ func (q *Queries) GetAllCompletedCollectionRequests(ctx context.Context, status 
 
 const getAllPendingCollectionRequests = `-- name: GetAllPendingCollectionRequests :many
 SELECT 
-    collection_requests.id, collection_requests.producer_id, collection_requests.collector_id, collection_requests.request_date, collection_requests.location, collection_requests.administrative_level_1_location, collection_requests.lat, collection_requests.lng, collection_requests.pickup_date, collection_requests.status, collection_requests.first_contact_person, collection_requests.second_contact_person, collection_requests.created_at,
+    collection_requests.id, collection_requests.producer_id, collection_requests.collector_id, collection_requests.request_date, collection_requests.pickup_time_stamp_id, collection_requests.location, collection_requests.administrative_level_1_location, collection_requests.lat, collection_requests.lng, collection_requests.pickup_date, collection_requests.status, collection_requests.first_contact_person, collection_requests.second_contact_person, collection_requests.created_at,
     champion.name AS aggregator_name,
     collector.name AS champion_name,
     secondcollector.name as second_collector_name
@@ -445,6 +455,7 @@ type GetAllPendingCollectionRequestsRow struct {
 	ProducerID                   int32           `json:"producer_id"`
 	CollectorID                  int32           `json:"collector_id"`
 	RequestDate                  time.Time       `json:"request_date"`
+	PickupTimeStampID            int32           `json:"pickup_time_stamp_id"`
 	Location                     sql.NullString  `json:"location"`
 	AdministrativeLevel1Location sql.NullString  `json:"administrative_level_1_location"`
 	Lat                          sql.NullFloat64 `json:"lat"`
@@ -473,6 +484,7 @@ func (q *Queries) GetAllPendingCollectionRequests(ctx context.Context) ([]GetAll
 			&i.ProducerID,
 			&i.CollectorID,
 			&i.RequestDate,
+			&i.PickupTimeStampID,
 			&i.Location,
 			&i.AdministrativeLevel1Location,
 			&i.Lat,
@@ -501,7 +513,7 @@ func (q *Queries) GetAllPendingCollectionRequests(ctx context.Context) ([]GetAll
 
 const getAllPendingConfirmationCollectionRequests = `-- name: GetAllPendingConfirmationCollectionRequests :many
 SELECT 
-    collection_requests.id, collection_requests.producer_id, collection_requests.collector_id, collection_requests.request_date, collection_requests.location, collection_requests.administrative_level_1_location, collection_requests.lat, collection_requests.lng, collection_requests.pickup_date, collection_requests.status, collection_requests.first_contact_person, collection_requests.second_contact_person, collection_requests.created_at,
+    collection_requests.id, collection_requests.producer_id, collection_requests.collector_id, collection_requests.request_date, collection_requests.pickup_time_stamp_id, collection_requests.location, collection_requests.administrative_level_1_location, collection_requests.lat, collection_requests.lng, collection_requests.pickup_date, collection_requests.status, collection_requests.first_contact_person, collection_requests.second_contact_person, collection_requests.created_at,
     champion.name AS aggregator_name,
     collector.name AS champion_name,
     secondcollector.name as second_collector_name
@@ -521,6 +533,7 @@ type GetAllPendingConfirmationCollectionRequestsRow struct {
 	ProducerID                   int32           `json:"producer_id"`
 	CollectorID                  int32           `json:"collector_id"`
 	RequestDate                  time.Time       `json:"request_date"`
+	PickupTimeStampID            int32           `json:"pickup_time_stamp_id"`
 	Location                     sql.NullString  `json:"location"`
 	AdministrativeLevel1Location sql.NullString  `json:"administrative_level_1_location"`
 	Lat                          sql.NullFloat64 `json:"lat"`
@@ -549,6 +562,7 @@ func (q *Queries) GetAllPendingConfirmationCollectionRequests(ctx context.Contex
 			&i.ProducerID,
 			&i.CollectorID,
 			&i.RequestDate,
+			&i.PickupTimeStampID,
 			&i.Location,
 			&i.AdministrativeLevel1Location,
 			&i.Lat,
@@ -577,7 +591,7 @@ func (q *Queries) GetAllPendingConfirmationCollectionRequests(ctx context.Contex
 
 const getAllProducerCompletedCollectionRequests = `-- name: GetAllProducerCompletedCollectionRequests :many
 SELECT
-    collection_requests.id, collection_requests.producer_id, collection_requests.collector_id, collection_requests.request_date, collection_requests.location, collection_requests.administrative_level_1_location, collection_requests.lat, collection_requests.lng, collection_requests.pickup_date, collection_requests.status, collection_requests.first_contact_person, collection_requests.second_contact_person, collection_requests.created_at,
+    collection_requests.id, collection_requests.producer_id, collection_requests.collector_id, collection_requests.request_date, collection_requests.pickup_time_stamp_id, collection_requests.location, collection_requests.administrative_level_1_location, collection_requests.lat, collection_requests.lng, collection_requests.pickup_date, collection_requests.status, collection_requests.first_contact_person, collection_requests.second_contact_person, collection_requests.created_at,
     collector.name AS collector_name,
     CAST(SUM(totals.weight) AS DECIMAL(10,2)) AS total_weight
 FROM
@@ -597,6 +611,7 @@ type GetAllProducerCompletedCollectionRequestsRow struct {
 	ProducerID                   int32           `json:"producer_id"`
 	CollectorID                  int32           `json:"collector_id"`
 	RequestDate                  time.Time       `json:"request_date"`
+	PickupTimeStampID            int32           `json:"pickup_time_stamp_id"`
 	Location                     sql.NullString  `json:"location"`
 	AdministrativeLevel1Location sql.NullString  `json:"administrative_level_1_location"`
 	Lat                          sql.NullFloat64 `json:"lat"`
@@ -624,6 +639,7 @@ func (q *Queries) GetAllProducerCompletedCollectionRequests(ctx context.Context,
 			&i.ProducerID,
 			&i.CollectorID,
 			&i.RequestDate,
+			&i.PickupTimeStampID,
 			&i.Location,
 			&i.AdministrativeLevel1Location,
 			&i.Lat,
@@ -651,7 +667,7 @@ func (q *Queries) GetAllProducerCompletedCollectionRequests(ctx context.Context,
 
 const getAllProducerPendingCollectionRequests = `-- name: GetAllProducerPendingCollectionRequests :many
 SELECT
-    collection_requests.id, collection_requests.producer_id, collection_requests.collector_id, collection_requests.request_date, collection_requests.location, collection_requests.administrative_level_1_location, collection_requests.lat, collection_requests.lng, collection_requests.pickup_date, collection_requests.status, collection_requests.first_contact_person, collection_requests.second_contact_person, collection_requests.created_at,
+    collection_requests.id, collection_requests.producer_id, collection_requests.collector_id, collection_requests.request_date, collection_requests.pickup_time_stamp_id, collection_requests.location, collection_requests.administrative_level_1_location, collection_requests.lat, collection_requests.lng, collection_requests.pickup_date, collection_requests.status, collection_requests.first_contact_person, collection_requests.second_contact_person, collection_requests.created_at,
     collector.name AS collector_name,
     CAST(SUM(totals.weight) AS DECIMAL(10,2)) AS total_weight
 FROM
@@ -671,6 +687,7 @@ type GetAllProducerPendingCollectionRequestsRow struct {
 	ProducerID                   int32           `json:"producer_id"`
 	CollectorID                  int32           `json:"collector_id"`
 	RequestDate                  time.Time       `json:"request_date"`
+	PickupTimeStampID            int32           `json:"pickup_time_stamp_id"`
 	Location                     sql.NullString  `json:"location"`
 	AdministrativeLevel1Location sql.NullString  `json:"administrative_level_1_location"`
 	Lat                          sql.NullFloat64 `json:"lat"`
@@ -698,6 +715,7 @@ func (q *Queries) GetAllProducerPendingCollectionRequests(ctx context.Context, p
 			&i.ProducerID,
 			&i.CollectorID,
 			&i.RequestDate,
+			&i.PickupTimeStampID,
 			&i.Location,
 			&i.AdministrativeLevel1Location,
 			&i.Lat,
@@ -725,7 +743,7 @@ func (q *Queries) GetAllProducerPendingCollectionRequests(ctx context.Context, p
 
 const getCollectionStats = `-- name: GetCollectionStats :many
 SELECT
-    collection_requests.id, collection_requests.producer_id, collection_requests.collector_id, collection_requests.request_date, collection_requests.location, collection_requests.administrative_level_1_location, collection_requests.lat, collection_requests.lng, collection_requests.pickup_date, collection_requests.status, collection_requests.first_contact_person, collection_requests.second_contact_person, collection_requests.created_at,
+    collection_requests.id, collection_requests.producer_id, collection_requests.collector_id, collection_requests.request_date, collection_requests.pickup_time_stamp_id, collection_requests.location, collection_requests.administrative_level_1_location, collection_requests.lat, collection_requests.lng, collection_requests.pickup_date, collection_requests.status, collection_requests.first_contact_person, collection_requests.second_contact_person, collection_requests.created_at,
     CAST(SUM(totals.weight) AS DECIMAL(10,2)) AS total_weight
 FROM
     collection_requests
@@ -742,6 +760,7 @@ type GetCollectionStatsRow struct {
 	ProducerID                   int32           `json:"producer_id"`
 	CollectorID                  int32           `json:"collector_id"`
 	RequestDate                  time.Time       `json:"request_date"`
+	PickupTimeStampID            int32           `json:"pickup_time_stamp_id"`
 	Location                     sql.NullString  `json:"location"`
 	AdministrativeLevel1Location sql.NullString  `json:"administrative_level_1_location"`
 	Lat                          sql.NullFloat64 `json:"lat"`
@@ -768,6 +787,7 @@ func (q *Queries) GetCollectionStats(ctx context.Context, producerID int32) ([]G
 			&i.ProducerID,
 			&i.CollectorID,
 			&i.RequestDate,
+			&i.PickupTimeStampID,
 			&i.Location,
 			&i.AdministrativeLevel1Location,
 			&i.Lat,
@@ -794,7 +814,7 @@ func (q *Queries) GetCollectionStats(ctx context.Context, producerID int32) ([]G
 
 const getLatestCollection = `-- name: GetLatestCollection :one
 SELECT
-    collection_requests.id, collection_requests.producer_id, collection_requests.collector_id, collection_requests.request_date, collection_requests.location, collection_requests.administrative_level_1_location, collection_requests.lat, collection_requests.lng, collection_requests.pickup_date, collection_requests.status, collection_requests.first_contact_person, collection_requests.second_contact_person, collection_requests.created_at,
+    collection_requests.id, collection_requests.producer_id, collection_requests.collector_id, collection_requests.request_date, collection_requests.pickup_time_stamp_id, collection_requests.location, collection_requests.administrative_level_1_location, collection_requests.lat, collection_requests.lng, collection_requests.pickup_date, collection_requests.status, collection_requests.first_contact_person, collection_requests.second_contact_person, collection_requests.created_at,
     collector.name AS collector_name,
     CAST(SUM(totals.weight) AS DECIMAL(10,2)) AS total_weight
 FROM
@@ -814,6 +834,7 @@ type GetLatestCollectionRow struct {
 	ProducerID                   int32           `json:"producer_id"`
 	CollectorID                  int32           `json:"collector_id"`
 	RequestDate                  time.Time       `json:"request_date"`
+	PickupTimeStampID            int32           `json:"pickup_time_stamp_id"`
 	Location                     sql.NullString  `json:"location"`
 	AdministrativeLevel1Location sql.NullString  `json:"administrative_level_1_location"`
 	Lat                          sql.NullFloat64 `json:"lat"`
@@ -835,6 +856,7 @@ func (q *Queries) GetLatestCollection(ctx context.Context, id int32) (GetLatestC
 		&i.ProducerID,
 		&i.CollectorID,
 		&i.RequestDate,
+		&i.PickupTimeStampID,
 		&i.Location,
 		&i.AdministrativeLevel1Location,
 		&i.Lat,
@@ -851,7 +873,7 @@ func (q *Queries) GetLatestCollection(ctx context.Context, id int32) (GetLatestC
 }
 
 const getProducerLatestCollectionId = `-- name: GetProducerLatestCollectionId :one
-SELECT id, producer_id, collector_id, request_date, location, administrative_level_1_location, lat, lng, pickup_date, status, first_contact_person, second_contact_person, created_at
+SELECT id, producer_id, collector_id, request_date, pickup_time_stamp_id, location, administrative_level_1_location, lat, lng, pickup_date, status, first_contact_person, second_contact_person, created_at
 FROM collection_requests
 WHERE producer_id = $1
 ORDER BY created_at DESC
@@ -866,6 +888,7 @@ func (q *Queries) GetProducerLatestCollectionId(ctx context.Context, producerID 
 		&i.ProducerID,
 		&i.CollectorID,
 		&i.RequestDate,
+		&i.PickupTimeStampID,
 		&i.Location,
 		&i.AdministrativeLevel1Location,
 		&i.Lat,
@@ -927,7 +950,7 @@ func (q *Queries) GetWasteItemsProducerData(ctx context.Context, producerID int3
 
 const insertNewCollectionRequest = `-- name: InsertNewCollectionRequest :exec
 
-insert into collection_requests( producer_id,collector_id,request_date,location,lat,lng,administrative_level_1_location,first_contact_person,status ) values ($1, $2, $3, $4, $5, $6, $7, $8, $9) returning id, producer_id, collector_id, request_date, location, administrative_level_1_location, lat, lng, pickup_date, status, first_contact_person, second_contact_person, created_at
+insert into collection_requests( producer_id,collector_id,request_date,location,lat,lng,administrative_level_1_location,first_contact_person,status ) values ($1, $2, $3, $4, $5, $6, $7, $8, $9) returning id, producer_id, collector_id, request_date, pickup_time_stamp_id, location, administrative_level_1_location, lat, lng, pickup_date, status, first_contact_person, second_contact_person, created_at
 `
 
 type InsertNewCollectionRequestParams struct {

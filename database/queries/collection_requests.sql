@@ -1,7 +1,7 @@
 -- collection_requests.sql
 
 -- name: InsertNewCollectionRequest :exec
-insert into collection_requests( producer_id,collector_id,request_date,location,lat,lng,administrative_level_1_location,first_contact_person,status ) values ($1, $2, $3, $4, $5, $6, $7, $8, $9) returning *;
+insert into collection_requests( producer_id,collector_id,request_date,pickup_time_stamp_id,location,lat,lng,administrative_level_1_location,first_contact_person,status ) values ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10) returning *;
 
 -- name: UpdateCollectionRequest :exec
 update collection_requests
@@ -15,6 +15,9 @@ update collection_requests set status = 2 where id = $1;
 
 -- name: CancelCollectionRequest :exec
 update collection_requests set status = 4 where id = $1;
+
+-- name: CompleteCollectionRequest :exec
+update collection_requests set status = 5 where id = $1;
 
 
 -- name: GetAllCollectionRequests :many
