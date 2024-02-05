@@ -984,7 +984,7 @@ func (aggregatorController AggregatorController) GetSuppliers(context *gin.Conte
 		limitOffset = fmt.Sprint(" LIMIT ", itemsPerPage, " OFFSET ", offset)
 	}
 	if companyID == "" {
-		companyQuery = fmt.Sprint(" and where company_id=", auth.UserCompanyId.Int64)
+		companyQuery = fmt.Sprint(" and  company_id=", auth.UserCompanyId.Int64)
 	} else {
 		companyQuery = " and company_id=" + companyID
 	}
@@ -1474,7 +1474,12 @@ func (aggregatorController AggregatorController) GetSales(context *gin.Context) 
 		searchQuery = " and (q.first_name ilike " + "'%" + search + "%'" + " or q.company_name ilike " + "'%" + search + "%'" + " or q.last_name ilike " + "'%" + search + "%'" + ")"
 	}
 	if itemsPerPage != "" && page != "" {
-		limitOffset = " LIMIT " + itemsPerPage + " OFFSET " + page
+		itemsPerPage, _ := strconv.Atoi(context.Query("ipp"))
+		page, _ := strconv.Atoi(context.Query("p"))
+
+		offset:=(page - 1) * itemsPerPage
+
+		limitOffset = fmt.Sprint(" LIMIT ", itemsPerPage, " OFFSET ", offset)
 	}
 	if companyID == "" {
 		companyQuery = fmt.Sprint(" and  q.company_id=", auth.UserCompanyId.Int64)
