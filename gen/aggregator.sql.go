@@ -105,8 +105,8 @@ type CreatePurchaseParams struct {
 	Ref         string                `json:"ref"`
 	CompanyID   int32                 `json:"company_id"`
 	SupplierID  int32                 `json:"supplier_id"`
-	TotalWeight sql.NullString        `json:"total_weight"`
-	TotalAmount sql.NullString        `json:"total_amount"`
+	TotalWeight sql.NullFloat64       `json:"total_weight"`
+	TotalAmount sql.NullFloat64       `json:"total_amount"`
 	Dump        pqtype.NullRawMessage `json:"dump"`
 }
 
@@ -138,12 +138,12 @@ insert into purchase_items(company_id,purchase_id,waste_type_id,weight,cost_per_
 `
 
 type CreatePurchaseItemParams struct {
-	CompanyID   int32          `json:"company_id"`
-	PurchaseID  int32          `json:"purchase_id"`
-	WasteTypeID int32          `json:"waste_type_id"`
-	Weight      sql.NullString `json:"weight"`
-	CostPerKg   sql.NullString `json:"cost_per_kg"`
-	TotalAmount string         `json:"total_amount"`
+	CompanyID   int32           `json:"company_id"`
+	PurchaseID  int32           `json:"purchase_id"`
+	WasteTypeID int32           `json:"waste_type_id"`
+	Weight      sql.NullFloat64 `json:"weight"`
+	CostPerKg   sql.NullFloat64 `json:"cost_per_kg"`
+	TotalAmount float64         `json:"total_amount"`
 }
 
 func (q *Queries) CreatePurchaseItem(ctx context.Context, arg CreatePurchaseItemParams) (PurchaseItem, error) {
@@ -176,8 +176,8 @@ type CreateSaleParams struct {
 	Ref         string                `json:"ref"`
 	CompanyID   int32                 `json:"company_id"`
 	BuyerID     int32                 `json:"buyer_id"`
-	TotalWeight sql.NullString        `json:"total_weight"`
-	TotalAmount sql.NullString        `json:"total_amount"`
+	TotalWeight sql.NullFloat64       `json:"total_weight"`
+	TotalAmount sql.NullFloat64       `json:"total_amount"`
 	Dump        pqtype.NullRawMessage `json:"dump"`
 }
 
@@ -209,12 +209,12 @@ insert into sale_items(company_id,sale_id,waste_type_id,weight,cost_per_kg,total
 `
 
 type CreateSaleItemParams struct {
-	CompanyID   int32          `json:"company_id"`
-	SaleID      int32          `json:"sale_id"`
-	WasteTypeID int32          `json:"waste_type_id"`
-	Weight      sql.NullString `json:"weight"`
-	CostPerKg   sql.NullString `json:"cost_per_kg"`
-	TotalAmount string         `json:"total_amount"`
+	CompanyID   int32           `json:"company_id"`
+	SaleID      int32           `json:"sale_id"`
+	WasteTypeID int32           `json:"waste_type_id"`
+	Weight      sql.NullFloat64 `json:"weight"`
+	CostPerKg   sql.NullFloat64 `json:"cost_per_kg"`
+	TotalAmount float64         `json:"total_amount"`
 }
 
 func (q *Queries) CreateSaleItem(ctx context.Context, arg CreateSaleItemParams) (SaleItem, error) {

@@ -1196,8 +1196,8 @@ func PurchaseWasteFromSupplierCash(param PurchaseWasteParam, auth *models.User, 
 		Ref:         ref,
 		CompanyID:   int32(auth.UserCompanyId.Int64),
 		SupplierID:  param.SupplierID,
-		TotalWeight: null.StringFrom(fmt.Sprint(totalWeight)).NullString,
-		TotalAmount: null.StringFrom(fmt.Sprint(totalAmount)).NullString,
+		TotalWeight: null.FloatFrom(totalWeight).NullFloat64,
+		TotalAmount: null.FloatFrom(totalAmount).NullFloat64,
 	})
 	if err != nil {
 		return err
@@ -1209,9 +1209,9 @@ func PurchaseWasteFromSupplierCash(param PurchaseWasteParam, auth *models.User, 
 			CompanyID:   int32(auth.UserCompanyId.Int64),
 			PurchaseID:  purchase.ID,
 			WasteTypeID: v.ID,
-			Weight:      null.StringFrom(fmt.Sprint(v.Weight)).NullString,
-			CostPerKg:   null.StringFrom(fmt.Sprint(v.CostPerKG)).NullString,
-			TotalAmount: fmt.Sprint(v.Weight * v.CostPerKG),
+			Weight:      null.FloatFrom(v.Weight).NullFloat64,
+			CostPerKg:   null.FloatFrom(v.CostPerKG).NullFloat64,
+			TotalAmount: null.FloatFrom(v.Weight * v.CostPerKG).Float64,
 		})
 		if err != nil {
 			errorSavingPurchaseItem = true
@@ -1391,8 +1391,8 @@ func SellWasteToBuyerCash(param SellWasteParam, auth *models.User, date sql.Null
 		Ref:         ref,
 		CompanyID:   int32(auth.UserCompanyId.Int64),
 		BuyerID:     param.BuyerID,
-		TotalWeight: null.StringFrom(fmt.Sprint(totalWeight)).NullString,
-		TotalAmount: null.StringFrom(fmt.Sprint(totalAmount)).NullString,
+		TotalWeight: null.FloatFrom(totalWeight).NullFloat64,
+		TotalAmount: null.FloatFrom(totalAmount).NullFloat64,
 	})
 	if err != nil {
 		return err
@@ -1404,9 +1404,9 @@ func SellWasteToBuyerCash(param SellWasteParam, auth *models.User, date sql.Null
 			CompanyID:   int32(auth.UserCompanyId.Int64),
 			SaleID:      sale.ID,
 			WasteTypeID: v.ID,
-			Weight:      null.StringFrom(fmt.Sprint(v.Weight)).NullString,
-			CostPerKg:   null.StringFrom(fmt.Sprint(v.CostPerKG)).NullString,
-			TotalAmount: fmt.Sprint(v.Weight * v.CostPerKG),
+			Weight:      null.FloatFrom(v.Weight).NullFloat64,
+			CostPerKg:   null.FloatFrom(v.CostPerKG).NullFloat64,
+			TotalAmount: v.Weight * v.CostPerKG,
 		})
 		if err != nil {
 			errorSavingSaleItem = true
@@ -1519,6 +1519,16 @@ func (aggregatorController AggregatorController) GetSales(context *gin.Context) 
 		})
 		return
 	}
+	
+	for _, v := range results {
+		id,_:=v["id"]
+		//fmt.Println(id)
+		items, _ := utils.Select(gen.REPO.DB, fmt.Sprint("select * from sale_items where sale_items.sale_id=",id))
+		//fmt.Println(items)
+		v["items"]=items
+	}
+
+
 	context.JSON(http.StatusOK, gin.H{
 		"error":   false,
 		"content": results,

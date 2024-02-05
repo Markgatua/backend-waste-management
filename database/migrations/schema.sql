@@ -314,8 +314,8 @@ CREATE TABLE sales(
   buyer_id int not null,
   FOREIGN Key (buyer_id) REFERENCES buyers(id),
   FOREIGN Key (company_id) REFERENCES companies(id),
-  total_weight DECIMAL NULL, --in kgs
-  total_amount DECIMAL NULL, --ksh
+  total_weight FLOAT NULL, --in kgs
+  total_amount FLOAT NULL, --ksh
   date TIMESTAMP without time zone NOT NULL DEFAULT NOW(),
   dump json NULL
 );
@@ -327,8 +327,8 @@ CREATE TABLE purchases(
   supplier_id int not null,
   FOREIGN Key (supplier_id) REFERENCES suppliers(id),
   FOREIGN Key (company_id) REFERENCES companies(id),
-  total_weight DECIMAL NULL, --in kgs
-  total_amount DECIMAL NULL, --ksh
+  total_weight FLOAT NULL, --in kgs
+  total_amount FLOAT NULL, --ksh
   date TIMESTAMP without time zone NOT NULL DEFAULT NOW(),
   dump json NULL
 );
@@ -341,9 +341,9 @@ CREATE TABLE purchase_items(
   waste_type_id INTEGER NOT NULL,
   FOREIGN Key (purchase_id) REFERENCES purchases(id) on delete cascade,
   FOREIGN Key (waste_type_id) REFERENCES waste_types(id),
-  weight DECIMAL NULL,
-  cost_per_kg DECIMAL NULL,
-  total_amount DECIMAL NOT NULL
+  weight FLOAT NULL,
+  cost_per_kg FLOAT NULL,
+  total_amount FLOAT NOT NULL
 );
 
 CREATE TABLE sale_items(
@@ -354,9 +354,9 @@ CREATE TABLE sale_items(
   waste_type_id INTEGER NOT NULL,
   FOREIGN Key (sale_id) REFERENCES sales(id) on delete cascade,
   FOREIGN Key (waste_type_id) REFERENCES waste_types(id),
-  weight DECIMAL NULL,
-  cost_per_kg DECIMAL NULL,
-  total_amount DECIMAL NOT NULL
+  weight FLOAT NULL,
+  cost_per_kg FLOAT NULL,
+  total_amount FLOAT NOT NULL
 );
 
 CREATE TABLE purchase_transactions(

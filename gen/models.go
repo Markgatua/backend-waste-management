@@ -177,20 +177,20 @@ type Purchase struct {
 	Ref         string                `json:"ref"`
 	CompanyID   int32                 `json:"company_id"`
 	SupplierID  int32                 `json:"supplier_id"`
-	TotalWeight sql.NullString        `json:"total_weight"`
-	TotalAmount sql.NullString        `json:"total_amount"`
+	TotalWeight sql.NullFloat64       `json:"total_weight"`
+	TotalAmount sql.NullFloat64       `json:"total_amount"`
 	Date        time.Time             `json:"date"`
 	Dump        pqtype.NullRawMessage `json:"dump"`
 }
 
 type PurchaseItem struct {
-	ID          int32          `json:"id"`
-	CompanyID   int32          `json:"company_id"`
-	PurchaseID  int32          `json:"purchase_id"`
-	WasteTypeID int32          `json:"waste_type_id"`
-	Weight      sql.NullString `json:"weight"`
-	CostPerKg   sql.NullString `json:"cost_per_kg"`
-	TotalAmount string         `json:"total_amount"`
+	ID          int32           `json:"id"`
+	CompanyID   int32           `json:"company_id"`
+	PurchaseID  int32           `json:"purchase_id"`
+	WasteTypeID int32           `json:"waste_type_id"`
+	Weight      sql.NullFloat64 `json:"weight"`
+	CostPerKg   sql.NullFloat64 `json:"cost_per_kg"`
+	TotalAmount float64         `json:"total_amount"`
 }
 
 type PurchaseTransaction struct {
@@ -233,20 +233,20 @@ type Sale struct {
 	Ref         string                `json:"ref"`
 	CompanyID   int32                 `json:"company_id"`
 	BuyerID     int32                 `json:"buyer_id"`
-	TotalWeight sql.NullString        `json:"total_weight"`
-	TotalAmount sql.NullString        `json:"total_amount"`
+	TotalWeight sql.NullFloat64       `json:"total_weight"`
+	TotalAmount sql.NullFloat64       `json:"total_amount"`
 	Date        time.Time             `json:"date"`
 	Dump        pqtype.NullRawMessage `json:"dump"`
 }
 
 type SaleItem struct {
-	ID          int32          `json:"id"`
-	CompanyID   int32          `json:"company_id"`
-	SaleID      int32          `json:"sale_id"`
-	WasteTypeID int32          `json:"waste_type_id"`
-	Weight      sql.NullString `json:"weight"`
-	CostPerKg   sql.NullString `json:"cost_per_kg"`
-	TotalAmount string         `json:"total_amount"`
+	ID          int32           `json:"id"`
+	CompanyID   int32           `json:"company_id"`
+	SaleID      int32           `json:"sale_id"`
+	WasteTypeID int32           `json:"waste_type_id"`
+	Weight      sql.NullFloat64 `json:"weight"`
+	CostPerKg   sql.NullFloat64 `json:"cost_per_kg"`
+	TotalAmount float64         `json:"total_amount"`
 }
 
 type SaleTransaction struct {
