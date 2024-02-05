@@ -938,9 +938,7 @@ func (aggregatorController AggregatorController) GetBuyers(context *gin.Context)
 	 ` + searchQuery + companyQuery +" order by created_at "+ limitOffset
 
 	var totalCount = 0
-
 	gen.REPO.DB.Get(&totalCount, "select count(*) from buyers where created_at is not null"+companyQuery)
-
 	logger.Log("AggregatorController/GetBuyers", query, logger.LOG_LEVEL_INFO)
 
 	results, err := utils.Select(gen.REPO.DB, query)
@@ -1471,7 +1469,7 @@ func (aggregatorController AggregatorController) GetSales(context *gin.Context) 
 	limitOffset := ""
 
 	if search != "" {
-		searchQuery = " and (q.first_name ilike " + "'%" + search + "%'" + " or q.company_name ilike " + "'%" + search + "%'" + " or q.last_name ilike " + "'%" + search + "%'" + ")"
+		searchQuery = " and (q.first_name ilike " + "'%" + search + "%'" + " or q.company_name ilike " + "'%" + search + "%'" + " or q.last_name ilike " + "'%" + search + "%'"+ " or q.ref ilike " + "'%" + search + "%'" + ")"
 	}
 	if itemsPerPage != "" && page != "" {
 		itemsPerPage, _ := strconv.Atoi(context.Query("ipp"))
@@ -1508,9 +1506,14 @@ func (aggregatorController AggregatorController) GetSales(context *gin.Context) 
 
 		inner join buyers on buyers.id=sales.buyer_id
 		inner join companies on companies.id = sales.company_id
-	 ) as q where q.sale_date is not null` + dateRangeQuery + searchQuery + companyQuery + limitOffset
+	 ) as q where q.sale_date is not null` + dateRangeQuery + searchQuery + companyQuery +" order by q.sale_date desc "+ limitOffset
 
+	var totalCount = 0
+	err:=gen.REPO.DB.Get(&totalCount, fmt.Sprint("select count(*) from sales where date is not null and company_id=", auth.UserCompanyId.Int64))
+
+	//fmt.Println(err.Error())
 	logger.Log("AggregatorController/GetSales", query, logger.LOG_LEVEL_INFO)
+	
 	results, err := utils.Select(gen.REPO.DB, query)
 	if err != nil {
 		context.JSON(http.StatusUnprocessableEntity, gin.H{
@@ -1528,10 +1531,10 @@ func (aggregatorController AggregatorController) GetSales(context *gin.Context) 
 		v["items"]=items
 	}
 
-
 	context.JSON(http.StatusOK, gin.H{
 		"error":   false,
 		"content": results,
+		"total_count": totalCount,
 	})
 }
 
@@ -1553,7 +1556,7 @@ func (aggregatorController AggregatorController) GetPurchases(context *gin.Conte
 	limitOffset := ""
 
 	if search != "" {
-		searchQuery = " and (q.first_name ilike " + "'%" + search + "%'" + " or q.company_name ilike " + "'%" + search + "%'" + " or q.last_name ilike " + "'%" + search + "%'" + ")"
+		searchQuery = " and (q.first_name ilike " + "'%" + search + "%'" + " or q.company_name ilike " + "'%" + search + "%'" + " or q.last_name ilike " + "'%" + search + "%'" + " or q.ref ilike " + "'%" + search + "%'" + ")"
 	}
 	if itemsPerPage != "" && page != "" {
 		limitOffset = " LIMIT " + itemsPerPage + " OFFSET " + page
@@ -1585,8 +1588,11 @@ func (aggregatorController AggregatorController) GetPurchases(context *gin.Conte
 
 		inner join suppliers on suppliers.id=purchases.supplier_id
 		inner join companies on companies.id = purchases.company_id
-	 ) as q where q.purchase_date is not null` + dateRangeQuery + searchQuery + companyQuery + limitOffset
+	 ) as q where q.purchase_date is not null` + dateRangeQuery + searchQuery + companyQuery +" order by q.purchase_date desc "+ limitOffset
 
+	 var totalCount = 0
+	 err:=gen.REPO.DB.Get(&totalCount, fmt.Sprint("select count(*) from purchases where date is not null and company_id=", auth.UserCompanyId.Int64))
+ 
 	logger.Log("AggregatorController/GetPurchases", query, logger.LOG_LEVEL_INFO)
 	results, err := utils.Select(gen.REPO.DB, query)
 	if err != nil {
@@ -1596,8 +1602,16 @@ func (aggregatorController AggregatorController) GetPurchases(context *gin.Conte
 		})
 		return
 	}
+	for _, v := range results {
+		id,_:=v["id"]
+		//fmt.Println(id)
+		items, _ := utils.Select(gen.REPO.DB, fmt.Sprint("select *,waste_types.name as waste_name from purchase_items join waste_types on waste_types.id=purchase_items.waste_type_id where purchase_items.purchase_id=",id))
+		//fmt.Println(items)
+		v["items"]=items
+	}
 	context.JSON(http.StatusOK, gin.H{
 		"error":   false,
 		"content": results,
+		"total_count": totalCount,
 	})
 }
