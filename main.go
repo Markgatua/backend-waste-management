@@ -179,10 +179,10 @@ func runProgram() {
 	router.GET("aggregator/purchases", middlewares.PermissionBlockerMiddleware("view_purchase_history"), controllers.AggregatorController{}.GetPurchases)
 	//--------------------------------------------------------------------------------------------
 
+
 	//----------------------------inventory-------------------------------------------------------------
 	router.POST("aggregator/make_inventory_adjustment", middlewares.PermissionBlockerMiddleware("make_inventory_adjustment"), controllers.AggregatorController{}.MakeInventoryAdjustments)
-	router.POST("aggregator/view_inventory", middlewares.PermissionBlockerMiddleware("make_inventory_adjustment"), controllers.AggregatorController{}.ViewInventory)
-
+	router.POST("aggregator/view_inventory", middlewares.PermissionBlockerMiddleware("view_inventory"), controllers.AggregatorController{}.ViewInventory)
 	//--------------------------------------------------------------------------------------------------
 
 	//---------------------------Aggregator ------------------------------------------------------
