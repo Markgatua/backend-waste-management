@@ -27,6 +27,7 @@ type InsertNewCollectionRequestParams struct {
 	Location       models.Location `json:"location" binding:"required"`
 	ContactPerson  string `json:"contact_person"  binding:"required"`
 	Status 			int32 `json:"status"  binding:"required"`
+	PickupTimeStampID int32 `json:"pickup_time_stamp_id"  binding:"required"`
 }
 
 type InsertNewNotificationRequestParams struct {
@@ -74,6 +75,7 @@ func (requestCollectionController RequestCollectionController) InsertNewCollecti
 		ProducerID: params.ProducerID,
 		CollectorID: championCID,
 		RequestDate: params.RequestDate,
+		PickupTimeStampID: params.PickupTimeStampID,
 		Location: null.StringFrom(params.Location.Location).NullString,
 		AdministrativeLevel1Location: null.StringFrom(params.Location.AdministrativeAreaLevel1).NullString,
 		Lat: null.FloatFrom(params.Location.LatLng.Lat).NullFloat64,
@@ -574,7 +576,7 @@ func (requestCollectionController RequestCollectionController) GetAggregatorNewR
 
 		context.JSON(http.StatusUnprocessableEntity, gin.H{
 			"error":   true,
-			"message": "Failed to Fetch Aggregator New Requests",
+			"message": insertError,
 		})
 		return
 	}else{
@@ -584,6 +586,37 @@ func (requestCollectionController RequestCollectionController) GetAggregatorNewR
 	context.JSON(http.StatusOK, gin.H{
 		"error":   false,
 		"message": "Successfully Fetched Aggregators new Requests",
+		"data": data,
+	})
+}
+
+func (requestCollectionController RequestCollectionController) GetMyLatestRequests(context *gin.Context){
+
+	id, _ := context.Params.Get("id")
+	var id32 int32
+	fmt.Sscan(id, &id32)
+
+	fmt.Println("********************");
+	fmt.Println(id32);
+
+	
+	data,insertError := gen.REPO.GetMyLatestRequests(context,id32)
+
+	if insertError != nil {
+		logger.Log("RequestCollectionController",insertError.Error(),logger.LOG_LEVEL_ERROR)
+
+		context.JSON(http.StatusUnprocessableEntity, gin.H{
+			"error":   true,
+			"message": insertError,
+		})
+		return
+	}else{
+		//logger.Log("RequestCollectionController",insertError.Error(),logger.LOG_LEVEL_ERROR)
+	}
+
+	context.JSON(http.StatusOK, gin.H{
+		"error":   false,
+		"message": "Successfully My new Requests",
 		"data": data,
 	})
 }

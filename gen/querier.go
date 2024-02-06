@@ -18,6 +18,7 @@ type Querier interface {
 	CancelCollectionRequest(ctx context.Context, id int32) error
 	CheckSubCountiesDuplicate(ctx context.Context, name string) (int64, error)
 	CollectionWeightTotals(ctx context.Context, producerID int32) (CollectionWeightTotalsRow, error)
+	CompleteCollectionRequest(ctx context.Context, id int32) error
 	ConfirmCollectionRequest(ctx context.Context, id int32) error
 	CreateCountry(ctx context.Context, arg CreateCountryParams) error
 	CreateMainOrganizationAdmin(ctx context.Context, arg CreateMainOrganizationAdminParams) error
@@ -74,6 +75,7 @@ type Querier interface {
 	GetMainOrganizationUser(ctx context.Context, id int32) (User, error)
 	GetMainOrganizationUserByEmail(ctx context.Context, email sql.NullString) (User, error)
 	GetMainWasteTypes(ctx context.Context) ([]GetMainWasteTypesRow, error)
+	GetMyLatestRequests(ctx context.Context, producerID int32) ([]GetMyLatestRequestsRow, error)
 	GetMyNotifications(ctx context.Context, userID int32) ([]Notification, error)
 	GetOneWasteType(ctx context.Context, id int32) (GetOneWasteTypeRow, error)
 	GetOrganization(ctx context.Context, id int32) (GetOrganizationRow, error)
