@@ -155,6 +155,8 @@ func runProgram() {
 	router.PUT("supplier/update", middlewares.PermissionBlockerMiddleware("edit_supplier"), controllers.AggregatorController{}.UpdateSupplier)
 	router.GET("suppliers", middlewares.PermissionBlockerMiddleware("view_supplier"), controllers.AggregatorController{}.GetSuppliers)
 	router.DELETE("supplier/delete/:id", middlewares.PermissionBlockerMiddleware("delete_supplier"), controllers.AggregatorController{}.DeleteSupplier)
+	router.PUT("/supplier/set_active_inactive_status", middlewares.PermissionBlockerMiddleware("edit_supplier"), controllers.AggregatorController{}.SetSupplierActiveInActiveStatus)
+
 	//-------------------------------------------------------------------------------------------
 
 	//---------------------------organization----------------------------------------------------
