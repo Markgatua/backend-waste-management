@@ -1514,7 +1514,7 @@ func (controller AggregatorController) ViewInventory(context *gin.Context) {
 	companyQuery := " and  q.company_id=" + companyID
 
 	if search != "" {
-		searchQuery = " and (q.company_name ilike " + "'%" + search + "%'" + " or q.waste_name ilike " + "'%" + search + "%'" + " or q.total_weight ilike " + "'%" + search + "%'" + " or q.id ilike " + "'%" + search + "%'" + ")"
+		searchQuery = " and (q.company_name ilike " + "'%" + search + "%'" + " or q.waste_name ilike " + "'%" + search + "%'" + ")"
 	}
 	if itemsPerPage != "" && page != "" {
 		itemsPerPage, _ := strconv.Atoi(context.Query("ipp"))
@@ -1665,7 +1665,6 @@ func (aggregatorController AggregatorController) GetUsers(context *gin.Context) 
 	//sortBy := context.Query("sort_by")
 	//orderBy := context.Query("order_by")
 	companyID := context.Query("cid")
-	
 
 	searchQuery := ""
 	companyQuery := ""
@@ -1679,10 +1678,10 @@ func (aggregatorController AggregatorController) GetUsers(context *gin.Context) 
 		limitOffset = " LIMIT " + itemsPerPage + " OFFSET " + page
 	}
 	if companyID == "" {
-		companyQuery = fmt.Sprint(" and  q.company_id=", auth.UserCompanyId.Int64)
-	} else {
-		companyQuery = " and  q.company_id=" + companyID
+		companyID = fmt.Sprint(" and  q.user_company_id=", auth.UserCompanyId.Int64)
 	}
+
+	companyQuery = " and  q.user_company_id=" + companyID
 	
 	query := `
 	 select * from 
@@ -1697,6 +1696,7 @@ func (aggregatorController AggregatorController) GetUsers(context *gin.Context) 
 		users.calling_code,
 		users.phone,
 		users.role_id,
+		users.created_at,
 		roles.name as role_name
 
 		from users
@@ -1704,11 +1704,14 @@ func (aggregatorController AggregatorController) GetUsers(context *gin.Context) 
 		inner join roles on users.role_id=roles.id
 		inner join companies on companies.id=users.user_company_id
 
-	 ) as q where q.created_at is not null` + searchQuery + companyQuery + " order by q.created_at desc " + limitOffset
+	 ) as q where q.created_at is not null and q.role_id!=3` + searchQuery + companyQuery + " order by q.created_at desc " + limitOffset
 
 	var totalCount = 0
-	err := gen.REPO.DB.Get(&totalCount, fmt.Sprint("select count(*) from users where date is not null and company_id=", auth.UserCompanyId.Int64))
+	err := gen.REPO.DB.Get(&totalCount, fmt.Sprint("select count(*) from users where created_at is not null and users.role_id!=3 and user_company_id=",companyID))
 
+	if err!=nil{
+		logger.Log("AggregatorController/GetUsers",err.Error(),logger.LOG_LEVEL_ERROR)
+	}
 	logger.Log("AggregatorController/GetUsers", query, logger.LOG_LEVEL_INFO)
 	results, err := utils.Select(gen.REPO.DB, query)
 	if err != nil {
@@ -1718,7 +1721,7 @@ func (aggregatorController AggregatorController) GetUsers(context *gin.Context) 
 		})
 		return
 	}
-	
+
 	context.JSON(http.StatusOK, gin.H{
 		"error":       false,
 		"content":     results,
