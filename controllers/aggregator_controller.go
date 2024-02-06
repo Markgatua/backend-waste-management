@@ -1006,6 +1006,10 @@ func (aggregatorController AggregatorController) GetSuppliers(context *gin.Conte
 
 	logger.Log("AggregatorController/GetSuppliers", query, logger.LOG_LEVEL_INFO)
 
+	var totalCount = 0
+	gen.REPO.DB.Get(&totalCount, "select count(*) from suppliers where created_at is not null"+companyQuery)
+
+
 	results, err := utils.Select(gen.REPO.DB, query)
 	if err != nil {
 		context.JSON(http.StatusUnprocessableEntity, gin.H{
@@ -1016,6 +1020,7 @@ func (aggregatorController AggregatorController) GetSuppliers(context *gin.Conte
 	}
 	context.JSON(http.StatusOK, gin.H{
 		"error":   false,
+		"total_count": totalCount,
 		"content": results,
 	})
 }
