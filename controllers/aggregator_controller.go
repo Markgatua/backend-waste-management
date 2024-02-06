@@ -933,7 +933,7 @@ func (aggregatorController AggregatorController) GetBuyers(context *gin.Context)
 		buyers.calling_code,
 		buyers.phone
 		from buyers 
-		inner join countries on countries.id = buyers.country_id
+		left join countries on countries.id = buyers.country_id
 		where created_at is not null
 	 ` + searchQuery + companyQuery +" order by created_at "+ limitOffset
 
@@ -999,7 +999,7 @@ func (aggregatorController AggregatorController) GetSuppliers(context *gin.Conte
 		suppliers.calling_code,
 		suppliers.phone
 		from suppliers
-		inner join countries on countries.id = suppliers.country_id
+		left join countries on countries.id = suppliers.country_id
 
 		where created_at is not null
 	 ` + searchQuery + companyQuery + " order by created_at " + limitOffset
@@ -1008,7 +1008,6 @@ func (aggregatorController AggregatorController) GetSuppliers(context *gin.Conte
 
 	var totalCount = 0
 	gen.REPO.DB.Get(&totalCount, "select count(*) from suppliers where created_at is not null"+companyQuery)
-
 
 	results, err := utils.Select(gen.REPO.DB, query)
 	if err != nil {
