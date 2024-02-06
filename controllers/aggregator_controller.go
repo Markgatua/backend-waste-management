@@ -1534,10 +1534,13 @@ func (controller AggregatorController) ViewInventory(context *gin.Context) {
 		inventory.waste_type_id,
 		inventory.total_weight,
 		waste_types.name as waste_name,
-		companies.name as company_name
+		companies.name as company_name,
+
+		coalesce(aggregator_waste_types.alert_level, 0) as alert_level
 		
 		from inventory
 
+		left join aggregator_waste_types on aggregator_waste_types.waste_id = inventory.waste_type_id and aggregator_waste_types.aggregator_id=inventory.company_id
 		inner join waste_types on waste_types.id=inventory.waste_type_id
 		inner join companies on companies.id = inventory.company_id
 	 ) as q where q.id is not null` + searchQuery + companyQuery + " order by q.id desc " + limitOffset
