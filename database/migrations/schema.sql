@@ -234,7 +234,7 @@ CREATE TABLE aggregator_waste_types(
   id SERIAL PRIMARY KEY,
   aggregator_id INTEGER NOT NULL,
   waste_id INTEGER NOT NULL,
-  alert_level FLOAT NULL
+  alert_level FLOAT NULL,
   FOREIGN Key (aggregator_id) REFERENCES companies(id),
   FOREIGN Key (waste_id) REFERENCES waste_types(id),
   UNIQUE(aggregator_id,waste_id)

@@ -4,4 +4,4 @@ atlas schema inspect -u "mysql://root:MysQl1998@localhost:3306/kmtc" --format '{
 
 atlas schema inspect -u "mysql://phpmyadmin:`Phpmyadmin_123#`@localhost:3306/kmtc">kmtc.hcl
 
- atlas schema apply --env "local"
+atlas schema apply --env "local"
