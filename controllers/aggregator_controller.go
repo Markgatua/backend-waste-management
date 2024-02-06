@@ -1678,10 +1678,10 @@ func (aggregatorController AggregatorController) GetUsers(context *gin.Context) 
 		limitOffset = " LIMIT " + itemsPerPage + " OFFSET " + page
 	}
 	if companyID == "" {
-		companyID = fmt.Sprint(" and  q.user_company_id=", auth.UserCompanyId.Int64)
+		companyID = fmt.Sprint(auth.UserCompanyId.Int64)
 	}
 
-	companyQuery = " and  q.user_company_id=" + companyID
+	companyQuery = " and q.user_company_id=" + companyID
 	
 	query := `
 	 select * from 
@@ -1702,9 +1702,8 @@ func (aggregatorController AggregatorController) GetUsers(context *gin.Context) 
 		from users
 
 		inner join roles on users.role_id=roles.id
-		inner join companies on companies.id=users.user_company_id
 
-	 ) as q where q.created_at is not null and q.role_id!=3` + searchQuery + companyQuery + " order by q.created_at desc " + limitOffset
+	 ) as q where q.created_at is not null and q.role_id!=3 ` + searchQuery + companyQuery + " order by q.created_at desc " + limitOffset
 
 	var totalCount = 0
 	err := gen.REPO.DB.Get(&totalCount, fmt.Sprint("select count(*) from users where created_at is not null and users.role_id!=3 and user_company_id=",companyID))
