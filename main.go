@@ -181,6 +181,8 @@ func runProgram() {
 
 	//----------------------------inventory-------------------------------------------------------------
 	router.POST("aggregator/make_inventory_adjustment", middlewares.PermissionBlockerMiddleware("make_inventory_adjustment"), controllers.AggregatorController{}.MakeInventoryAdjustments)
+	router.POST("aggregator/view_inventory", middlewares.PermissionBlockerMiddleware("make_inventory_adjustment"), controllers.AggregatorController{}.ViewInventory)
+
 	//--------------------------------------------------------------------------------------------------
 
 	//---------------------------Aggregator ------------------------------------------------------
