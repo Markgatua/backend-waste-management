@@ -1061,7 +1061,7 @@ func (aggregatorController AggregatorController) MakeInventoryAdjustments(contex
 						WasteTypeID: sql.NullInt32{Int32: v.ID, Valid: true},
 						CompanyID:   int32(auth.UserCompanyId.Int64),
 					})
-					currentQuantity, _ := strconv.ParseFloat(strings.TrimSpace(item.TotalWeight), 64)
+					currentQuantity:=item.TotalWeight
 					if currentQuantity-v.Adjustment < 0 {
 						inventoryErrors = append(inventoryErrors, fmt.Sprint("Invalid new total weight for waste ", wasteItem.Name, " new total weight will be ", currentQuantity-v.Adjustment))
 					}
@@ -1089,7 +1089,7 @@ func (aggregatorController AggregatorController) MakeInventoryAdjustments(contex
 				err = gen.REPO.InsertToInventory(context, gen.InsertToInventoryParams{
 					WasteTypeID: sql.NullInt32{Int32: v.ID, Valid: true},
 					CompanyID:   int32(auth.UserCompanyId.Int64),
-					TotalWeight: fmt.Sprint(v.Adjustment),
+					TotalWeight: v.Adjustment,
 				})
 				if err != nil {
 					logger.Log("Aggregator/MakeAdjustment", err.Error(), logger.LOG_LEVEL_ERROR)
@@ -1101,13 +1101,13 @@ func (aggregatorController AggregatorController) MakeInventoryAdjustments(contex
 					CompanyID:   int32(auth.UserCompanyId.Int64),
 				})
 
-				currentQuantity, _ := strconv.ParseFloat(strings.TrimSpace(item.TotalWeight), 64)
+				currentQuantity:=item.TotalWeight
 				if v.AdjustmentType == "negative" {
 					remainingWeight := currentQuantity - v.Adjustment
 					logger.Log("Aggregator/MakeAdjustment", fmt.Sprint("[Negative adjustment] remaining weight ", remainingWeight), logger.LOG_LEVEL_INFO)
 
 					err = gen.REPO.UpdateInventoryItem(context, gen.UpdateInventoryItemParams{
-						TotalWeight: fmt.Sprint(remainingWeight),
+						TotalWeight: remainingWeight,
 						ID:          item.ID,
 					})
 
@@ -1118,7 +1118,7 @@ func (aggregatorController AggregatorController) MakeInventoryAdjustments(contex
 					remainingWeight := currentQuantity + v.Adjustment
 					logger.Log("Aggregator/MakeAdjustment", fmt.Sprint("[positive adjustment] remaining weight ", remainingWeight, "-", v.ID), logger.LOG_LEVEL_INFO)
 					err = gen.REPO.UpdateInventoryItem(context, gen.UpdateInventoryItemParams{
-						TotalWeight: fmt.Sprint(remainingWeight),
+						TotalWeight: remainingWeight,
 						ID:          item.ID,
 					})
 					if err != nil {
@@ -1245,7 +1245,7 @@ func PurchaseWasteFromSupplierCash(param PurchaseWasteParam, auth *models.User, 
 
 		if err != nil && err == sql.ErrNoRows {
 			gen.REPO.InsertToInventory(context.Background(), gen.InsertToInventoryParams{
-				TotalWeight: fmt.Sprint(v.Weight),
+				TotalWeight: v.Weight,
 				CompanyID:   int32(auth.UserCompanyId.Int64),
 				WasteTypeID: sql.NullInt32{Int32: v.ID, Valid: true},
 			})
@@ -1253,12 +1253,12 @@ func PurchaseWasteFromSupplierCash(param PurchaseWasteParam, auth *models.User, 
 			//errorSavingInventory = true
 			logger.Log("AggregatorController/PurchaseWasteFromSupplierCash", fmt.Sprint("Error saving to inventory :: ", err.Error()), logger.LOG_LEVEL_ERROR)
 		} else {
-			currentQuantity, _ := strconv.ParseFloat(strings.TrimSpace(item.TotalWeight), 64)
+			currentQuantity:= item.TotalWeight
 
 			var remainingWeight = currentQuantity + v.Weight
 			//update with the remaining weight
 			gen.REPO.UpdateInventoryItem(context.Background(), gen.UpdateInventoryItemParams{
-				TotalWeight: fmt.Sprint(remainingWeight),
+				TotalWeight: remainingWeight,
 				ID:          item.ID,
 			})
 		}
@@ -1406,7 +1406,7 @@ func SellWasteToBuyerCash(param SellWasteParam, auth *models.User, date sql.Null
 					WasteTypeID: sql.NullInt32{Int32: v.ID, Valid: true},
 					CompanyID:   int32(auth.UserCompanyId.Int64),
 				})
-				currentQuantity, _ := strconv.ParseFloat(strings.TrimSpace(item.TotalWeight), 64)
+				currentQuantity := item.TotalWeight// strconv.ParseFloat(strings.TrimSpace(item.TotalWeight), 64)
 				if currentQuantity-v.Weight < 0 {
 					inventoryErrors = append(inventoryErrors, fmt.Sprint("Not enough items in the inventory for waste item ", wasteItem.Name, " current quantity is ", currentQuantity, " Kgs requested quantity is ", totalWeight, " kgs"))
 				}
@@ -1469,12 +1469,12 @@ func SellWasteToBuyerCash(param SellWasteParam, auth *models.User, date sql.Null
 				WasteTypeID: sql.NullInt32{Int32: v.ID, Valid: true},
 				CompanyID:   int32(auth.UserCompanyId.Int64)})
 
-		currentQuantity, _ := strconv.ParseFloat(strings.TrimSpace(item.TotalWeight), 64)
+		currentQuantity:= item.TotalWeight
 
 		var remainingWeight = currentQuantity - v.Weight
 		//update with the remaining weight
 		gen.REPO.UpdateInventoryItem(context.Background(), gen.UpdateInventoryItemParams{
-			TotalWeight: fmt.Sprint(remainingWeight),
+			TotalWeight: remainingWeight,
 			ID:          item.ID,
 		})
 
@@ -1520,7 +1520,7 @@ func (controller AggregatorController) ViewInventory(context *gin.Context) {
         inventory.id,
 		inventory.company_id,
 		inventory.waste_type_id,
-		inventroy.total_weight,
+		inventory.total_weight,
 		waste_types.name as waste_name,
 		companies.name as company_name
 		
@@ -1531,9 +1531,12 @@ func (controller AggregatorController) ViewInventory(context *gin.Context) {
 	 ) as q where q.id is not null` + searchQuery + companyQuery + " order by q.id desc " + limitOffset
 
 	var totalCount = 0
-	gen.REPO.DB.Get(&totalCount, "select count(*) from inventory where id is not null"+companyQuery)
+	err:=gen.REPO.DB.Get(&totalCount, fmt.Sprint("select count(*) from inventory where id is not null and company_id=",companyID))
 	logger.Log("AggregatorController/GetInventory", query, logger.LOG_LEVEL_INFO)
 
+	if err!=nil{
+		logger.Log("AggregatorController/GetInventory",err.Error(),logger.LOG_LEVEL_ERROR)
+	}
 	results, err := utils.Select(gen.REPO.DB, query)
 
 	if err != nil {

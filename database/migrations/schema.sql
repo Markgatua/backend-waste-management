@@ -293,7 +293,7 @@ CREATE TABLE inventory(
   FOREIGN Key (company_id) REFERENCES companies(id),
   waste_type_id INTEGER NULL,
   FOREIGN Key (waste_type_id) REFERENCES waste_types(id),
-  total_weight DECIMAL not null --in kgs
+  total_weight FLOAT not null --in kgs
 );
 
 CREATE TABLE inventory_adjustments(

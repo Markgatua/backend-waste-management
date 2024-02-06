@@ -407,7 +407,7 @@ insert into inventory(waste_type_id,company_id,total_weight) VALUES($1,$2,$3)
 type InsertToInventoryParams struct {
 	WasteTypeID sql.NullInt32 `json:"waste_type_id"`
 	CompanyID   int32         `json:"company_id"`
-	TotalWeight string        `json:"total_weight"`
+	TotalWeight float64       `json:"total_weight"`
 }
 
 func (q *Queries) InsertToInventory(ctx context.Context, arg InsertToInventoryParams) error {
@@ -595,8 +595,8 @@ update inventory set total_weight=$1 where id =$2
 `
 
 type UpdateInventoryItemParams struct {
-	TotalWeight string `json:"total_weight"`
-	ID          int32  `json:"id"`
+	TotalWeight float64 `json:"total_weight"`
+	ID          int32   `json:"id"`
 }
 
 func (q *Queries) UpdateInventoryItem(ctx context.Context, arg UpdateInventoryItemParams) error {
