@@ -56,9 +56,13 @@ type UpdateAggregatorStatusParams struct {
 
 func (controller AggregatorController) SetWasteTypes(context *gin.Context) {
 	auth, _ := helpers.Functions{}.CurrentUserFromToken(context)
+	type WasteType struct {
+		ID         int32   `json:"id" binding:"id"`
+		AlertLevel float64 `json:"alert_level"`
+	}
 	type Params struct {
 		//AggregatorID int32   `json:"aggregator_id"`
-		WasteTypeIDS []int32 `json:"waste_type_ids"`
+		WasteTypes []WasteType `json:"waste_types" binding:"required"`
 	}
 	var AggregatorID int32 = int32(auth.UserCompanyId.Int64)
 	var params Params
@@ -79,10 +83,11 @@ func (controller AggregatorController) SetWasteTypes(context *gin.Context) {
 		return
 	}
 
-	for _, v := range params.WasteTypeIDS {
+	for _, v := range params.WasteTypes {
 		gen.REPO.CreateAggregatorWasteType(context, gen.CreateAggregatorWasteTypeParams{
 			AggregatorID: AggregatorID,
-			WasteID:      v,
+			WasteID:      v.ID,
+			AlertLevel:   null.FloatFrom(v.AlertLevel).NullFloat64,
 		})
 	}
 	context.JSON(http.StatusOK, gin.H{
@@ -99,13 +104,14 @@ func (controller AggregatorController) GetWasteTypes(context *gin.Context) {
 	auth, _ := helpers.Functions{}.CurrentUserFromToken(context)
 
 	type Result struct {
-		ID        int32          `json:"id"`
-		Name      string         `json:"name"`
-		IsActive  bool           `json:"is_active"`
-		ParentID  sql.NullInt32  `json:"parent_id"`
-		CreatedAt time.Time      `json:"created_at"`
-		FilePath  sql.NullString `json:"file_path"`
-		Parent    *Result        `json:"parent"`
+		ID         int32          `json:"id"`
+		Name       string         `json:"name"`
+		IsActive   bool           `json:"is_active"`
+		ParentID   sql.NullInt32  `json:"parent_id"`
+		AlertLevel float64        `json:"alert_level"`
+		CreatedAt  time.Time      `json:"created_at"`
+		FilePath   sql.NullString `json:"file_path"`
+		Parent     *Result        `json:"parent"`
 	}
 
 	type GetAllWasteTypesRow struct {
@@ -113,6 +119,7 @@ func (controller AggregatorController) GetWasteTypes(context *gin.Context) {
 		Name       string         `json:"name"`
 		IsActive   bool           `json:"is_active"`
 		IsSelected bool           `json:"is_selected"`
+		AlertLevel float64        `json:"alert_level"`
 		ParentID   sql.NullInt32  `json:"parent_id"`
 		Parent     *Result        `json:"parent"`
 		CreatedAt  time.Time      `json:"created_at"`
@@ -164,13 +171,16 @@ func (controller AggregatorController) GetWasteTypes(context *gin.Context) {
 
 		aggregatorWasteTypes, _ := gen.REPO.GetAggregatorWasteTypes(context, int32(auth.UserCompanyId.Int64))
 		for _, v := range parentsFilter {
+
 			isSelected := false
+			item := GetAllWasteTypesRow{}
 			for _, x := range aggregatorWasteTypes {
 				if v.ID == x.WasteID {
 					isSelected = true
+					item.AlertLevel = x.AlertLevel.Float64
 				}
 			}
-			item := GetAllWasteTypesRow{}
+
 			item.CreatedAt = v.CreatedAt
 			item.FilePath = v.FilePath
 			item.ID = v.ID
@@ -199,12 +209,14 @@ func (controller AggregatorController) GetWasteTypes(context *gin.Context) {
 
 		for _, v := range wasteTypes {
 			isSelected := false
+			item := GetAllWasteTypesRow{}
+
 			for _, x := range aggregatorWasteTypes {
 				if v.ID == x.WasteID {
 					isSelected = true
+					item.AlertLevel = x.AlertLevel.Float64
 				}
 			}
-			item := GetAllWasteTypesRow{}
 			item.CreatedAt = v.CreatedAt
 			item.FilePath = v.FilePath
 			item.ID = v.ID
@@ -1061,7 +1073,7 @@ func (aggregatorController AggregatorController) MakeInventoryAdjustments(contex
 						WasteTypeID: sql.NullInt32{Int32: v.ID, Valid: true},
 						CompanyID:   int32(auth.UserCompanyId.Int64),
 					})
-					currentQuantity:=item.TotalWeight
+					currentQuantity := item.TotalWeight
 					if currentQuantity-v.Adjustment < 0 {
 						inventoryErrors = append(inventoryErrors, fmt.Sprint("Invalid new total weight for waste ", wasteItem.Name, " new total weight will be ", currentQuantity-v.Adjustment))
 					}
@@ -1101,7 +1113,7 @@ func (aggregatorController AggregatorController) MakeInventoryAdjustments(contex
 					CompanyID:   int32(auth.UserCompanyId.Int64),
 				})
 
-				currentQuantity:=item.TotalWeight
+				currentQuantity := item.TotalWeight
 				if v.AdjustmentType == "negative" {
 					remainingWeight := currentQuantity - v.Adjustment
 					logger.Log("Aggregator/MakeAdjustment", fmt.Sprint("[Negative adjustment] remaining weight ", remainingWeight), logger.LOG_LEVEL_INFO)
@@ -1253,7 +1265,7 @@ func PurchaseWasteFromSupplierCash(param PurchaseWasteParam, auth *models.User, 
 			//errorSavingInventory = true
 			logger.Log("AggregatorController/PurchaseWasteFromSupplierCash", fmt.Sprint("Error saving to inventory :: ", err.Error()), logger.LOG_LEVEL_ERROR)
 		} else {
-			currentQuantity:= item.TotalWeight
+			currentQuantity := item.TotalWeight
 
 			var remainingWeight = currentQuantity + v.Weight
 			//update with the remaining weight
@@ -1406,7 +1418,7 @@ func SellWasteToBuyerCash(param SellWasteParam, auth *models.User, date sql.Null
 					WasteTypeID: sql.NullInt32{Int32: v.ID, Valid: true},
 					CompanyID:   int32(auth.UserCompanyId.Int64),
 				})
-				currentQuantity := item.TotalWeight// strconv.ParseFloat(strings.TrimSpace(item.TotalWeight), 64)
+				currentQuantity := item.TotalWeight // strconv.ParseFloat(strings.TrimSpace(item.TotalWeight), 64)
 				if currentQuantity-v.Weight < 0 {
 					inventoryErrors = append(inventoryErrors, fmt.Sprint("Not enough items in the inventory for waste item ", wasteItem.Name, " current quantity is ", currentQuantity, " Kgs requested quantity is ", totalWeight, " kgs"))
 				}
@@ -1469,7 +1481,7 @@ func SellWasteToBuyerCash(param SellWasteParam, auth *models.User, date sql.Null
 				WasteTypeID: sql.NullInt32{Int32: v.ID, Valid: true},
 				CompanyID:   int32(auth.UserCompanyId.Int64)})
 
-		currentQuantity:= item.TotalWeight
+		currentQuantity := item.TotalWeight
 
 		var remainingWeight = currentQuantity - v.Weight
 		//update with the remaining weight
@@ -1531,11 +1543,11 @@ func (controller AggregatorController) ViewInventory(context *gin.Context) {
 	 ) as q where q.id is not null` + searchQuery + companyQuery + " order by q.id desc " + limitOffset
 
 	var totalCount = 0
-	err:=gen.REPO.DB.Get(&totalCount, fmt.Sprint("select count(*) from inventory where id is not null and company_id=",companyID))
+	err := gen.REPO.DB.Get(&totalCount, fmt.Sprint("select count(*) from inventory where id is not null and company_id=", companyID))
 	logger.Log("AggregatorController/GetInventory", query, logger.LOG_LEVEL_INFO)
 
-	if err!=nil{
-		logger.Log("AggregatorController/GetInventory",err.Error(),logger.LOG_LEVEL_ERROR)
+	if err != nil {
+		logger.Log("AggregatorController/GetInventory", err.Error(), logger.LOG_LEVEL_ERROR)
 	}
 	results, err := utils.Select(gen.REPO.DB, query)
 

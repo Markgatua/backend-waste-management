@@ -12,9 +12,10 @@ import (
 )
 
 type AggregatorWasteType struct {
-	ID           int32 `json:"id"`
-	AggregatorID int32 `json:"aggregator_id"`
-	WasteID      int32 `json:"waste_id"`
+	ID           int32           `json:"id"`
+	AggregatorID int32           `json:"aggregator_id"`
+	WasteID      int32           `json:"waste_id"`
+	AlertLevel   sql.NullFloat64 `json:"alert_level"`
 }
 
 type Buyer struct {

@@ -82,7 +82,7 @@ insert into inventory(waste_type_id,company_id,total_weight) VALUES($1,$2,$3);
 delete from aggregator_waste_types where aggregator_id =$1;
 
 -- name: CreateAggregatorWasteType :one
-insert into aggregator_waste_types(aggregator_id,waste_id) VALUES ($1,$2) returning *;
+insert into aggregator_waste_types(aggregator_id,waste_id,alert_level) VALUES ($1,$2,$3) returning *;
 
 
 -- name: GetAggregatorWasteTypes :many

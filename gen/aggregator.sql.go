@@ -14,18 +14,24 @@ import (
 )
 
 const createAggregatorWasteType = `-- name: CreateAggregatorWasteType :one
-insert into aggregator_waste_types(aggregator_id,waste_id) VALUES ($1,$2) returning id, aggregator_id, waste_id
+insert into aggregator_waste_types(aggregator_id,waste_id,alert_level) VALUES ($1,$2,$3) returning id, aggregator_id, waste_id, alert_level
 `
 
 type CreateAggregatorWasteTypeParams struct {
-	AggregatorID int32 `json:"aggregator_id"`
-	WasteID      int32 `json:"waste_id"`
+	AggregatorID int32           `json:"aggregator_id"`
+	WasteID      int32           `json:"waste_id"`
+	AlertLevel   sql.NullFloat64 `json:"alert_level"`
 }
 
 func (q *Queries) CreateAggregatorWasteType(ctx context.Context, arg CreateAggregatorWasteTypeParams) (AggregatorWasteType, error) {
-	row := q.db.QueryRowContext(ctx, createAggregatorWasteType, arg.AggregatorID, arg.WasteID)
+	row := q.db.QueryRowContext(ctx, createAggregatorWasteType, arg.AggregatorID, arg.WasteID, arg.AlertLevel)
 	var i AggregatorWasteType
-	err := row.Scan(&i.ID, &i.AggregatorID, &i.WasteID)
+	err := row.Scan(
+		&i.ID,
+		&i.AggregatorID,
+		&i.WasteID,
+		&i.AlertLevel,
+	)
 	return i, err
 }
 
@@ -353,7 +359,7 @@ func (q *Queries) DeleteSupplier(ctx context.Context, id int32) error {
 }
 
 const getAggregatorWasteTypes = `-- name: GetAggregatorWasteTypes :many
-select id, aggregator_id, waste_id from aggregator_waste_types where aggregator_id = $1
+select id, aggregator_id, waste_id, alert_level from aggregator_waste_types where aggregator_id = $1
 `
 
 func (q *Queries) GetAggregatorWasteTypes(ctx context.Context, aggregatorID int32) ([]AggregatorWasteType, error) {
@@ -365,7 +371,12 @@ func (q *Queries) GetAggregatorWasteTypes(ctx context.Context, aggregatorID int3
 	items := []AggregatorWasteType{}
 	for rows.Next() {
 		var i AggregatorWasteType
-		if err := rows.Scan(&i.ID, &i.AggregatorID, &i.WasteID); err != nil {
+		if err := rows.Scan(
+			&i.ID,
+			&i.AggregatorID,
+			&i.WasteID,
+			&i.AlertLevel,
+		); err != nil {
 			return nil, err
 		}
 		items = append(items, i)
