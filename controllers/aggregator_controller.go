@@ -1312,6 +1312,39 @@ func (aggregatorController AggregatorController) SellWasteToBuyer(context *gin.C
 	}
 }
 
+
+func (controller AggregatorController) SetSupplierActiveInActiveStatus(context *gin.Context) {
+	type Param struct {
+		ID       int32 `json:"id" binding:"required"`
+		IsActive *bool `json:"is_active" binding:"required"`
+	}
+	var param Param
+	err := context.ShouldBindJSON(&param)
+	if err != nil {
+		context.JSON(http.StatusUnprocessableEntity, gin.H{
+			"error":   true,
+			"message": err.Error(),
+		})
+		return
+	}
+
+	err = gen.REPO.SetSupplierActiveInactiveStatus(context, gen.SetSupplierActiveInactiveStatusParams{
+		IsActive: *param.IsActive,
+		ID:       int32(param.ID),
+	})
+	if err != nil {
+		context.JSON(http.StatusUnprocessableEntity, gin.H{
+			"error":   true,
+			"message": "Error setting supplier status",
+		})
+	} else {
+		context.JSON(http.StatusOK, gin.H{
+			"error":   false,
+			"message": "Updated supplier status",
+		})
+	}
+}
+
 func (controller AggregatorController) SetBuyerActiveInActiveStatus(context *gin.Context) {
 	type Param struct {
 		ID       int32 `json:"id" binding:"required"`
