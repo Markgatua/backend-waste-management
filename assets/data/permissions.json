@@ -315,7 +315,7 @@
                 "permission_id": 103,
                 "name": "Edit supplier",
                 "sub_module": "Supplier",
-                "action": "edit_buyer"
+                "action": "edit_supplier"
             }
         ]
     },
