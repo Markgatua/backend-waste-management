@@ -1655,6 +1655,78 @@ func (aggregatorController AggregatorController) GetSales(context *gin.Context) 
 	})
 }
 
+
+func (aggregatorController AggregatorController) GetUsers(context *gin.Context) {
+	auth, _ := helpers.Functions{}.CurrentUserFromToken(context)
+
+	search := context.Query("s")
+	itemsPerPage := context.Query("ipp")
+	page := context.Query("p")
+	//sortBy := context.Query("sort_by")
+	//orderBy := context.Query("order_by")
+	companyID := context.Query("cid")
+	
+
+	searchQuery := ""
+	companyQuery := ""
+	
+	limitOffset := ""
+
+	if search != "" {
+		searchQuery = " and (q.first_name ilike " + "'%" + search + "%'" + " or q.company_name ilike " + "'%" + search + "%'" + " or q.last_name ilike " + "'%" + search + "%'" + " or q.ref ilike " + "'%" + search + "%'" + ")"
+	}
+	if itemsPerPage != "" && page != "" {
+		limitOffset = " LIMIT " + itemsPerPage + " OFFSET " + page
+	}
+	if companyID == "" {
+		companyQuery = fmt.Sprint(" and  q.company_id=", auth.UserCompanyId.Int64)
+	} else {
+		companyQuery = " and  q.company_id=" + companyID
+	}
+	
+	query := `
+	 select * from 
+	 (
+		select 
+		users.id,
+		users.first_name,
+		users.last_name,
+		users.user_company_id,
+		users.email,
+		users.is_active,
+		users.calling_code,
+		users.phone,
+		users.role_id,
+		roles.name as role_name
+
+		from users
+
+		inner join roles on users.role_id=roles.id
+		inner join companies on companies.id=users.user_company_id
+
+	 ) as q where q.created_at is not null` + searchQuery + companyQuery + " order by q.created_at desc " + limitOffset
+
+	var totalCount = 0
+	err := gen.REPO.DB.Get(&totalCount, fmt.Sprint("select count(*) from users where date is not null and company_id=", auth.UserCompanyId.Int64))
+
+	logger.Log("AggregatorController/GetUsers", query, logger.LOG_LEVEL_INFO)
+	results, err := utils.Select(gen.REPO.DB, query)
+	if err != nil {
+		context.JSON(http.StatusUnprocessableEntity, gin.H{
+			"error":   true,
+			"message": err.Error(),
+		})
+		return
+	}
+	
+	context.JSON(http.StatusOK, gin.H{
+		"error":       false,
+		"content":     results,
+		"total_count": totalCount,
+	})
+}
+
+
 func (aggregatorController AggregatorController) GetPurchases(context *gin.Context) {
 	auth, _ := helpers.Functions{}.CurrentUserFromToken(context)
 

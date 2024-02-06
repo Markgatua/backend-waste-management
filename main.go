@@ -198,6 +198,10 @@ func runProgram() {
 
 	router.GET("aggregator/waste_types", middlewares.PermissionBlockerMiddleware("view_waste_type"), controllers.AggregatorController{}.GetWasteTypes)
 	router.POST("aggregator/waste_types/create", middlewares.PermissionBlockerMiddleware("create_waste_type"), controllers.AggregatorController{}.SetWasteTypes)
+
+	router.GET("aggregator/users", middlewares.PermissionBlockerMiddleware("view_user"), controllers.AggregatorController{}.GetUsers)
+
+
 	//-------------------------------------------------------------------------------------------
 
 	//---------------------------Green champion ------------------------------------------------------
