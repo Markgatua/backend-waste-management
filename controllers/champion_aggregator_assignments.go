@@ -3,14 +3,14 @@ package controllers
 import (
 	"database/sql"
 	"fmt"
+	"github.com/gin-gonic/gin"
+	_ "gopkg.in/guregu/null.v3"
 	"net/http"
 	"strconv"
 	"ttnmwastemanagementsystem/gen"
 	"ttnmwastemanagementsystem/helpers"
 	"ttnmwastemanagementsystem/logger"
-
-	"github.com/gin-gonic/gin"
-	_ "gopkg.in/guregu/null.v3"
+	"ttnmwastemanagementsystem/utils"
 )
 
 type ChampionCollectorController struct{}
@@ -93,23 +93,23 @@ func (championCollectorController ChampionCollectorController) AssignAggregators
 		return
 	}
 	for _, v := range params.Aggregators {
-		value,err:=gen.REPO.AssignCollectorsToGreenChampion(context, gen.AssignCollectorsToGreenChampionParams{
+		value, err := gen.REPO.AssignCollectorsToGreenChampion(context, gen.AssignCollectorsToGreenChampionParams{
 			ChampionID:  params.GreenChampionID,
 			CollectorID: int32(v.ID),
 			//PickupDay:   null.StringFrom(v.PickupDay).NullString,
 			//PickupTime:  null.StringFrom(v.PickupTime).NullString,
 		})
-		if err!=nil{
-			logger.Log("ChamptionAggregatorAssignmentController",err.Error(),logger.LOG_LEVEL_ERROR)
+		if err != nil {
+			logger.Log("ChamptionAggregatorAssignmentController", err.Error(), logger.LOG_LEVEL_ERROR)
 		}
 		for _, x := range v.PickupTimes {
-			err = gen.REPO.SetPickupTimesForGreenChampion(context,gen.SetPickupTimesForGreenChampionParams{
+			err = gen.REPO.SetPickupTimesForGreenChampion(context, gen.SetPickupTimesForGreenChampionParams{
 				ChampionAggregatorAssignmentID: value.ID,
-				PickupTimeStampID: x.PickupID,
-				PickupDay: x.PickupDay,
+				PickupTimeStampID:              x.PickupID,
+				PickupDay:                      x.PickupDay,
 			})
-			if err!=nil{
-				logger.Log("ChamptionAggregatorAssignmentController [Pickup times]",err.Error(),logger.LOG_LEVEL_ERROR)
+			if err != nil {
+				logger.Log("ChamptionAggregatorAssignmentController [Pickup times]", err.Error(), logger.LOG_LEVEL_ERROR)
 			}
 		}
 	}
@@ -212,7 +212,7 @@ func (championCollectorController ChampionCollectorController) GetAllChampionsFo
 
 	searchQuery := ""
 	companyQuery := ""
-	
+
 	limitOffset := ""
 
 	if search != "" {
@@ -232,19 +232,9 @@ func (championCollectorController ChampionCollectorController) GetAllChampionsFo
 	}
 
 	companyQuery = " and q.collector_id=" + companyID
-	
+
 	// Retrieve champion ID from the URL parameter
 	collectorIDParam := context.Param("id")
-
-	// Convert the champion ID parameter to an int32
-	collectorID, err := strconv.ParseInt(collectorIDParam, 10, 32)
-	if err != nil {
-		context.JSON(http.StatusBadRequest, gin.H{
-			"error":   true,
-			"message": "Invalid collector ID",
-		})
-		return
-	}
 
 	query := `
 	 select * from 
@@ -270,13 +260,13 @@ func (championCollectorController ChampionCollectorController) GetAllChampionsFo
 
 		inner join companies on companies.id=champion_aggregator_assignments.collector_id
 
-	 ) as q where q.created_at is not null` + searchQuery + companyQuery + " order by q.created_at desc " + limitOffset
+	 ) as q where q.created_at is not null and q.collector_id=`+collectorIDParam + searchQuery + companyQuery + " order by q.created_at desc " + limitOffset
 
 	var totalCount = 0
-	err := gen.REPO.DB.Get(&totalCount, fmt.Sprint("select count(*) from champion_aggregator_assignments where created_at is not null and collector_id=",companyID))
+	err := gen.REPO.DB.Get(&totalCount, fmt.Sprint("select count(*) from champion_aggregator_assignments where created_at is not null and collector_id=", companyID))
 
-	if err!=nil{
-		logger.Log("AggregatorController/GetAllChampionsForACollector",err.Error(),logger.LOG_LEVEL_ERROR)
+	if err != nil {
+		logger.Log("AggregatorController/GetAllChampionsForACollector", err.Error(), logger.LOG_LEVEL_ERROR)
 	}
 	logger.Log("AggregatorController/GetAllChampionsForACollector", query, logger.LOG_LEVEL_INFO)
 
@@ -288,35 +278,30 @@ func (championCollectorController ChampionCollectorController) GetAllChampionsFo
 		})
 		return
 	}
-	
+
 	for _, v := range results {
-		assignmentID,_ := v["id"]
+		assignmentID, _ := v["id"]
+		query := fmt.Sprint(`
+		select champion_pickup_times.*, 
+		pickup_time_stamps.stamp,
+		pickup_time_stamps.time_range 
+		from champion_pickup_times left join pickup_time_stamps where pickup_time_stamps.id=champion_pickup_times.pickup_time_stamp_id
+
+		where champion_pickup_times.champion_aggregator_assignment_id=
+		`, assignmentID)
+
+		pickupTimes, err := utils.Select(gen.REPO.DB, query)
+
+		if err != nil {
+			logger.Log("AggregatorController/GetAllChampionsForACollector[pickup time]", err.Error(), logger.LOG_LEVEL_ERROR)
+		}
+		v["pickup_times"] = pickupTimes
 	}
 
-
-
-	// // Create a sql.NullInt32 instance for Championid
-
-	// // Call the repository method with the champion ID
-	// Champions, err := gen.REPO.GetAllChampionsForACollector(context, int32(collectorID))
-	// if err != nil {
-	// 	if err == sql.ErrNoRows {
-	// 		context.JSON(http.StatusUnprocessableEntity, gin.H{
-	// 			"error":   false,
-	// 			"content": []any{},
-	// 		})
-	// 		return
-	// 	}
-	// 	context.JSON(http.StatusUnprocessableEntity, gin.H{
-	// 		"error":   true,
-	// 		"message": err.Error(),
-	// 	})
-	// 	return
-	// }
-
 	context.JSON(http.StatusOK, gin.H{
-		"error":   false,
-		"content": []//Champions,
+		"error":       false,
+		"total_count": totalCount,
+		"content":     results,
 	})
 }
 
