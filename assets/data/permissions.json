@@ -257,7 +257,6 @@
             }
         ]
     },
-
     {
         "module": "Waste buyer",
         "key": "buyer",
@@ -288,7 +287,6 @@
             }
         ]
     },
-
     {
         "module": "Waste supplier",
         "key": "supplier",
@@ -319,7 +317,6 @@
             }
         ]
     },
-
     {
         "module": "Sales",
         "key": "sales",
@@ -338,7 +335,6 @@
             }
         ]
     },
-
     {
         "module": "Purchases",
         "key": "purchases",
@@ -357,7 +353,6 @@
             }
         ]
     },
-
     {
         "module": "Inventory",
         "key": "inventory",
@@ -376,12 +371,6 @@
             }
         ]
     },
-
-
-
-
-
-
     {
         "module": "Statistics",
         "key": "statics",
