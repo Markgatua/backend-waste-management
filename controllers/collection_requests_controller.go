@@ -153,6 +153,8 @@ func (aggregatorController CollectionRequestsController) GetCollectionSchedule(c
 		collection_requests.created_at,
 		collection_requests.pickup_time_stamp_id,
 		collection_requests.id,
+		collection_requests.first_contact_person,
+		collecction_requests.second_contact_person,
 		pickup_time_stamps.stamp,
 		pickup_time_stamps.time_range
 
