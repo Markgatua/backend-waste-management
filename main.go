@@ -52,7 +52,7 @@ func runProgram() {
 	usersController := controllers.UsersController{}
 	wasteTypesController := controllers.WasteTypesController{}
 	organzationController := controllers.OrgnizationController{}
-	//geoController := controllers.GeoController{}
+	geoController := controllers.GeoController{}
 	championCollectorController := controllers.ChampionCollectorController{}
 	// rolesController := controllers.RolesController{}
 	// rolespermissions := controllers.RoleAndPermissionsController{}
@@ -138,7 +138,25 @@ func runProgram() {
 	router.GET("/company/users/:id", usersController.GetCompanyUsers)
 
 	//---------------------------countries-------------------------------------------------------
-	//router.GET("countries", geoController.GetAllCountries)
+	router.GET("countries", geoController.GetAllCountries)
+	//-------------------------------------------------------------------------------------------
+
+	//---------------------------buyer----------------------------------------------------
+	router.POST("buyer/add", middlewares.PermissionBlockerMiddleware("add_buyer"), controllers.AggregatorController{}.AddBuyer)
+	router.PUT("buyer/update", middlewares.PermissionBlockerMiddleware("edit_buyer"), controllers.AggregatorController{}.UpdateBuyer)
+	router.GET("buyers", middlewares.PermissionBlockerMiddleware("view_buyer"), controllers.AggregatorController{}.GetBuyers)
+	router.PUT("/buyer/set_active_inactive_status", middlewares.PermissionBlockerMiddleware("edit_buyer"), controllers.AggregatorController{}.SetBuyerActiveInActiveStatus)
+
+	router.DELETE("buyer/delete/:id", middlewares.PermissionBlockerMiddleware("delete_buyer"), controllers.AggregatorController{}.DeleteBuyer)
+	//-------------------------------------------------------------------------------------------
+
+	//---------------------------suppliers----------------------------------------------------
+	router.POST("supplier/add", middlewares.PermissionBlockerMiddleware("add_supplier"), controllers.AggregatorController{}.AddSupplier)
+	router.PUT("supplier/update", middlewares.PermissionBlockerMiddleware("edit_supplier"), controllers.AggregatorController{}.UpdateSupplier)
+	router.GET("suppliers", middlewares.PermissionBlockerMiddleware("view_supplier"), controllers.AggregatorController{}.GetSuppliers)
+	router.DELETE("supplier/delete/:id", middlewares.PermissionBlockerMiddleware("delete_supplier"), controllers.AggregatorController{}.DeleteSupplier)
+	router.PUT("/supplier/set_active_inactive_status", middlewares.PermissionBlockerMiddleware("edit_supplier"), controllers.AggregatorController{}.SetSupplierActiveInActiveStatus)
+
 	//-------------------------------------------------------------------------------------------
 
 	//---------------------------organization----------------------------------------------------
@@ -151,6 +169,22 @@ func runProgram() {
 	router.GET("organization/:id", middlewares.PermissionBlockerMiddleware("view_organizations"), organzationController.GetOrganization)
 	//-------------------------------------------------------------------------------------------
 
+	//---------------------------Sell-------------------------------------------------------------
+	router.POST("aggregator/sell_waste_to_buyer", middlewares.PermissionBlockerMiddleware("sell"), controllers.AggregatorController{}.SellWasteToBuyer)
+	router.GET("aggregator/sales", middlewares.PermissionBlockerMiddleware("view_sale_history"), controllers.AggregatorController{}.GetSales)
+	//--------------------------------------------------------------------------------------------
+
+	//---------------------------Purchases-------------------------------------------------------------
+	router.POST("aggregator/purchase_waste_from_supplier", middlewares.PermissionBlockerMiddleware("purchase"), controllers.AggregatorController{}.PurchaseWasteFromSupplier)
+	router.GET("aggregator/purchases", middlewares.PermissionBlockerMiddleware("view_purchase_history"), controllers.AggregatorController{}.GetPurchases)
+	//--------------------------------------------------------------------------------------------
+
+
+	//----------------------------inventory-------------------------------------------------------------
+	router.POST("aggregator/make_inventory_adjustment", middlewares.PermissionBlockerMiddleware("make_inventory_adjustment"), controllers.AggregatorController{}.MakeInventoryAdjustments)
+	router.GET("aggregator/view_inventory", middlewares.PermissionBlockerMiddleware("view_inventory"), controllers.AggregatorController{}.ViewInventory)
+	//--------------------------------------------------------------------------------------------------
+
 	//---------------------------Aggregator ------------------------------------------------------
 	router.POST("aggregator/add", middlewares.PermissionBlockerMiddleware("add_aggregator"), controllers.AggregatorController{}.InsertAggregator)
 	router.GET("aggregators", middlewares.PermissionBlockerMiddleware("view_aggregator"), controllers.AggregatorController{}.GetAllAggregators)
@@ -161,6 +195,12 @@ func runProgram() {
 
 	router.POST("aggregator/add/user", middlewares.PermissionBlockerMiddleware("add_user"), authController.AddAggregatorUser)
 	router.PUT("aggregator/update/user", middlewares.PermissionBlockerMiddleware("edit_user"), authController.UpdateAggregatorUser)
+
+	router.GET("aggregator/waste_types", middlewares.PermissionBlockerMiddleware("view_waste_type"), controllers.AggregatorController{}.GetWasteTypes)
+	router.POST("aggregator/waste_types/create", middlewares.PermissionBlockerMiddleware("create_waste_type"), controllers.AggregatorController{}.SetWasteTypes)
+
+	router.GET("aggregator/users", middlewares.PermissionBlockerMiddleware("view_user"), controllers.AggregatorController{}.GetUsers)
+
 
 	//-------------------------------------------------------------------------------------------
 
@@ -204,10 +244,10 @@ func runProgram() {
 	//-------------------------------------------------------------------------------------------
 
 	//--------------------------- wastegroups-----------------------------------------------------
-	router.POST("settings/wastetypes/create", wasteTypesController.InsertWasteGroup)
+	router.POST("settings/wastetypes/create", middlewares.PermissionBlockerMiddleware("create_waste_type"),wasteTypesController.InsertWasteGroup)
 	router.PUT("settings/wastetypes/update", middlewares.PermissionBlockerMiddleware("update_waste_type"), wasteTypesController.UpdateWasteType)
-	router.GET("settings/wastetypes/all", wasteTypesController.GetAllWasteTypes)
-	router.GET("settings/wastetypes/user", wasteTypesController.GetUsersWasteGroups)
+	router.GET("settings/wastetypes/all",middlewares.PermissionBlockerMiddleware("view_waste_type"), wasteTypesController.GetAllWasteTypes)
+	router.GET("settings/wastetypes/user",middlewares.PermissionBlockerMiddleware("view_waste_type"), wasteTypesController.GetUsersWasteGroups)
 	router.GET("settings/wastetypes/wastegroup/:id", middlewares.PermissionBlockerMiddleware("view_waste_type"), wasteTypesController.GetOneWasteGroup)
 	//--------------------------------------------------------------------------------------------
 

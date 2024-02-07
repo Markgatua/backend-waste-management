@@ -11,13 +11,22 @@ import (
 	"github.com/sqlc-dev/pqtype"
 )
 
+type AggregatorWasteType struct {
+	ID           int32           `json:"id"`
+	AggregatorID int32           `json:"aggregator_id"`
+	WasteID      int32           `json:"waste_id"`
+	AlertLevel   sql.NullFloat64 `json:"alert_level"`
+}
+
 type Buyer struct {
 	ID                           int32           `json:"id"`
 	CompanyID                    int32           `json:"company_id"`
 	Company                      sql.NullString  `json:"company"`
+	CountryID                    sql.NullInt32   `json:"country_id"`
 	FirstName                    string          `json:"first_name"`
 	LastName                     string          `json:"last_name"`
 	IsActive                     bool            `json:"is_active"`
+	Region                       sql.NullString  `json:"region"`
 	CallingCode                  sql.NullString  `json:"calling_code"`
 	Location                     sql.NullString  `json:"location"`
 	AdministrativeLevel1Location sql.NullString  `json:"administrative_level_1_location"`
@@ -102,6 +111,22 @@ type EmailVerificationToken struct {
 	CreatedAt time.Time `json:"created_at"`
 }
 
+type Inventory struct {
+	ID          int32         `json:"id"`
+	CompanyID   int32         `json:"company_id"`
+	WasteTypeID sql.NullInt32 `json:"waste_type_id"`
+	TotalWeight float64       `json:"total_weight"`
+}
+
+type InventoryAdjustment struct {
+	ID                   int32     `json:"id"`
+	AdjustedBy           int32     `json:"adjusted_by"`
+	CreatedAt            time.Time `json:"created_at"`
+	CompanyID            int32     `json:"company_id"`
+	AdjustmentAmount     string    `json:"adjustment_amount"`
+	IsPositiveAdjustment bool      `json:"is_positive_adjustment"`
+}
+
 type MainOrganization struct {
 	ID                     int32     `json:"id"`
 	OrganizationID         string    `json:"organization_id"`
@@ -137,12 +162,6 @@ type Organization struct {
 	OrganizationType int32  `json:"organization_type"`
 }
 
-type PaymentMethod struct {
-	ID            int32     `json:"id"`
-	PaymentMethod string    `json:"payment_method"`
-	CreatedAt     time.Time `json:"created_at"`
-}
-
 type Permission struct {
 	ID        int32          `json:"id"`
 	Name      string         `json:"name"`
@@ -160,6 +179,47 @@ type PhoneVerificationToken struct {
 	Phone       string    `json:"phone"`
 	CreatedAt   time.Time `json:"created_at"`
 }
+
+
+type Purchase struct {
+	ID          int32                 `json:"id"`
+	Ref         string                `json:"ref"`
+	CompanyID   int32                 `json:"company_id"`
+	SupplierID  int32                 `json:"supplier_id"`
+	TotalWeight sql.NullFloat64       `json:"total_weight"`
+	TotalAmount sql.NullFloat64       `json:"total_amount"`
+	Date        time.Time             `json:"date"`
+	Dump        pqtype.NullRawMessage `json:"dump"`
+}
+
+type PurchaseItem struct {
+	ID          int32           `json:"id"`
+	CompanyID   int32           `json:"company_id"`
+	PurchaseID  int32           `json:"purchase_id"`
+	WasteTypeID int32           `json:"waste_type_id"`
+	Weight      sql.NullFloat64 `json:"weight"`
+	CostPerKg   sql.NullFloat64 `json:"cost_per_kg"`
+	TotalAmount float64         `json:"total_amount"`
+}
+
+type PurchaseTransaction struct {
+	Ref               string         `json:"ref"`
+	ID                int32          `json:"id"`
+	PurchaseID        int32          `json:"purchase_id"`
+	CompanyID         int32          `json:"company_id"`
+	PaymentMethod     string         `json:"payment_method"`
+	CheckoutRequestID sql.NullString `json:"checkout_request_id"`
+	MerchantRequestID sql.NullString `json:"merchant_request_id"`
+	CardMask          sql.NullString `json:"card_mask"`
+	MsisdnIdnum       sql.NullString `json:"msisdn_idnum"`
+	TransactionDate   sql.NullTime   `json:"transaction_date"`
+	ReceiptNo         sql.NullString `json:"receipt_no"`
+	Amount            string         `json:"amount"`
+	MpesaResultCode   sql.NullString `json:"mpesa_result_code"`
+	MpesaResultDesc   sql.NullString `json:"mpesa_result_desc"`
+	IpayStatus        sql.NullString `json:"ipay_status"`
+	CreatedAt         time.Time      `json:"created_at"`
+	UpdatedAt         time.Time      `json:"updated_at"`
 
 type PickupTimeStamp struct {
 	ID        int32  `json:"id"`
@@ -183,6 +243,28 @@ type RoleHasPermission struct {
 }
 
 type Sale struct {
+	ID          int32                 `json:"id"`
+	Ref         string                `json:"ref"`
+	CompanyID   int32                 `json:"company_id"`
+	BuyerID     int32                 `json:"buyer_id"`
+	TotalWeight sql.NullFloat64       `json:"total_weight"`
+	TotalAmount sql.NullFloat64       `json:"total_amount"`
+	Date        time.Time             `json:"date"`
+	Dump        pqtype.NullRawMessage `json:"dump"`
+}
+
+type SaleItem struct {
+	ID          int32           `json:"id"`
+	CompanyID   int32           `json:"company_id"`
+	SaleID      int32           `json:"sale_id"`
+	WasteTypeID int32           `json:"waste_type_id"`
+	Weight      sql.NullFloat64 `json:"weight"`
+	CostPerKg   sql.NullFloat64 `json:"cost_per_kg"`
+	TotalAmount float64         `json:"total_amount"`
+}
+
+type SaleTransaction struct {
+	Ref               string         `json:"ref"`
 	ID                 int32                 `json:"id"`
 	Ref                string                `json:"ref"`
 	CompanyID          int32                 `json:"company_id"`
@@ -228,6 +310,25 @@ type SubCounty struct {
 	CountyID int32  `json:"county_id"`
 }
 
+type Supplier struct {
+	ID                           int32           `json:"id"`
+	CompanyID                    int32           `json:"company_id"`
+	Company                      sql.NullString  `json:"company"`
+	FirstName                    string          `json:"first_name"`
+	CountryID                    sql.NullInt32   `json:"country_id"`
+	LastName                     string          `json:"last_name"`
+	IsActive                     bool            `json:"is_active"`
+	Region                       sql.NullString  `json:"region"`
+	CallingCode                  sql.NullString  `json:"calling_code"`
+	Location                     sql.NullString  `json:"location"`
+	AdministrativeLevel1Location sql.NullString  `json:"administrative_level_1_location"`
+	Lat                          sql.NullFloat64 `json:"lat"`
+	Lng                          sql.NullFloat64 `json:"lng"`
+	Phone                        sql.NullString  `json:"phone"`
+	CreatedAt                    time.Time       `json:"created_at"`
+	UpdatedAt                    time.Time       `json:"updated_at"`
+}
+
 type Upload struct {
 	ID           int32                 `json:"id"`
 	ItemID       sql.NullInt32         `json:"item_id"`
@@ -266,42 +367,11 @@ type User struct {
 	UpdatedAt                time.Time      `json:"updated_at"`
 }
 
-type WasteBuyer struct {
-	ID      int32                 `json:"id"`
-	BuyerID sql.NullInt32         `json:"buyer_id"`
-	Rates   pqtype.NullRawMessage `json:"rates"`
-}
-
-type WasteForSale struct {
-	ID     int32                 `json:"id"`
-	Seller sql.NullInt32         `json:"seller"`
-	Waste  pqtype.NullRawMessage `json:"waste"`
-}
-
 type WasteItem struct {
 	ID                  int32  `json:"id"`
 	CollectionRequestID int32  `json:"collection_request_id"`
 	WasteTypeID         int32  `json:"waste_type_id"`
 	Weight              string `json:"weight"`
-}
-
-type WasteTransaction struct {
-	ID                int32                 `json:"id"`
-	Date              time.Time             `json:"date"`
-	BuyerID           sql.NullInt32         `json:"buyer_id"`
-	SellerID          sql.NullInt32         `json:"seller_id"`
-	WasteProducts     pqtype.NullRawMessage `json:"waste_products"`
-	TotalAmount       string                `json:"total_amount"`
-	PaymentMethodID   sql.NullInt32         `json:"payment_method_id"`
-	MerchantRequestID sql.NullString        `json:"merchant_request_id"`
-	CheckoutRequestID sql.NullString        `json:"checkout_request_id"`
-	MpesaResultCode   sql.NullString        `json:"mpesa_result_code"`
-	MpesaResultDesc   sql.NullString        `json:"mpesa_result_desc"`
-	MpesaReceiptCode  sql.NullString        `json:"mpesa_receipt_code"`
-	TimePaid          sql.NullString        `json:"time_paid"`
-	IsPaid            sql.NullBool          `json:"is_paid"`
-	CreatedAt         time.Time             `json:"created_at"`
-	UpdatedAt         time.Time             `json:"updated_at"`
 }
 
 type WasteType struct {
