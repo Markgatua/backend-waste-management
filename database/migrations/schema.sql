@@ -112,6 +112,15 @@ CREATE TABLE companies (
   lng float NULL,
   is_active BOOLEAN NOT NULL DEFAULT TRUE,
   created_at TIMESTAMP NOT NULL DEFAULT NOW(),
+  contact_person1_first_name VARCHAR NULL,
+  contact_person1_last_name VARCHAR NULL,
+  contact_person1_phone VARCHAR NULL,
+  contact_person1_email VARCHAR NULL,
+  contact_person2_email VARCHAR NULL,
+  contact_person2_first_name VARCHAR NULL,
+  contact_person2_last_name VARCHAR NULL,
+  contact_person2_phone VARCHAR NULL,
+  
   FOREIGN Key (organization_id) REFERENCES organizations(id),
   FOREIGN Key (country_id) REFERENCES countries(id)
 );
@@ -171,18 +180,41 @@ CREATE TABLE email_verification_token (
 );
 
 
--- Create "champion_assigned_aggregator" table
+-- Create "Champion_assigned_aggregator" table
 CREATE TABLE champion_aggregator_assignments (
   id SERIAL PRIMARY KEY,
   champion_id INTEGER NOT NULL,
   FOREIGN Key (champion_id) REFERENCES companies(id),
   collector_id INTEGER NOT NULL,
   FOREIGN Key (collector_id) REFERENCES companies(id),
-  pickup_day VARCHAR NULL,
-  pickup_time VARCHAR NULL,
+  --pickup_day VARCHAR NULL,
+  --pickup_time VARCHAR NULL,
   created_at TIMESTAMP NOT NULL DEFAULT NOW()
 );
-ALTER TABLE champion_aggregator_assignments ADD CONSTRAINT check_pickup_day CHECK (pickup_day IN ('Monday','Tuesday','Wednesday','Thursday','Friday','Saturday','Sunday')); 
+
+--ALTER TABLE champion_aggregator_assignments ADD CONSTRAINT check_pickup_day CHECK (pickup_day IN ('Monday','Tuesday','Wednesday','Thursday','Friday','Saturday','Sunday')); 
+
+
+CREATE TABLE pickup_time_stamps (
+  id SERIAL PRIMARY KEY,
+  stamp VARCHAR(255) NOT NULL,
+  time_range VARCHAR(255) NOT NULL
+);
+ALTER TABLE pickup_time_stamps ADD CONSTRAINT check_stamp CHECK (stamp IN ('Morning','Afternoon','Evening'));
+
+-- Create "Champion pickup times"
+CREATE TABLE champion_pickup_times(
+  id SERIAL PRIMARY KEY,
+  champion_aggregator_assignment_id INTEGER NOT NULL,
+  pickup_time_stamp_id INTEGER NOT NULL,
+  ExactPickupTime VARCHAR(255) NULL,
+  FOREIGN Key (champion_aggregator_assignment_id) REFERENCES champion_aggregator_assignments(id) on delete cascade,
+  FOREIGN Key (pickup_time_stamp_id) REFERENCES pickup_time_stamps(id),
+  pickup_day VARCHAR NOT NULL
+);
+
+ALTER TABLE champion_pickup_times ADD CONSTRAINT champion_pickup_times_check_pickup_day CHECK (pickup_day IN ('Monday','Tuesday','Wednesday','Thursday','Friday','Saturday','Sunday')); 
+
 
 CREATE TABLE waste_types (
   id SERIAL PRIMARY KEY,
@@ -193,13 +225,6 @@ CREATE TABLE waste_types (
   created_at TIMESTAMP NOT NULL DEFAULT NOW()
 );
 
-CREATE TABLE pickup_time_stamps (
-  id SERIAL PRIMARY KEY,
-  stamp VARCHAR(255) NOT NULL,
-  time_range VARCHAR(255) NOT NULL
-);
-
-ALTER TABLE pickup_time_stamps ADD CONSTRAINT check_stamp CHECK (stamp IN ('Morning','Afternoon','Evening')); 
 
 CREATE TABLE collection_requests (
   id SERIAL PRIMARY KEY,
@@ -223,13 +248,14 @@ CREATE TABLE collection_requests (
 
 ALTER TABLE collection_requests ADD CONSTRAINT collection_requests_status CHECK (status IN (1,2,3,4,5)); 
 
-CREATE TABLE waste_items (
+CREATE TABLE collection_request_waste_items (
   id SERIAL PRIMARY KEY,
   collection_request_id INTEGER NOT NULL,
   FOREIGN Key (collection_request_id) REFERENCES collection_requests(id),
   waste_type_id INTEGER NOT NULL,
   FOREIGN Key (waste_type_id) REFERENCES waste_types(id),
-  weight DECIMAL NOT NULL
+  weight FLOAT NOT NULL,
+  created_at TIMESTAMP NOT NULL DEFAULT NOW()
 );
 
 CREATE UNIQUE INDEX waste_types_unique_name_idx on waste_types (LOWER(name));  

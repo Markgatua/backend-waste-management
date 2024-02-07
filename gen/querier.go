@@ -12,7 +12,7 @@ import (
 type Querier interface {
 	ActivateRole(ctx context.Context, roleID int32) error
 	AssignChampionToCollector(ctx context.Context, arg AssignChampionToCollectorParams) (ChampionAggregatorAssignment, error)
-	AssignCollectorsToGreenChampion(ctx context.Context, arg AssignCollectorsToGreenChampionParams) error
+	AssignCollectorsToGreenChampion(ctx context.Context, arg AssignCollectorsToGreenChampionParams) (ChampionAggregatorAssignment, error)
 	AssignPermission(ctx context.Context, arg AssignPermissionParams) error
 	AssignPermissionToRole(ctx context.Context, arg AssignPermissionToRoleParams) error
 	CancelCollectionRequest(ctx context.Context, id int32) error
@@ -43,6 +43,7 @@ type Querier interface {
 	DeleteRole(ctx context.Context, id int32) error
 	DeleteSale(ctx context.Context, id int32) error
 	DeleteSupplier(ctx context.Context, id int32) error
+	DeleteWasteItemsForCollectionRequest(ctx context.Context, collectionRequestID int32) error
 	DuplicateCounties(ctx context.Context, name string) (int64, error)
 	DuplicatePickupTimeStamp(ctx context.Context, stamp string) (int64, error)
 	GetAggregatorNewRequests(ctx context.Context, collectorID int32) ([]GetAggregatorNewRequestsRow, error)
@@ -107,6 +108,8 @@ type Querier interface {
 	GetUsersWasteType(ctx context.Context) ([]GetUsersWasteTypeRow, error)
 	GetUsersWithRole(ctx context.Context) ([]GetUsersWithRoleRow, error)
 	GetWasteItemsProducerData(ctx context.Context, producerID int32) ([]GetWasteItemsProducerDataRow, error)
+	// waste_items.sql
+	InsertCollectionRequestWasteItem(ctx context.Context, arg InsertCollectionRequestWasteItemParams) (CollectionRequestWasteItem, error)
 	InsertCompany(ctx context.Context, arg InsertCompanyParams) (Company, error)
 	// counties.sql
 	InsertCounties(ctx context.Context, name string) error
@@ -121,8 +124,6 @@ type Querier interface {
 	// sub_counties.sql
 	InsertSubcounties(ctx context.Context, arg InsertSubcountiesParams) error
 	InsertToInventory(ctx context.Context, arg InsertToInventoryParams) error
-	// waste_items.sql
-	InsertWasteItem(ctx context.Context, arg InsertWasteItemParams) (WasteItem, error)
 	InsertWasteType(ctx context.Context, arg InsertWasteTypeParams) (WasteType, error)
 	InventoryItemCount(ctx context.Context, arg InventoryItemCountParams) (int64, error)
 	MakeCashPayment(ctx context.Context, arg MakeCashPaymentParams) (SaleTransaction, error)
@@ -133,6 +134,7 @@ type Querier interface {
 	RevokePermission(ctx context.Context, arg RevokePermissionParams) error
 	RoleExists(ctx context.Context, name string) (int64, error)
 	SetBuyerActiveInactiveStatus(ctx context.Context, arg SetBuyerActiveInactiveStatusParams) error
+	SetPickupTimesForGreenChampion(ctx context.Context, arg SetPickupTimesForGreenChampionParams) error
 	SetSupplierActiveInactiveStatus(ctx context.Context, arg SetSupplierActiveInactiveStatusParams) error
 	UpdateBuyer(ctx context.Context, arg UpdateBuyerParams) error
 	UpdateChampionCollector(ctx context.Context, arg UpdateChampionCollectorParams) error

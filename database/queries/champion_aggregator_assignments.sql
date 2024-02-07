@@ -56,9 +56,11 @@ select * from champion_aggregator_assignments where champion_id=$1;
 -- name: RemoveAggrigatorsAssignedFromGreenChampions :exec
 delete from champion_aggregator_assignments where champion_id =$1;
 
--- name: AssignCollectorsToGreenChampion :exec
-insert into champion_aggregator_assignments(champion_id,collector_id,pickup_day,pickup_time) VALUES($1,$2,$3,$4);
+-- name: AssignCollectorsToGreenChampion :one
+insert into champion_aggregator_assignments(champion_id,collector_id) VALUES($1,$2) returning *;
 
+-- name: SetPickupTimesForGreenChampion :exec
+insert into champion_pickup_times(champion_aggregator_assignment_id,pickup_time_stamp_id,pickup_day)VALUES($1,$2,$3);
 
 -- name: GetTheCollectorForAChampion :one
 select champion_aggregator_assignments.*, collector.name AS collector_name  from champion_aggregator_assignments

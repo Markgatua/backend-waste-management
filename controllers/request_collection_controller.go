@@ -507,8 +507,8 @@ func (requestCollectionController RequestCollectionController) GetTheCollectorFo
 
 	fmt.Println(data)
 
-	pickupDay := data.PickupDay.String
-	valid := data.PickupDay.Valid
+	pickupDay := ""//data.PickupDay.String
+	valid := true//data.PickupDay.Valid
 
 	if !valid {
 		fmt.Println("Error accessing pickup_day.String field in data.")
@@ -525,8 +525,8 @@ func (requestCollectionController RequestCollectionController) GetTheCollectorFo
 
 	if currentDay == pickupDay {
 		data2:= ChampionAggregatorAssignment{}
-		data2.PickupTime=data.PickupTime
-		data2.PickupDay=data.PickupDay
+		//data2.PickupTime=data.PickupTime
+		//data2.PickupDay=data.PickupDay
 		data2.NextDate="Today"
 		data2.Collector=data.CollectorName.String
 
@@ -543,8 +543,8 @@ func (requestCollectionController RequestCollectionController) GetTheCollectorFo
 		nextMonday := time.Now().AddDate(0, 0, daysUntilNextMonday)
 
 		data2:= ChampionAggregatorAssignment{}
-		data2.PickupTime=data.PickupTime
-		data2.PickupDay=data.PickupDay
+		//data2.PickupTime=data.PickupTime
+		//data2.PickupDay=data.PickupDay
 		data2.NextDate=nextMonday.Format("02-01-2006")
 		data2.Collector=data.CollectorName.String
 
