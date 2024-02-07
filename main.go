@@ -201,6 +201,7 @@ func runProgram() {
 
 	router.GET("aggregator/users", middlewares.PermissionBlockerMiddleware("view_user"), controllers.AggregatorController{}.GetUsers)
 	router.GET("aggregator/collections",collectionRequestsController.GetCollections)
+	router.GET("aggregator/collection_schedule",collectionRequestsController.GetCollectionSchedule)
 
 
 	//-------------------------------------------------------------------------------------------

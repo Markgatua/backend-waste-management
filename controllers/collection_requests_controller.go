@@ -94,6 +94,89 @@ func (controller CollectionRequestsController) InsertWasteItems(context *gin.Con
 
 }
 
+func (aggregatorController CollectionRequestsController) GetCollectionSchedule(context *gin.Context) {
+	auth, _ := helpers.Functions{}.CurrentUserFromToken(context)
+	dateRangeStart := context.Query("sd")
+	search :=context.Query("s")
+	dateRangeEnd := context.Query("ed")
+	companyID := context.Query("cid")
+	status :=context.Query("st")//1- Pending, 2- confirmed, 3- on the way, 4 cancelled, 5 completed
+
+	searchQuery := ""
+	companyQuery := ""
+	dateRangeQuery := ""
+	limitOffset := ""
+	statusQuery := ""
+
+	if search != "" {
+		searchQuery = " and (q.waste_name ilike " + "'%" + search + "%'" + " or q.company_name ilike " + "'%" + search + "%'" + ")"
+	}
+	if itemsPerPage != "" && page != "" {
+		itemsPerPage, _ := strconv.Atoi(context.Query("ipp"))
+		page, _ := strconv.Atoi(context.Query("p"))
+
+		offset := (page - 1) * itemsPerPage
+
+		limitOffset = fmt.Sprint(" LIMIT ", itemsPerPage, " OFFSET ", offset)
+	}
+	if companyID == "" {
+		companyID = fmt.Sprint(auth.UserCompanyId.Int64)
+		//companyQuery = fmt.Sprint(" and  q.company_id=", auth.UserCompanyId.Int64)
+	}
+
+
+	companyQuery = " and q.collector_id=" + companyID
+
+	if dateRangeStart != "" && dateRangeEnd != "" {
+		dateRangeQuery = " and cast(q.created_at as date)>='" + dateRangeStart + "' and cast(q.created_at as date)<='" + dateRangeEnd + "'"
+	}
+
+	query := `
+	 select * from 
+	 (
+		select 
+		collection_requests.id,
+		collection_requests.producer_id,
+		companies.name as champion_name,
+		collection_requests.collector_id,
+		collection_requests.request_date,
+		collection_requests.pickup_date,
+		collection_requests.status,
+		collection_requests.created_at,
+		collection_requests.pickup_time_stamp_id,
+		collection_requests.id,
+		pickup_time_stamps.stamp,
+		pickup_time_stamps.time_range,
+
+		from collection_requests 
+
+		inner join pickup_time_stamps on pickup_time_stamps.id=collection_requests.pickup_time_stamp_id
+		inner join companies on companies.id=collection_requests.producer_id
+	 ) as q where q.created_at is not null` + dateRangeQuery + searchQuery + companyQuery + " order by q.created_at desc " + limitOffset
+
+	var totalCount = 0
+	err := gen.REPO.DB.Get(&totalCount, fmt.Sprint("select count(*) from collection_request_waste_items where created_at is not null and collector_id=", companyID))
+
+	//fmt.Println(err.Error())
+	logger.Log("CollectionRequestsController/GetCollections", query, logger.LOG_LEVEL_INFO)
+
+	results, err := utils.Select(gen.REPO.DB, query)
+	if err != nil {
+		context.JSON(http.StatusUnprocessableEntity, gin.H{
+			"error":   true,
+			"message": err.Error(),
+		})
+		return
+	}
+
+
+	context.JSON(http.StatusOK, gin.H{
+		"error":       false,
+		"content":     results,
+		"total_count": totalCount,
+	})
+}
+
 func (aggregatorController CollectionRequestsController) GetCollections(context *gin.Context) {
 	auth, _ := helpers.Functions{}.CurrentUserFromToken(context)
 
@@ -154,7 +237,7 @@ func (aggregatorController CollectionRequestsController) GetCollections(context 
 	 ) as q where q.created_at is not null` + dateRangeQuery + searchQuery + companyQuery + " order by q.created_at desc " + limitOffset
 
 	var totalCount = 0
-	err := gen.REPO.DB.Get(&totalCount, fmt.Sprint("select count(*) from collection_request_waste_items where created_at is not null and collector_id=",companyID))
+	err := gen.REPO.DB.Get(&totalCount, fmt.Sprint("select count(*) from collection_request_waste_items where created_at is not null and collector_id=", companyID))
 
 	//fmt.Println(err.Error())
 	logger.Log("CollectionRequestsController/GetCollections", query, logger.LOG_LEVEL_INFO)
