@@ -21,9 +21,9 @@ func (q *Queries) CancelCollectionRequest(ctx context.Context, id int32) error {
 }
 
 const collectionWeightTotals = `-- name: CollectionWeightTotals :one
-select sum(waste_items.weight) as total_weight,waste_types.name from waste_items 
-inner join waste_types on waste_types.id=waste_items.waste_type_id 
-inner join collection_requests on collection_requests.id=waste_items.collection_request_id
+select sum(collection_request_waste_items.weight) as total_weight,waste_types.name from collection_request_waste_items 
+inner join waste_types on waste_types.id=collection_request_waste_items.waste_type_id 
+inner join collection_requests on collection_requests.id=collection_request_waste_items.collection_request_id
 where collection_requests.producer_id=$1 GROUP BY waste_types.name
 `
 
@@ -608,7 +608,7 @@ FROM
 LEFT JOIN
     companies AS collector ON collector.id = collection_requests.collector_id
 LEFT JOIN
-    waste_items AS totals ON totals.collection_request_id = collection_requests.id
+    collection_request_waste_items AS totals ON totals.collection_request_id = collection_requests.id
 WHERE
     collection_requests.producer_id = $1 AND collection_requests.status = true
 GROUP BY
@@ -684,7 +684,7 @@ FROM
 LEFT JOIN
     companies AS collector ON collector.id = collection_requests.collector_id
 LEFT JOIN
-    waste_items AS totals ON totals.collection_request_id = collection_requests.id
+    collection_request_waste_items AS totals ON totals.collection_request_id = collection_requests.id
 WHERE
     collection_requests.producer_id = $1 AND collection_requests.status = false
 GROUP BY
@@ -757,7 +757,7 @@ SELECT
 FROM
     collection_requests
 LEFT JOIN
-    waste_items AS totals ON totals.collection_request_id = collection_requests.id
+    collection_request_waste_items AS totals ON totals.collection_request_id = collection_requests.id
 WHERE
     collection_requests.producer_id = $1
 GROUP BY
@@ -831,7 +831,7 @@ FROM
 LEFT JOIN
     companies AS collector ON collector.id = collection_requests.collector_id
 LEFT JOIN
-    waste_items AS totals ON totals.collection_request_id = collection_requests.id
+    collection_request_waste_items AS totals ON totals.collection_request_id = collection_requests.id
 WHERE
     collection_requests.id = $1
 GROUP BY
@@ -913,15 +913,15 @@ func (q *Queries) GetProducerLatestCollectionId(ctx context.Context, producerID 
 
 const getWasteItemsProducerData = `-- name: GetWasteItemsProducerData :many
 SELECT
-    CAST(SUM(waste_items.weight) AS DECIMAL(10,2)) AS total_weight,
+    CAST(SUM(collection_request_waste_items.weight) AS DECIMAL(10,2)) AS total_weight,
     waste.name AS waste_name,
     collections.status AS collection_status
 FROM
-    waste_items
+    collection_request_waste_items
 JOIN
-    waste_types AS waste ON waste_items.waste_type_id = waste.id
+    waste_types AS waste ON collection_request_waste_items.waste_type_id = waste.id
 LEFT JOIN
-    collection_requests AS collections ON collections.id = waste_items.collection_request_id
+    collection_requests AS collections ON collections.id = collection_request_waste_items.collection_request_id
 WHERE
     collections.producer_id = $1
 GROUP BY

@@ -43,6 +43,7 @@ type Querier interface {
 	DeleteRole(ctx context.Context, id int32) error
 	DeleteSale(ctx context.Context, id int32) error
 	DeleteSupplier(ctx context.Context, id int32) error
+	DeleteWasteItemsForCollectionRequest(ctx context.Context, collectionRequestID int32) error
 	DuplicateCounties(ctx context.Context, name string) (int64, error)
 	DuplicatePickupTimeStamp(ctx context.Context, stamp string) (int64, error)
 	GetAggregatorNewRequests(ctx context.Context, collectorID int32) ([]GetAggregatorNewRequestsRow, error)
@@ -107,6 +108,8 @@ type Querier interface {
 	GetUsersWasteType(ctx context.Context) ([]GetUsersWasteTypeRow, error)
 	GetUsersWithRole(ctx context.Context) ([]GetUsersWithRoleRow, error)
 	GetWasteItemsProducerData(ctx context.Context, producerID int32) ([]GetWasteItemsProducerDataRow, error)
+	// waste_items.sql
+	InsertCollectionRequestWasteItem(ctx context.Context, arg InsertCollectionRequestWasteItemParams) (CollectionRequestWasteItem, error)
 	InsertCompany(ctx context.Context, arg InsertCompanyParams) (Company, error)
 	// counties.sql
 	InsertCounties(ctx context.Context, name string) error
@@ -121,8 +124,6 @@ type Querier interface {
 	// sub_counties.sql
 	InsertSubcounties(ctx context.Context, arg InsertSubcountiesParams) error
 	InsertToInventory(ctx context.Context, arg InsertToInventoryParams) error
-	// waste_items.sql
-	InsertWasteItem(ctx context.Context, arg InsertWasteItemParams) (WasteItem, error)
 	InsertWasteType(ctx context.Context, arg InsertWasteTypeParams) (WasteType, error)
 	InventoryItemCount(ctx context.Context, arg InventoryItemCountParams) (int64, error)
 	MakeCashPayment(ctx context.Context, arg MakeCashPaymentParams) (SaleTransaction, error)

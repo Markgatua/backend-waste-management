@@ -248,13 +248,14 @@ CREATE TABLE collection_requests (
 
 ALTER TABLE collection_requests ADD CONSTRAINT collection_requests_status CHECK (status IN (1,2,3,4,5)); 
 
-CREATE TABLE waste_items (
+CREATE TABLE collection_request_waste_items (
   id SERIAL PRIMARY KEY,
   collection_request_id INTEGER NOT NULL,
   FOREIGN Key (collection_request_id) REFERENCES collection_requests(id),
   waste_type_id INTEGER NOT NULL,
   FOREIGN Key (waste_type_id) REFERENCES waste_types(id),
-  weight DECIMAL NOT NULL
+  weight FLOAT NOT NULL,
+  created_at TIMESTAMP NOT NULL DEFAULT NOW()
 );
 
 CREATE UNIQUE INDEX waste_types_unique_name_idx on waste_types (LOWER(name));  

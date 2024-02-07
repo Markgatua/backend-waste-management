@@ -1481,6 +1481,7 @@ func SellWasteToBuyerCash(param SellWasteParam, auth *models.User, date sql.Null
 				WasteTypeID: sql.NullInt32{Int32: v.ID, Valid: true},
 				CompanyID:   int32(auth.UserCompanyId.Int64)})
 
+				
 		currentQuantity := item.TotalWeight
 
 		var remainingWeight = currentQuantity - v.Weight

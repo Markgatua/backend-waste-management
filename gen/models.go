@@ -69,6 +69,14 @@ type CollectionRequest struct {
 	CreatedAt                    time.Time       `json:"created_at"`
 }
 
+type CollectionRequestWasteItem struct {
+	ID                  int32     `json:"id"`
+	CollectionRequestID int32     `json:"collection_request_id"`
+	WasteTypeID         int32     `json:"waste_type_id"`
+	Weight              float64   `json:"weight"`
+	CreatedAt           time.Time `json:"created_at"`
+}
+
 type Company struct {
 	ID                           int32           `json:"id"`
 	Name                         string          `json:"name"`
@@ -82,6 +90,14 @@ type Company struct {
 	Lng                          sql.NullFloat64 `json:"lng"`
 	IsActive                     bool            `json:"is_active"`
 	CreatedAt                    time.Time       `json:"created_at"`
+	ContactPerson1FirstName      sql.NullString  `json:"contact_person1_first_name"`
+	ContactPerson1LastName       sql.NullString  `json:"contact_person1_last_name"`
+	ContactPerson1Phone          sql.NullString  `json:"contact_person1_phone"`
+	ContactPerson1Email          sql.NullString  `json:"contact_person1_email"`
+	ContactPerson2Email          sql.NullString  `json:"contact_person2_email"`
+	ContactPerson2FirstName      sql.NullString  `json:"contact_person2_first_name"`
+	ContactPerson2LastName       sql.NullString  `json:"contact_person2_last_name"`
+	ContactPerson2Phone          sql.NullString  `json:"contact_person2_phone"`
 }
 
 type Country struct {
@@ -350,13 +366,6 @@ type User struct {
 	LastLogin                sql.NullTime   `json:"last_login"`
 	CreatedAt                time.Time      `json:"created_at"`
 	UpdatedAt                time.Time      `json:"updated_at"`
-}
-
-type WasteItem struct {
-	ID                  int32  `json:"id"`
-	CollectionRequestID int32  `json:"collection_request_id"`
-	WasteTypeID         int32  `json:"waste_type_id"`
-	Weight              string `json:"weight"`
 }
 
 type WasteType struct {
