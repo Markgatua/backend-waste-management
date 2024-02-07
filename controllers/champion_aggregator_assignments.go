@@ -174,7 +174,6 @@ func (championCollectorController ChampionCollectorController) GetCollectorsForG
 	greenChampionID := context.Query("gid")
 
 	searchQuery := ""
-	companyQuery := ""
 
 	limitOffset := ""
 
@@ -194,8 +193,6 @@ func (championCollectorController ChampionCollectorController) GetCollectorsForG
 		greenChampionID = fmt.Sprint(auth.UserCompanyId.Int64)
 	}
 
-	companyQuery = " and q.champion_id=" + greenChampionID
-
 	// Retrieve champion ID from the URL parameter
 	greenChampionIDParam := context.Param("id")
 
@@ -206,8 +203,8 @@ func (championCollectorController ChampionCollectorController) GetCollectorsForG
 		champion_aggregator_assignments.id,
 		champion_aggregator_assignments.champion_id,
 		champion_aggregator_assignments.collector_id,
-		companies.name as  champion_company_name,
-		companies.location as champion_company_location,
+		companies.name as  collector_company_name,
+		companies.location as collector_company_location,
 		champion_aggregator_assignments.created_at,
 
 		companies.contact_person1_first_name as collector_contact_person1_first_name,
@@ -223,7 +220,7 @@ func (championCollectorController ChampionCollectorController) GetCollectorsForG
 
 		inner join companies on companies.id=champion_aggregator_assignments.collector_id
 
-	 ) as q where q.created_at is not null and q.champion_id=` + greenChampionIDParam + searchQuery + companyQuery + " order by q.created_at desc " + limitOffset
+	 ) as q where q.created_at is not null and q.champion_id=` + greenChampionIDParam + searchQuery + " order by q.created_at desc " + limitOffset
 
 	var totalCount = 0
 	err := gen.REPO.DB.Get(&totalCount, fmt.Sprint("select count(*) from champion_aggregator_assignments where created_at is not null and champion_id=", greenChampionIDParam))
@@ -303,8 +300,6 @@ func (championCollectorController ChampionCollectorController) GetAllChampionsFo
 	if companyID == "" {
 		companyID = fmt.Sprint(auth.UserCompanyId.Int64)
 	}
-
-	companyQuery = " and q.collector_id=" + companyID
 
 	// Retrieve champion ID from the URL parameter
 	collectorIDParam := context.Param("id")
