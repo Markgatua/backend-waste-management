@@ -200,6 +200,7 @@ func runProgram() {
 	router.POST("aggregator/waste_types/create", middlewares.PermissionBlockerMiddleware("create_waste_type"), controllers.AggregatorController{}.SetWasteTypes)
 
 	router.GET("aggregator/users", middlewares.PermissionBlockerMiddleware("view_user"), controllers.AggregatorController{}.GetUsers)
+	router.GET("aggregator/collections",collectionRequestsController.GetCollections)
 
 
 	//-------------------------------------------------------------------------------------------
