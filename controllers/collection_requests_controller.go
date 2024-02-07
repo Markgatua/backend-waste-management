@@ -48,7 +48,6 @@ func (controller CollectionRequestsController) InsertWasteItems(context *gin.Con
 		if insertError != nil {
 			errorInsertingWasteItem = true
 		}
-
 	}
 
 	if errorInsertingWasteItem {
@@ -65,7 +64,6 @@ func (controller CollectionRequestsController) InsertWasteItems(context *gin.Con
 			context, gen.GetInventoryItemParams{
 				WasteTypeID: sql.NullInt32{Int32: int32(v.WasteTypeID), Valid: true},
 				CompanyID:   int32(auth.UserCompanyId.Int64)})
-
 		if err != nil && err == sql.ErrNoRows {
 			gen.REPO.InsertToInventory(context, gen.InsertToInventoryParams{
 				TotalWeight: v.Weight,
@@ -77,7 +75,6 @@ func (controller CollectionRequestsController) InsertWasteItems(context *gin.Con
 			logger.Log("CollectionRequestWasteItemsController/InsertWasteItems", fmt.Sprint("Error saving to inventory :: ", err.Error()), logger.LOG_LEVEL_ERROR)
 		} else {
 			currentQuantity := item.TotalWeight
-
 			var remainingWeight = currentQuantity + v.Weight
 			//update with the remaining weight
 			gen.REPO.UpdateInventoryItem(context, gen.UpdateInventoryItemParams{
