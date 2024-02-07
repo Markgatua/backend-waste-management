@@ -132,7 +132,7 @@ func (aggregatorController CollectionRequestsController) GetCollectionSchedule(c
 	companyQuery = " and q.collector_id=" + companyID
 
 	if dateRangeStart != "" && dateRangeEnd != "" {
-		dateRangeQuery = " and cast(q.created_at as date)>='" + dateRangeStart + "' and cast(q.created_at as date)<='" + dateRangeEnd + "'"
+		dateRangeQuery = " and cast(q.request_date as date)>='" + dateRangeStart + "' and cast(q.request_date as date)<='" + dateRangeEnd + "'"
 	}
 
 	query := `
@@ -154,7 +154,7 @@ func (aggregatorController CollectionRequestsController) GetCollectionSchedule(c
 		collection_requests.pickup_time_stamp_id,
 		collection_requests.id,
 		collection_requests.first_contact_person,
-		collecction_requests.second_contact_person,
+		collection_requests.second_contact_person,
 		pickup_time_stamps.stamp,
 		pickup_time_stamps.time_range
 
