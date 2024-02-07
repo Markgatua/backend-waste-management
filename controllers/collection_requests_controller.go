@@ -12,7 +12,7 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-type CollectionRequestWasteItemsController struct{}
+type CollectionRequestsController struct{}
 
 type InsertWasteItemParams struct {
 	CollectionRequestID int32   `json:"collection_request_id"`
@@ -23,7 +23,7 @@ type Waste struct {
 	Weight      float64 `json:"weight"`
 }
 
-func (controller CollectionRequestWasteItemsController) InsertWasteItems(context *gin.Context) {
+func (controller CollectionRequestsController) InsertWasteItems(context *gin.Context) {
 	auth, _ := helpers.Functions{}.CurrentUserFromToken(context)
 
 	var params InsertWasteItemParams
