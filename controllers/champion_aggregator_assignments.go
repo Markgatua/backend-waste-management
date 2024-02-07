@@ -254,7 +254,7 @@ func (championCollectorController ChampionCollectorController) GetAllChampionsFo
         companies.contact_person2_email as contact_person2_email,
         companies.contact_person2_first_name as contact_person2_first_name,
         companies.contact_person2_last_name as contact_person2_last_name,
-        companies.contact_person2_phone as contact_person2_phone,
+        companies.contact_person2_phone as contact_person2_phone
 
 		from champion_aggregator_assignments
 
@@ -263,7 +263,7 @@ func (championCollectorController ChampionCollectorController) GetAllChampionsFo
 	 ) as q where q.created_at is not null and q.collector_id=`+collectorIDParam + searchQuery + companyQuery + " order by q.created_at desc " + limitOffset
 
 	var totalCount = 0
-	err := gen.REPO.DB.Get(&totalCount, fmt.Sprint("select count(*) from champion_aggregator_assignments where created_at is not null and collector_id=", companyID))
+	err := gen.REPO.DB.Get(&totalCount, fmt.Sprint("select count(*) from champion_aggregator_assignments where created_at is not null and collector_id=", collectorIDParam))
 
 	if err != nil {
 		logger.Log("AggregatorController/GetAllChampionsForACollector", err.Error(), logger.LOG_LEVEL_ERROR)
@@ -285,7 +285,7 @@ func (championCollectorController ChampionCollectorController) GetAllChampionsFo
 		select champion_pickup_times.*, 
 		pickup_time_stamps.stamp,
 		pickup_time_stamps.time_range 
-		from champion_pickup_times left join pickup_time_stamps where pickup_time_stamps.id=champion_pickup_times.pickup_time_stamp_id
+		from champion_pickup_times left join pickup_time_stamps on pickup_time_stamps.id=champion_pickup_times.pickup_time_stamp_id
 
 		where champion_pickup_times.champion_aggregator_assignment_id=
 		`, assignmentID)
@@ -293,7 +293,7 @@ func (championCollectorController ChampionCollectorController) GetAllChampionsFo
 		pickupTimes, err := utils.Select(gen.REPO.DB, query)
 
 		if err != nil {
-			logger.Log("AggregatorController/GetAllChampionsForACollector[pickup time]", err.Error(), logger.LOG_LEVEL_ERROR)
+			logger.Log("AggregatorController/GetAllChampionsForACollector[pickup time]",query, logger.LOG_LEVEL_ERROR)
 		}
 		v["pickup_times"] = pickupTimes
 	}
