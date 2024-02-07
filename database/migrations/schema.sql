@@ -193,15 +193,31 @@ CREATE TABLE waste_types (
   created_at TIMESTAMP NOT NULL DEFAULT NOW()
 );
 
+CREATE TABLE pickup_time_stamps (
+  id SERIAL PRIMARY KEY,
+  stamp VARCHAR(255) NOT NULL,
+  time_range VARCHAR(255) NOT NULL
+);
+
+ALTER TABLE pickup_time_stamps ADD CONSTRAINT check_stamp CHECK (stamp IN ('Morning','Afternoon','Evening')); 
+
 CREATE TABLE collection_requests (
   id SERIAL PRIMARY KEY,
   producer_id INTEGER NOT NULL,
   FOREIGN Key (producer_id) REFERENCES companies(id),
   collector_id INTEGER NOT NULL,
   FOREIGN Key (collector_id) REFERENCES companies(id),
-  request_date TIMESTAMP NOT NULL,
+  request_date DATE NOT NULL,
+  pickup_time_stamp_id INTEGER NOT NULL,
+  FOREIGN Key (pickup_time_stamp_id) REFERENCES pickup_time_stamps(id),
+  location VARCHAR(255) NULL, -- the location of this company ie citadel muthithi road
+  administrative_level_1_location VARCHAR(255) NULL, -- in kenya, this will be county, in uganda it will be a different value , ie Nairobi county
+  lat float NULL,
+  lng float NULL,
   pickup_date TIMESTAMP NULL,
   status INTEGER NOT NULL, --1 pending, 2 confirmed, 3 on the way, 4 cancelled, 5 completed  
+  first_contact_person VARCHAR(255) NOT NULL,
+  second_contact_person VARCHAR(255),
   created_at TIMESTAMP NOT NULL DEFAULT NOW()
 );
 
