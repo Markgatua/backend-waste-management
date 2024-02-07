@@ -23,6 +23,7 @@ type Waste struct {
 	Weight      float64 `json:"weight"`
 }
 
+
 func (controller CollectionRequestsController) InsertWasteItems(context *gin.Context) {
 	auth, _ := helpers.Functions{}.CurrentUserFromToken(context)
 
@@ -47,14 +48,7 @@ func (controller CollectionRequestsController) InsertWasteItems(context *gin.Con
 		if insertError != nil {
 			errorInsertingWasteItem = true
 		}
-		// if insertError != nil {
-		// 	context.JSON(http.StatusUnprocessableEntity, gin.H{
-		// 		"error":           true,
-		// 		"message":         "Failed to insert waste items",
-		// 		"Collected Waste": collectedWaste,
-		// 	})
-		// 	return
-		// }
+
 	}
 
 	if errorInsertingWasteItem {
@@ -97,5 +91,9 @@ func (controller CollectionRequestsController) InsertWasteItems(context *gin.Con
 		"error":   true,
 		"message": "Inserted waste items",
 	})
+
+}
+
+func (controller CollectionRequestsController) GetCollections(context *gin.Context) {
 
 }
