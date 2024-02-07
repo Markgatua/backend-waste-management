@@ -112,6 +112,15 @@ CREATE TABLE companies (
   lng float NULL,
   is_active BOOLEAN NOT NULL DEFAULT TRUE,
   created_at TIMESTAMP NOT NULL DEFAULT NOW(),
+  contact_person1_first_name VARCHAR NULL,
+  contact_person1_last_name VARCHAR NULL,
+  contact_person1_phone VARCHAR NULL,
+  contact_person1_email VARCHAR NULL,
+  contact_person2_email VARCHAR NULL,
+  contact_person2_first_name VARCHAR NULL,
+  contact_person2_last_name VARCHAR NULL,
+  contact_person2_phone VARCHAR NULL,
+  
   FOREIGN Key (organization_id) REFERENCES organizations(id),
   FOREIGN Key (country_id) REFERENCES countries(id)
 );
