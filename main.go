@@ -58,7 +58,7 @@ func runProgram() {
 	// rolespermissions := controllers.RoleAndPermissionsController{}
 	ttnmOrganizationController := controllers.TtnmOrganizationController{}
 	requestCollectionController := controllers.RequestCollectionController{}
-	wasteItemsController := controllers.WasteItemsController{}
+	wasteItemsController := controllers.CollectionRequestWasteItemsController{}
 
 	router.LoadHTMLGlob("templates/**/*")
 
@@ -269,7 +269,7 @@ func runProgram() {
 
 	
 	//--------------------------- Request Collections -----------------------------------------------------
-	router.POST("collection_request_data", wasteItemsController.InsertWasteItem)
+	router.POST("collection_request_data", wasteItemsController.InsertWasteItems)
 	router.GET("collection_request_latest/:id", requestCollectionController.GetLatestCollection)
 	router.GET("collections_producer_waste_data/:id", requestCollectionController.GetWasteItemsProducerData)
 	router.GET("collections_producer_stats/:id", requestCollectionController.GetCollectionStats)

@@ -2,10 +2,12 @@ package controllers
 
 import (
 	"database/sql"
+	"fmt"
 	_ "fmt"
 	"net/http"
 	"ttnmwastemanagementsystem/gen"
 	"ttnmwastemanagementsystem/helpers"
+	"ttnmwastemanagementsystem/logger"
 
 	"github.com/gin-gonic/gin"
 )
@@ -21,7 +23,7 @@ type Waste struct {
 	Weight      float64 `json:"weight"`
 }
 
-func (controller CollectionRequestWasteItemsController) InsertWasteItem(context *gin.Context) {
+func (controller CollectionRequestWasteItemsController) InsertWasteItems(context *gin.Context) {
 	auth, _ := helpers.Functions{}.CurrentUserFromToken(context)
 
 	var params InsertWasteItemParams
@@ -65,12 +67,21 @@ func (controller CollectionRequestWasteItemsController) InsertWasteItem(context 
 	}
 
 	for _, v := range params.Waste {
-		item, get_error := gen.REPO.GetInventoryItem(
+		item, err := gen.REPO.GetInventoryItem(
 			context, gen.GetInventoryItemParams{
 				WasteTypeID: sql.NullInt32{Int32: int32(v.WasteTypeID), Valid: true},
 				CompanyID:   int32(auth.UserCompanyId.Int64)})
 
-		if get_error != nil {
+		if err != nil && err == sql.ErrNoRows {
+			gen.REPO.InsertToInventory(context, gen.InsertToInventoryParams{
+				TotalWeight: v.Weight,
+				CompanyID:   int32(auth.UserCompanyId.Int64),
+				WasteTypeID: sql.NullInt32{Int32: int32(v.WasteTypeID), Valid: true},
+			})
+		} else if err != nil && err != sql.ErrNoRows {
+			//errorSavingInventory = true
+			logger.Log("CollectionRequestWasteItemsController/InsertWasteItems", fmt.Sprint("Error saving to inventory :: ", err.Error()), logger.LOG_LEVEL_ERROR)
+		} else {
 			currentQuantity := item.TotalWeight
 
 			var remainingWeight = currentQuantity + v.Weight
