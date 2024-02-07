@@ -251,9 +251,11 @@ ALTER TABLE collection_requests ADD CONSTRAINT collection_requests_status CHECK 
 CREATE TABLE collection_request_waste_items (
   id SERIAL PRIMARY KEY,
   collection_request_id INTEGER NOT NULL,
+  collector_id INTEGER NOT NULL,
   FOREIGN Key (collection_request_id) REFERENCES collection_requests(id),
   waste_type_id INTEGER NOT NULL,
   FOREIGN Key (waste_type_id) REFERENCES waste_types(id),
+  FOREIGN Key (collector_id) REFERENCES companies(id),
   weight FLOAT NOT NULL,
   created_at TIMESTAMP NOT NULL DEFAULT NOW()
 );

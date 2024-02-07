@@ -20,22 +20,29 @@ func (q *Queries) DeleteWasteItemsForCollectionRequest(ctx context.Context, coll
 
 const insertCollectionRequestWasteItem = `-- name: InsertCollectionRequestWasteItem :one
 
-INSERT INTO collection_request_waste_items (collection_request_id,waste_type_id,weight) VALUES ($1,$2,$3) RETURNING id, collection_request_id, waste_type_id, weight, created_at
+INSERT INTO collection_request_waste_items (collection_request_id,waste_type_id,weight,collector_id) VALUES ($1,$2,$3,$4) RETURNING id, collection_request_id, collector_id, waste_type_id, weight, created_at
 `
 
 type InsertCollectionRequestWasteItemParams struct {
 	CollectionRequestID int32   `json:"collection_request_id"`
 	WasteTypeID         int32   `json:"waste_type_id"`
 	Weight              float64 `json:"weight"`
+	CollectorID         int32   `json:"collector_id"`
 }
 
 // waste_items.sql
 func (q *Queries) InsertCollectionRequestWasteItem(ctx context.Context, arg InsertCollectionRequestWasteItemParams) (CollectionRequestWasteItem, error) {
-	row := q.db.QueryRowContext(ctx, insertCollectionRequestWasteItem, arg.CollectionRequestID, arg.WasteTypeID, arg.Weight)
+	row := q.db.QueryRowContext(ctx, insertCollectionRequestWasteItem,
+		arg.CollectionRequestID,
+		arg.WasteTypeID,
+		arg.Weight,
+		arg.CollectorID,
+	)
 	var i CollectionRequestWasteItem
 	err := row.Scan(
 		&i.ID,
 		&i.CollectionRequestID,
+		&i.CollectorID,
 		&i.WasteTypeID,
 		&i.Weight,
 		&i.CreatedAt,

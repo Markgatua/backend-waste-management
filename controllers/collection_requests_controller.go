@@ -23,7 +23,6 @@ type Waste struct {
 	Weight      float64 `json:"weight"`
 }
 
-
 func (controller CollectionRequestsController) InsertWasteItems(context *gin.Context) {
 	auth, _ := helpers.Functions{}.CurrentUserFromToken(context)
 
@@ -43,6 +42,7 @@ func (controller CollectionRequestsController) InsertWasteItems(context *gin.Con
 		_, insertError := gen.REPO.InsertCollectionRequestWasteItem(context, gen.InsertCollectionRequestWasteItemParams{
 			CollectionRequestID: params.CollectionRequestID,
 			WasteTypeID:         int32(wasteItem.WasteTypeID),
+			CollectorID:         int32(auth.UserCompanyId.Int64),
 			Weight:              wasteItem.Weight,
 		})
 		if insertError != nil {

@@ -72,6 +72,7 @@ type CollectionRequest struct {
 type CollectionRequestWasteItem struct {
 	ID                  int32     `json:"id"`
 	CollectionRequestID int32     `json:"collection_request_id"`
+	CollectorID         int32     `json:"collector_id"`
 	WasteTypeID         int32     `json:"waste_type_id"`
 	Weight              float64   `json:"weight"`
 	CreatedAt           time.Time `json:"created_at"`
