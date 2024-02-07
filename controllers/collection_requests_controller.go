@@ -6,6 +6,7 @@ import (
 	_ "fmt"
 	"net/http"
 	"strconv"
+	"time"
 	"ttnmwastemanagementsystem/gen"
 	"ttnmwastemanagementsystem/helpers"
 	"ttnmwastemanagementsystem/logger"
@@ -111,7 +112,7 @@ func (aggregatorController CollectionRequestsController) GetCollectionSchedule(c
 	statusQuery := ""
 
 	if search != "" {
-		searchQuery = " and (q.waste_name ilike " + "'%" + search + "%'" + " or q.company_name ilike " + "'%" + search + "%'" + ")"
+		searchQuery = " and (q.time_range ilike " + "'%" + search + "%'" + " or q.champion_name ilike " + "'%" + search + "%'" + ")"
 	}
 	if itemsPerPage != "" && page != "" {
 		itemsPerPage, _ := strconv.Atoi(context.Query("ipp"))
@@ -145,11 +146,15 @@ func (aggregatorController CollectionRequestsController) GetCollectionSchedule(c
 		collection_requests.request_date,
 		collection_requests.pickup_date,
 		collection_requests.status,
+
+		collection_requests.lat,
+		collection_requests.lng,
+
 		collection_requests.created_at,
 		collection_requests.pickup_time_stamp_id,
 		collection_requests.id,
 		pickup_time_stamps.stamp,
-		pickup_time_stamps.time_range,
+		pickup_time_stamps.time_range
 
 		from collection_requests 
 
@@ -172,9 +177,28 @@ func (aggregatorController CollectionRequestsController) GetCollectionSchedule(c
 		return
 	}
 
+	group := make(map[string][]interface{})
+
+	for _, v := range results {
+		requestDate,_:=v["request_date"]
+		//date, _ := time.Parse("2006-01-02", requestDate.(string))
+
+		key :=  requestDate.(time.Time).Format("2006-01-02")
+
+		items, ok := group[key]
+		if ok {
+			items = append(items, v)
+			group[key]=items
+		} else {
+			var values []interface{}
+			values = append(values, v)
+			group[key] = values
+		}
+	}
+
 	context.JSON(http.StatusOK, gin.H{
 		"error":   false,
-		"content": results,
+		"content": group,
 		//"total_count": totalCount,
 	})
 }
