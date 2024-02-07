@@ -12,7 +12,7 @@ import (
 type Querier interface {
 	ActivateRole(ctx context.Context, roleID int32) error
 	AssignChampionToCollector(ctx context.Context, arg AssignChampionToCollectorParams) (ChampionAggregatorAssignment, error)
-	AssignCollectorsToGreenChampion(ctx context.Context, arg AssignCollectorsToGreenChampionParams) error
+	AssignCollectorsToGreenChampion(ctx context.Context, arg AssignCollectorsToGreenChampionParams) (ChampionAggregatorAssignment, error)
 	AssignPermission(ctx context.Context, arg AssignPermissionParams) error
 	AssignPermissionToRole(ctx context.Context, arg AssignPermissionToRoleParams) error
 	CancelCollectionRequest(ctx context.Context, id int32) error
@@ -133,6 +133,7 @@ type Querier interface {
 	RevokePermission(ctx context.Context, arg RevokePermissionParams) error
 	RoleExists(ctx context.Context, name string) (int64, error)
 	SetBuyerActiveInactiveStatus(ctx context.Context, arg SetBuyerActiveInactiveStatusParams) error
+	SetPickupTimesForGreenChampion(ctx context.Context, arg SetPickupTimesForGreenChampionParams) error
 	SetSupplierActiveInactiveStatus(ctx context.Context, arg SetSupplierActiveInactiveStatusParams) error
 	UpdateBuyer(ctx context.Context, arg UpdateBuyerParams) error
 	UpdateChampionCollector(ctx context.Context, arg UpdateChampionCollectorParams) error

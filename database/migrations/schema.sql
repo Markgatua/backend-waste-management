@@ -171,18 +171,41 @@ CREATE TABLE email_verification_token (
 );
 
 
--- Create "champion_assigned_aggregator" table
+-- Create "Champion_assigned_aggregator" table
 CREATE TABLE champion_aggregator_assignments (
   id SERIAL PRIMARY KEY,
   champion_id INTEGER NOT NULL,
   FOREIGN Key (champion_id) REFERENCES companies(id),
   collector_id INTEGER NOT NULL,
   FOREIGN Key (collector_id) REFERENCES companies(id),
-  pickup_day VARCHAR NULL,
-  pickup_time VARCHAR NULL,
+  --pickup_day VARCHAR NULL,
+  --pickup_time VARCHAR NULL,
   created_at TIMESTAMP NOT NULL DEFAULT NOW()
 );
-ALTER TABLE champion_aggregator_assignments ADD CONSTRAINT check_pickup_day CHECK (pickup_day IN ('Monday','Tuesday','Wednesday','Thursday','Friday','Saturday','Sunday')); 
+
+--ALTER TABLE champion_aggregator_assignments ADD CONSTRAINT check_pickup_day CHECK (pickup_day IN ('Monday','Tuesday','Wednesday','Thursday','Friday','Saturday','Sunday')); 
+
+
+CREATE TABLE pickup_time_stamps (
+  id SERIAL PRIMARY KEY,
+  stamp VARCHAR(255) NOT NULL,
+  time_range VARCHAR(255) NOT NULL
+);
+ALTER TABLE pickup_time_stamps ADD CONSTRAINT check_stamp CHECK (stamp IN ('Morning','Afternoon','Evening'));
+
+-- Create "Champion pickup times"
+CREATE TABLE champion_pickup_times(
+  id SERIAL PRIMARY KEY,
+  champion_aggregator_assignment_id INTEGER NOT NULL,
+  pickup_time_stamp_id INTEGER NOT NULL,
+  ExactPickupTime VARCHAR(255) NULL,
+  FOREIGN Key (champion_aggregator_assignment_id) REFERENCES champion_aggregator_assignments(id) on delete cascade,
+  FOREIGN Key (pickup_time_stamp_id) REFERENCES pickup_time_stamps(id),
+  pickup_day VARCHAR NOT NULL
+);
+
+ALTER TABLE champion_pickup_times ADD CONSTRAINT champion_pickup_times_check_pickup_day CHECK (pickup_day IN ('Monday','Tuesday','Wednesday','Thursday','Friday','Saturday','Sunday')); 
+
 
 CREATE TABLE waste_types (
   id SERIAL PRIMARY KEY,
@@ -193,13 +216,6 @@ CREATE TABLE waste_types (
   created_at TIMESTAMP NOT NULL DEFAULT NOW()
 );
 
-CREATE TABLE pickup_time_stamps (
-  id SERIAL PRIMARY KEY,
-  stamp VARCHAR(255) NOT NULL,
-  time_range VARCHAR(255) NOT NULL
-);
-
-ALTER TABLE pickup_time_stamps ADD CONSTRAINT check_stamp CHECK (stamp IN ('Morning','Afternoon','Evening')); 
 
 CREATE TABLE collection_requests (
   id SERIAL PRIMARY KEY,

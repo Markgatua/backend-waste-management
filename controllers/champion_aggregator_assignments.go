@@ -5,9 +5,10 @@ import (
 	"net/http"
 	"strconv"
 	"ttnmwastemanagementsystem/gen"
+	"ttnmwastemanagementsystem/logger"
 
 	"github.com/gin-gonic/gin"
-	"gopkg.in/guregu/null.v3"
+	_ "gopkg.in/guregu/null.v3"
 )
 
 type ChampionCollectorController struct{}
@@ -23,9 +24,13 @@ type AssignAggregatorsToGreenChampionsParams struct {
 }
 
 type Aggregator struct {
-	ID         int64  `json:"id"`
-	PickupTime string `json:"pickup_time"`
-	PickupDay  string `json:"pickup_day"`
+	ID          int64         `json:"id"`
+	PickupTimes []PickUpTimes `json:"pickup_times"`
+}
+
+type PickUpTimes struct {
+	PickupID  int32  `json:"pickup_id" binding:"required"`
+	PickupDay string `json:"pickup_day"`
 }
 
 type UpdateChampionCollectorParams struct {
@@ -86,12 +91,25 @@ func (championCollectorController ChampionCollectorController) AssignAggregators
 		return
 	}
 	for _, v := range params.Aggregators {
-		gen.REPO.AssignCollectorsToGreenChampion(context, gen.AssignCollectorsToGreenChampionParams{
+		value,err:=gen.REPO.AssignCollectorsToGreenChampion(context, gen.AssignCollectorsToGreenChampionParams{
 			ChampionID:  params.GreenChampionID,
 			CollectorID: int32(v.ID),
-			PickupDay:   null.StringFrom(v.PickupDay).NullString,
-			PickupTime:  null.StringFrom(v.PickupTime).NullString,
+			//PickupDay:   null.StringFrom(v.PickupDay).NullString,
+			//PickupTime:  null.StringFrom(v.PickupTime).NullString,
 		})
+		if err!=nil{
+			logger.Log("ChamptionAggregatorAssignmentController",err.Error(),logger.LOG_LEVEL_ERROR)
+		}
+		for _, x := range v.PickupTimes {
+			err = gen.REPO.SetPickupTimesForGreenChampion(context,gen.SetPickupTimesForGreenChampionParams{
+				ChampionAggregatorAssignmentID: value.ID,
+				PickupTimeStampID: x.PickupID,
+				PickupDay: x.PickupDay,
+			})
+			if err!=nil{
+				logger.Log("ChamptionAggregatorAssignmentController [Pickup times]",err.Error(),logger.LOG_LEVEL_ERROR)
+			}
+		}
 	}
 	context.JSON(http.StatusOK, gin.H{
 		"error":   false,

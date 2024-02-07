@@ -38,12 +38,18 @@ type Buyer struct {
 }
 
 type ChampionAggregatorAssignment struct {
-	ID          int32          `json:"id"`
-	ChampionID  int32          `json:"champion_id"`
-	CollectorID int32          `json:"collector_id"`
-	PickupDay   sql.NullString `json:"pickup_day"`
-	PickupTime  sql.NullString `json:"pickup_time"`
-	CreatedAt   time.Time      `json:"created_at"`
+	ID          int32     `json:"id"`
+	ChampionID  int32     `json:"champion_id"`
+	CollectorID int32     `json:"collector_id"`
+	CreatedAt   time.Time `json:"created_at"`
+}
+
+type ChampionPickupTime struct {
+	ID                             int32          `json:"id"`
+	ChampionAggregatorAssignmentID int32          `json:"champion_aggregator_assignment_id"`
+	PickupTimeStampID              int32          `json:"pickup_time_stamp_id"`
+	Exactpickuptime                sql.NullString `json:"exactpickuptime"`
+	PickupDay                      string         `json:"pickup_day"`
 }
 
 type CollectionRequest struct {
