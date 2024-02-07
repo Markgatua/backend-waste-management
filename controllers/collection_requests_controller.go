@@ -112,7 +112,7 @@ func (aggregatorController CollectionRequestsController) GetCollections(context 
 	limitOffset := ""
 
 	if search != "" {
-		searchQuery = " and (q.waste_name ilike " + "'%" + search + "%'" + " or q.company_name ilike " + "'%" + search + "%'" + " or q.last_name ilike " + "'%" + search + "%'" + " or q.ref ilike " + "'%" + search + "%'" + ")"
+		searchQuery = " and (q.waste_name ilike " + "'%" + search + "%'" + " or q.company_name ilike " + "'%" + search + "%'" + ")"
 	}
 	if itemsPerPage != "" && page != "" {
 		itemsPerPage, _ := strconv.Atoi(context.Query("ipp"))
@@ -143,14 +143,14 @@ func (aggregatorController CollectionRequestsController) GetCollections(context 
 		collection_request_waste_items.id,
 		collection_request_waste_items.waste_type_id,
 		collection_request_waste_items.weight,
-		collection_request_waste_items.collector_id,
+		collection_request_waste_items.collector_id as company_id,
 		collection_request_waste_items.created_at,
 		waste_types.name as waste_name,
-		companies.name as company_name,
+		companies.name as company_name
 		from collection_request_waste_items 
 
 		inner join companies on companies.id=collection_request_waste_items.collector_id
-		inner join collection_request_waste_items on collection_request_waste_items.waste_type_id=waste_types.id
+		inner join waste_types on collection_request_waste_items.waste_type_id=waste_types.id
 	 ) as q where q.created_at is not null` + dateRangeQuery + searchQuery + companyQuery + " order by q.created_at desc " + limitOffset
 
 	var totalCount = 0
