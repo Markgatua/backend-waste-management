@@ -1674,8 +1674,14 @@ func (aggregatorController AggregatorController) GetUsers(context *gin.Context) 
 	if search != "" {
 		searchQuery = " and (q.first_name ilike " + "'%" + search + "%'" + " or q.company_name ilike " + "'%" + search + "%'" + " or q.last_name ilike " + "'%" + search + "%'" + " or q.ref ilike " + "'%" + search + "%'" + ")"
 	}
+
 	if itemsPerPage != "" && page != "" {
-		limitOffset = " LIMIT " + itemsPerPage + " OFFSET " + page
+		itemsPerPage, _ := strconv.Atoi(context.Query("ipp"))
+		page, _ := strconv.Atoi(context.Query("p"))
+
+		offset := (page - 1) * itemsPerPage
+
+		limitOffset = fmt.Sprint(" LIMIT ", itemsPerPage, " OFFSET ", offset)
 	}
 	if companyID == "" {
 		companyID = fmt.Sprint(auth.UserCompanyId.Int64)
@@ -1703,7 +1709,7 @@ func (aggregatorController AggregatorController) GetUsers(context *gin.Context) 
 
 		inner join roles on users.role_id=roles.id
 
-	 ) as q where q.created_at is not null and q.role_id!=3 ` + searchQuery + companyQuery + " order by q.created_at desc " + limitOffset
+	 ) as q where q.created_at is not null and q.role_id!=3` + searchQuery + companyQuery + " order by q.created_at desc " + limitOffset
 
 	var totalCount = 0
 	err := gen.REPO.DB.Get(&totalCount, fmt.Sprint("select count(*) from users where created_at is not null and users.role_id!=3 and user_company_id=",companyID))
