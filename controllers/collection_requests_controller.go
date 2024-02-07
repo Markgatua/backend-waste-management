@@ -97,10 +97,12 @@ func (controller CollectionRequestsController) InsertWasteItems(context *gin.Con
 func (aggregatorController CollectionRequestsController) GetCollectionSchedule(context *gin.Context) {
 	auth, _ := helpers.Functions{}.CurrentUserFromToken(context)
 	dateRangeStart := context.Query("sd")
-	search :=context.Query("s")
+	search := context.Query("s")
 	dateRangeEnd := context.Query("ed")
 	companyID := context.Query("cid")
-	status :=context.Query("st")//1- Pending, 2- confirmed, 3- on the way, 4 cancelled, 5 completed
+	itemsPerPage := context.Query("ipp")
+	page := context.Query("p")
+	status := context.Query("st") //1- Pending, 2- confirmed, 3- on the way, 4 cancelled, 5 completed
 
 	searchQuery := ""
 	companyQuery := ""
@@ -123,8 +125,9 @@ func (aggregatorController CollectionRequestsController) GetCollectionSchedule(c
 		companyID = fmt.Sprint(auth.UserCompanyId.Int64)
 		//companyQuery = fmt.Sprint(" and  q.company_id=", auth.UserCompanyId.Int64)
 	}
-
-
+	if status != "" {
+		statusQuery = " and q.status=" + status
+	}
 	companyQuery = " and q.collector_id=" + companyID
 
 	if dateRangeStart != "" && dateRangeEnd != "" {
@@ -152,10 +155,10 @@ func (aggregatorController CollectionRequestsController) GetCollectionSchedule(c
 
 		inner join pickup_time_stamps on pickup_time_stamps.id=collection_requests.pickup_time_stamp_id
 		inner join companies on companies.id=collection_requests.producer_id
-	 ) as q where q.created_at is not null` + dateRangeQuery + searchQuery + companyQuery + " order by q.created_at desc " + limitOffset
+	 ) as q where q.created_at is not null` + dateRangeQuery + statusQuery + searchQuery + companyQuery + " order by q.created_at desc " + limitOffset
 
-	var totalCount = 0
-	err := gen.REPO.DB.Get(&totalCount, fmt.Sprint("select count(*) from collection_request_waste_items where created_at is not null and collector_id=", companyID))
+	// var totalCount = 0
+	// err := gen.REPO.DB.Get(&totalCount, fmt.Sprint("select count(*) from collection_request_waste_items where created_at is not null and collector_id=", companyID))
 
 	//fmt.Println(err.Error())
 	logger.Log("CollectionRequestsController/GetCollections", query, logger.LOG_LEVEL_INFO)
@@ -169,11 +172,10 @@ func (aggregatorController CollectionRequestsController) GetCollectionSchedule(c
 		return
 	}
 
-
 	context.JSON(http.StatusOK, gin.H{
-		"error":       false,
-		"content":     results,
-		"total_count": totalCount,
+		"error":   false,
+		"content": results,
+		//"total_count": totalCount,
 	})
 }
 
