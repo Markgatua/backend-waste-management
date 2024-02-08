@@ -80,6 +80,12 @@ CREATE TABLE organizations(
 
 ALTER TABLE organizations ADD CONSTRAINT check_organizations_type CHECK (organization_type IN (1,2)); -- make sure organization type is either 1 or 2
 
+CREATE TABLE vehicles(
+  id SERIAL PRIMARY key,
+  type VARCHAR(255) not NULL,
+  
+
+)
 
 CREATE TABLE main_organization(
   id SERIAL PRIMARY KEY,
