@@ -172,7 +172,7 @@ create table vehicle_types(
 CREATE TABLE vehicles(
   id SERIAL PRIMARY key,
   company_id INTEGER not null,
-  assigned_driver_id INTEGER not null,
+  assigned_driver_id INTEGER null,
   vehicle_type_id INTEGER not NULL,
   reg_no VARCHAR(255) not null UNIQUE,
   is_active BOOLEAN not null DEFAULT TRUE,

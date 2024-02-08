@@ -11,6 +11,7 @@ import (
 
 type Querier interface {
 	ActivateRole(ctx context.Context, roleID int32) error
+	AddVehicle(ctx context.Context, arg AddVehicleParams) (Vehicle, error)
 	AssignChampionToCollector(ctx context.Context, arg AssignChampionToCollectorParams) (ChampionAggregatorAssignment, error)
 	AssignCollectorsToGreenChampion(ctx context.Context, arg AssignCollectorsToGreenChampionParams) (ChampionAggregatorAssignment, error)
 	AssignPermission(ctx context.Context, arg AssignPermissionParams) error
@@ -44,6 +45,7 @@ type Querier interface {
 	DeleteRole(ctx context.Context, id int32) error
 	DeleteSale(ctx context.Context, id int32) error
 	DeleteSupplier(ctx context.Context, id int32) error
+	DeleteVehicle(ctx context.Context, id int32) error
 	DeleteWasteItemsForCollectionRequest(ctx context.Context, collectionRequestID int32) error
 	DuplicateCounties(ctx context.Context, name string) (int64, error)
 	DuplicatePickupTimeStamp(ctx context.Context, stamp string) (int64, error)
@@ -70,6 +72,7 @@ type Querier interface {
 	GetAllProducerCompletedCollectionRequests(ctx context.Context, producerID int32) ([]GetAllProducerCompletedCollectionRequestsRow, error)
 	GetAllProducerPendingCollectionRequests(ctx context.Context, producerID int32) ([]GetAllProducerPendingCollectionRequestsRow, error)
 	GetAllUsers(ctx context.Context) ([]GetAllUsersRow, error)
+	GetAllVehicles(ctx context.Context, companyID int32) ([]GetAllVehiclesRow, error)
 	// waste_types.sql
 	GetAllWasteTypes(ctx context.Context) ([]GetAllWasteTypesRow, error)
 	GetAssignedCollectorsToGreenChampion(ctx context.Context, championID int32) ([]ChampionAggregatorAssignment, error)
@@ -85,6 +88,8 @@ type Querier interface {
 	GetDuplicateCompaniesWithoutID(ctx context.Context, arg GetDuplicateCompaniesWithoutIDParams) ([]Company, error)
 	GetDuplicateOrganization(ctx context.Context, arg GetDuplicateOrganizationParams) ([]Organization, error)
 	GetDuplicateRoleHasPermission(ctx context.Context, arg GetDuplicateRoleHasPermissionParams) (int64, error)
+	GetDuplicateVehicle(ctx context.Context, regNo string) (int64, error)
+	GetDuplicateVehiclesWithoutID(ctx context.Context, arg GetDuplicateVehiclesWithoutIDParams) (int64, error)
 	GetInventoryItem(ctx context.Context, arg GetInventoryItemParams) (Inventory, error)
 	GetLatestCollection(ctx context.Context, id int32) (GetLatestCollectionRow, error)
 	GetMainOrganization(ctx context.Context, organizationID string) ([]MainOrganization, error)
@@ -155,6 +160,8 @@ type Querier interface {
 	UpdateUserFirstNameLastNameEmailRoleAndUserType(ctx context.Context, arg UpdateUserFirstNameLastNameEmailRoleAndUserTypeParams) error
 	UpdateUserFirstNameLastNameEmailRoleUserTypeAndPassword(ctx context.Context, arg UpdateUserFirstNameLastNameEmailRoleUserTypeAndPasswordParams) error
 	UpdateUserIsActive(ctx context.Context, arg UpdateUserIsActiveParams) error
+	UpdateVehicle(ctx context.Context, arg UpdateVehicleParams) error
+	UpdateVehicleStatus(ctx context.Context, arg UpdateVehicleStatusParams) error
 	UpdateWasteType(ctx context.Context, arg UpdateWasteTypeParams) error
 	ViewCounties(ctx context.Context) ([]County, error)
 	ViewSubCounties(ctx context.Context) ([]SubCounty, error)
