@@ -182,6 +182,7 @@ func (aggregatorController CollectionRequestsController) GetCollectionSchedule(c
 	group := make(map[string][]interface{})
 
 	for _, v := range results {
+		v["type"]="Collection request"
 		requestDate,_:=v["request_date"]
 		//date, _ := time.Parse("2006-01-02", requestDate.(string))
 
