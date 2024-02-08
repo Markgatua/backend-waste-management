@@ -297,8 +297,6 @@ func (aggregatorController CollectionRequestsController) GetCollectionSchedule(c
 	context.JSON(http.StatusOK, gin.H{
 		"error":               false,
 		"content":             group,
-		//"collection_schedule": collectionScheduleResults,
-		//"total_count": totalCount,
 	})
 }
 
