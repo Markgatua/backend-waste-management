@@ -65,6 +65,44 @@
             }
         ]
     },
+
+    {
+        "module":"Vehicles",
+        "key":"vehicles",
+        "permissions":[
+            {
+                "permission_id": 103,
+                "name": "Add vehicle",
+                "sub_module": "vehicle",
+                "action": "add_vehicle"
+            },
+            {
+                "permission_id": 103,
+                "name": "Edit vehicle",
+                "sub_module": "vehicle",
+                "action": "edit_vehicle"
+            },
+            {
+                "permission_id": 103,
+                "name": "View vehicle",
+                "sub_module": "vehicle",
+                "action": "view_vehicle"
+            },
+            {
+                "permission_id": 103,
+                "name": "Delete vehicle",
+                "sub_module": "vehicle",
+                "action": "delete_vehicle"
+            },
+            {
+                "permission_id": 103,
+                "name": "View vehicle types",
+                "sub_module": "vehicle",
+                "action": "view_vehicle_types"
+            }
+        ]
+    },
+    
     {
         "module": "Settings",
         "key": "settings",

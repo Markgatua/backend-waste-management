@@ -10,6 +10,9 @@ INSERT INTO vehicle_types (id,name,max_vehicle_weight,max_vehicle_height,descrip
 -- name: UpdateVehicle :exec
 update vehicles set assigned_driver_id=$1,vehicle_type_id=$2,reg_no=$3,is_active=$4 where id=$5;
 
+-- name: GetVehicleTypes :many
+select * from vehicle_types;
+
 -- name: AddVehicle :one
 insert into vehicles(company_id,assigned_driver_id,vehicle_type_id,reg_no,is_active) VALUES(
    sqlc.arg('company_id'),

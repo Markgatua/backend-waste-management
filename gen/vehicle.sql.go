@@ -172,6 +172,39 @@ func (q *Queries) GetDuplicateVehiclesWithoutID(ctx context.Context, arg GetDupl
 	return count, err
 }
 
+const getVehicleTypes = `-- name: GetVehicleTypes :many
+select id, name, max_vehicle_weight, max_vehicle_height, description from vehicle_types
+`
+
+func (q *Queries) GetVehicleTypes(ctx context.Context) ([]VehicleType, error) {
+	rows, err := q.db.QueryContext(ctx, getVehicleTypes)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	items := []VehicleType{}
+	for rows.Next() {
+		var i VehicleType
+		if err := rows.Scan(
+			&i.ID,
+			&i.Name,
+			&i.MaxVehicleWeight,
+			&i.MaxVehicleHeight,
+			&i.Description,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
 const updateVehicle = `-- name: UpdateVehicle :exec
 update vehicles set assigned_driver_id=$1,vehicle_type_id=$2,reg_no=$3,is_active=$4 where id=$5
 `

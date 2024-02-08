@@ -82,6 +82,23 @@ func (controller VehicleController) InsertVehicle(context *gin.Context) {
 	})
 }
 
+
+
+func (controller VehicleController) GetAllVehicleTypes(context *gin.Context) {
+	auth, _ := helpers.Functions{}.CurrentUserFromToken(context)
+	items, err := gen.REPO.GetAllVehicles(context, int32(auth.UserCompanyId.Int64))
+	if err != nil {
+		context.JSON(http.StatusUnprocessableEntity, gin.H{
+			"error":   true,
+			"message": err.Error(),
+		})
+		return
+	}
+	context.JSON(http.StatusOK, gin.H{
+		"error":   false,
+		"content": items,
+	})
+}
 func (controller VehicleController) GetAllVehicles(context *gin.Context) {
 	auth, _ := helpers.Functions{}.CurrentUserFromToken(context)
 	items, err := gen.REPO.GetAllVehicles(context, int32(auth.UserCompanyId.Int64))
