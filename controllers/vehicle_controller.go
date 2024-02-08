@@ -83,10 +83,10 @@ func (controller VehicleController) InsertVehicle(context *gin.Context) {
 		})
 	} else {
 		vehicle, insertError := gen.REPO.AddVehicle(context, gen.AddVehicleParams{
-			CompanyID:        int32(auth.UserCompanyId.Int64),
-			VehicleTypeID:    params.VehicleTypeID,
-			RegNo:            params.RegNo,
-			IsActive:         *params.IsActive,
+			CompanyID:     int32(auth.UserCompanyId.Int64),
+			VehicleTypeID: params.VehicleTypeID,
+			RegNo:         params.RegNo,
+			IsActive:      *params.IsActive,
 		})
 		if insertError != nil {
 			context.JSON(http.StatusUnprocessableEntity, gin.H{
@@ -206,18 +206,35 @@ func (controller VehicleController) UpdateVehicle(context *gin.Context) {
 		return
 	}
 
-	updateError := gen.REPO.UpdateVehicle(context, gen.UpdateVehicleParams{
-		IsActive:         *params.IsActive,
-		RegNo:            params.RegNo,
-		AssignedDriverID: sql.NullInt32{Int32: *params.AssignedDriverID, Valid: params.AssignedDriverID != nil},
-		ID:               int32(params.ID),
-	})
-	if updateError != nil {
-		context.JSON(http.StatusUnprocessableEntity, gin.H{
-			"error":   true,
-			"message": updateError.Error(),
+	if params.AssignedDriverID != nil {
+		updateError := gen.REPO.UpdateVehicle(context, gen.UpdateVehicleParams{
+			IsActive:         *params.IsActive,
+			RegNo:            params.RegNo,
+			VehicleTypeID:    params.VehicleTypeID,
+			AssignedDriverID: sql.NullInt32{Int32: *params.AssignedDriverID, Valid: params.AssignedDriverID != nil},
+			ID:               int32(params.ID),
 		})
-		return
+		if updateError != nil {
+			context.JSON(http.StatusUnprocessableEntity, gin.H{
+				"error":   true,
+				"message": updateError.Error(),
+			})
+			return
+		}
+	} else {
+		updateError := gen.REPO.UpdateVehicle(context, gen.UpdateVehicleParams{
+			IsActive:         *params.IsActive,
+			RegNo:            params.RegNo,
+			VehicleTypeID:    params.VehicleTypeID,
+			ID:               int32(params.ID),
+		})
+		if updateError != nil {
+			context.JSON(http.StatusUnprocessableEntity, gin.H{
+				"error":   true,
+				"message": updateError.Error(),
+			})
+			return
+		}
 	}
 
 	context.JSON(http.StatusOK, gin.H{
