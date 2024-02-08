@@ -13,6 +13,7 @@ import (
 	"ttnmwastemanagementsystem/utils"
 
 	"github.com/gin-gonic/gin"
+	"github.com/golang-module/carbon"
 )
 
 type CollectionRequestsController struct{}
@@ -179,29 +180,124 @@ func (aggregatorController CollectionRequestsController) GetCollectionSchedule(c
 		return
 	}
 
+	var addRequestsToSchedule bool = true
+	now := carbon.Now()
 	group := make(map[string][]interface{})
-
 	for _, v := range results {
-		v["type"]="Collection request"
-		requestDate,_:=v["request_date"]
-		//date, _ := time.Parse("2006-01-02", requestDate.(string))
+		v["type"] = "Collection request"
+		requestDate, _ := v["request_date"]
 
-		key :=  requestDate.(time.Time).Format("2006-01-02")
+		if addRequestsToSchedule {
+			dayOfWeek := ""
+			carbonTime := carbon.Parse(requestDate.(time.Time).Format("2006-01-02"))
+			if carbonTime.IsMonday() {
+				dayOfWeek = "Monday"
+			} else if carbonTime.IsTuesday() {
+				dayOfWeek = "Tuesday"
+			} else if carbonTime.IsWednesday() {
+				dayOfWeek = "Wednesday"
+			} else if carbonTime.IsThursday() {
+				dayOfWeek = "Thursday"
+			} else if carbonTime.IsFriday() {
+				dayOfWeek = "Friday"
+			} else if carbonTime.IsSaturday() {
+				dayOfWeek = "Saturday"
+			} else if carbonTime.IsSunday() {
+				dayOfWeek = "Sunday"
+			}
 
-		items, ok := group[key]
-		if ok {
-			items = append(items, v)
-			group[key]=items
+			if carbonTime.DiffInWeeks(now) == 0 {
+				items, ok := group[dayOfWeek]
+				if ok {
+					items = append(items, v)
+					group[dayOfWeek] = items
+				} else {
+					var values []interface{}
+					values = append(values, v)
+					group[dayOfWeek] = values
+				}
+			}
+
+			//fmt.Println(dayOfWeek)
 		} else {
-			var values []interface{}
-			values = append(values, v)
-			group[key] = values
+			//date, _ := time.Parse("2006-01-02", requestDate.(string))
+			key := requestDate.(time.Time).Format("2006-01-02")
+			items, ok := group[key]
+			if ok {
+				items = append(items, v)
+				group[key] = items
+			} else {
+				var values []interface{}
+				values = append(values, v)
+				group[key] = values
+			}
 		}
 	}
 
+	collectionScheduleQuery := `
+	select * from 
+	(
+	   select 
+	   champion_pickup_times.id as pickup_time_id,
+	   champion_pickup_times.champion_aggregator_assignment_id,
+	   champion_pickup_times.pickup_time_stamp_id,
+	   champion_pickup_times.pickup_day,
+	   champion_aggregator_assignments.champion_id,
+	   champion_aggregator_assignments.collector_id,
+
+	   companies.lat,
+	   companies.lng,
+	   companies.name as champion_name,
+	   companies.location,
+
+	   companies.contact_person1_first_name,
+       companies.contact_person1_last_name,
+       companies.contact_person1_phone,
+       companies.contact_person1_email,
+       companies.contact_person2_email,
+	   companies.administrative_level_1_location,
+       companies.contact_person2_first_name,
+       companies.contact_person2_last_name,
+       companies.contact_person2_phone,
+
+	   pickup_time_stamps.stamp,
+	   pickup_time_stamps.time_range
+
+	   from champion_pickup_times 
+
+	   left join pickup_time_stamps on pickup_time_stamps.id=champion_pickup_times.pickup_time_stamp_id
+	   left join champion_aggregator_assignments on champion_pickup_times.champion_aggregator_assignment_id=champion_aggregator_assignments.id
+	   left join companies on companies.id = champion_aggregator_assignments.champion_id
+
+	) as q where q.pickup_time_id is not null` //+ dateRangeQuery + statusQuery + searchQuery + companyQuery + " order by q.created_at desc " + limitOffset
+
+	collectionScheduleResults, err := utils.Select(gen.REPO.DB, collectionScheduleQuery)
+	if err != nil {
+		context.JSON(http.StatusUnprocessableEntity, gin.H{
+			"error":   true,
+			"message": err.Error(),
+		})
+		return
+	}
+
+	for _, v := range collectionScheduleResults {
+		key, _ := v["pickup_day"]
+		items, ok := group[key.(string)]
+		if ok {
+			items = append(items, v)
+			group[key.(string)] = items
+		} else {
+			var values []interface{}
+			values = append(values, v)
+			group[key.(string)] = values
+		}
+		v["type"] = "Collection schedule"
+	}
+
 	context.JSON(http.StatusOK, gin.H{
-		"error":   false,
-		"content": group,
+		"error":               false,
+		"content":             group,
+		//"collection_schedule": collectionScheduleResults,
 		//"total_count": totalCount,
 	})
 }
