@@ -2,12 +2,12 @@ package controllers
 
 import (
 	"database/sql"
+	"github.com/gin-gonic/gin"
 	"net/http"
 	"strconv"
 	"strings"
 	"ttnmwastemanagementsystem/gen"
 	"ttnmwastemanagementsystem/helpers"
-	"github.com/gin-gonic/gin"
 )
 
 type VehicleController struct{}
@@ -62,7 +62,7 @@ func (controller VehicleController) InsertVehicle(context *gin.Context) {
 	}
 	vehicle, insertError := gen.REPO.AddVehicle(context, gen.AddVehicleParams{
 		CompanyID:        int32(auth.UserCompanyId.Int64),
-		AssignedDriverID: sql.NullInt32{Int32: *params.AssignedDriverID, Valid: params.AssignedDriverID!=nil},
+		AssignedDriverID: sql.NullInt32{Int32: *params.AssignedDriverID, Valid: params.AssignedDriverID != nil},
 		VehicleTypeID:    params.VehicleTypeID,
 		RegNo:            params.RegNo,
 		IsActive:         *params.IsActive,
@@ -172,8 +172,8 @@ func (controller VehicleController) UpdateVehicle(context *gin.Context) {
 	updateError := gen.REPO.UpdateVehicle(context, gen.UpdateVehicleParams{
 		IsActive:         *params.IsActive,
 		RegNo:            params.RegNo,
-		AssignedDriverID: sql.NullInt32{Int32: *params.AssignedDriverID, Valid: params.AssignedDriverID!=nil},
-		ID: int32(params.ID),
+		AssignedDriverID: sql.NullInt32{Int32: *params.AssignedDriverID, Valid: params.AssignedDriverID != nil},
+		ID:               int32(params.ID),
 	})
 	if updateError != nil {
 		context.JSON(http.StatusUnprocessableEntity, gin.H{
@@ -188,10 +188,3 @@ func (controller VehicleController) UpdateVehicle(context *gin.Context) {
 		"message": "Successfully updated vehicle",
 	})
 }
-
-
-
-
-
-
-

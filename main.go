@@ -215,6 +215,14 @@ func runProgram() {
 	router.PUT("green_champion/update", middlewares.PermissionBlockerMiddleware("edit_green_champion"), controllers.GreenChampionController{}.UpdateGreenChampion)
 	//-------------------------------------------------------------------------------------------
 
+	//---------------------------Vehicle ------------------------------------------------------
+	router.POST("vehicle/add", middlewares.PermissionBlockerMiddleware("add_green_champion"), controllers.VehicleController{}.InsertVehicle)
+	router.GET("vehicles", middlewares.PermissionBlockerMiddleware("view_green_champion"), controllers.VehicleController{}.GetAllVehicles)
+	router.PUT("vehicle/set_active_inactive_status", middlewares.PermissionBlockerMiddleware("edit_green_champion"), controllers.VehicleController{}.UpdateVehicleStatus)
+	router.DELETE("vehicle/delete/:id", middlewares.PermissionBlockerMiddleware("delete_green_champion"), controllers.VehicleController{}.DeleteVehicle)
+	router.PUT("vehicle/update", middlewares.PermissionBlockerMiddleware("edit_green_champion"), controllers.VehicleController{}.UpdateVehicle)
+	//-------------------------------------------------------------------------------------------
+
 	//---------------------------Roles ------------------------------------------------------
 	// router.GET("roles", rolesController.GetRoles)
 	// router.GET("role/:id", rolesController.GetRole)
