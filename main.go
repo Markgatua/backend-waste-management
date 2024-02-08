@@ -219,7 +219,6 @@ func runProgram() {
 	router.POST("vehicle/add", middlewares.PermissionBlockerMiddleware("add_vehicle"), controllers.VehicleController{}.InsertVehicle)
 	router.GET("vehicles", middlewares.PermissionBlockerMiddleware("view_vehicle"), controllers.VehicleController{}.GetAllVehicles)
 	router.GET("vehicle_types", middlewares.PermissionBlockerMiddleware("view_vehicle_types"), controllers.VehicleController{}.GetAllVehicleTypes)
-
 	router.PUT("vehicle/set_active_inactive_status", middlewares.PermissionBlockerMiddleware("edit_vehicle"), controllers.VehicleController{}.UpdateVehicleStatus)
 	router.DELETE("vehicle/delete/:id", middlewares.PermissionBlockerMiddleware("delete_vehicle"), controllers.VehicleController{}.DeleteVehicle)
 	router.PUT("vehicle/update", middlewares.PermissionBlockerMiddleware("edit_vehicle"), controllers.VehicleController{}.UpdateVehicle)

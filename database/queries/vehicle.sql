@@ -23,7 +23,11 @@ insert into vehicles(company_id,assigned_driver_id,vehicle_type_id,reg_no,is_act
 )returning *;
 
 -- name: GetAllVehicles :many
-select vehicles.*,vehicle_types.description,vehicle_types.max_vehicle_height,vehicle_types.max_vehicle_weight,vehicle_types.name from vehicles inner join vehicle_types on vehicle_types.id=vehicles.vehicle_type_id where vehicles.company_id=$1;
+select vehicles.*,users.first_name as driver_first_name,users.last_name as driver_last_name,users.calling_code as driver_calling_code,users.phone as driver_phone,users.email as driver_email, vehicle_types.description,vehicle_types.max_vehicle_height,vehicle_types.max_vehicle_weight,vehicle_types.name 
+from vehicles 
+inner join vehicle_types on vehicle_types.id=vehicles.vehicle_type_id 
+inner join users on vehicles.assigned_driver_id=users.id 
+where vehicles.company_id=$1;
 
 -- name: DeleteVehicle :exec
 delete from vehicles where id=$1;

@@ -60,33 +60,53 @@ func (controller VehicleController) InsertVehicle(context *gin.Context) {
 		})
 		return
 	}
-	vehicle, insertError := gen.REPO.AddVehicle(context, gen.AddVehicleParams{
-		CompanyID:        int32(auth.UserCompanyId.Int64),
-		AssignedDriverID: sql.NullInt32{Int32: *params.AssignedDriverID, Valid: params.AssignedDriverID != nil},
-		VehicleTypeID:    params.VehicleTypeID,
-		RegNo:            params.RegNo,
-		IsActive:         *params.IsActive,
-	})
-	if insertError != nil {
-		context.JSON(http.StatusUnprocessableEntity, gin.H{
-			"error":   true,
-			"message": "Failed to add vehicle",
+	if params.AssignedDriverID != nil {
+		vehicle, insertError := gen.REPO.AddVehicle(context, gen.AddVehicleParams{
+			CompanyID:        int32(auth.UserCompanyId.Int64),
+			AssignedDriverID: sql.NullInt32{Int32: *params.AssignedDriverID, Valid: params.AssignedDriverID != nil},
+			VehicleTypeID:    params.VehicleTypeID,
+			RegNo:            params.RegNo,
+			IsActive:         *params.IsActive,
 		})
-		return
+		if insertError != nil {
+			context.JSON(http.StatusUnprocessableEntity, gin.H{
+				"error":   true,
+				"message": "Failed to add vehicle",
+			})
+			return
+		}
+
+		context.JSON(http.StatusOK, gin.H{
+			"error":   false,
+			"message": "Successfully Added vehicle",
+			"vehicle": vehicle,
+		})
+	} else {
+		vehicle, insertError := gen.REPO.AddVehicle(context, gen.AddVehicleParams{
+			CompanyID:        int32(auth.UserCompanyId.Int64),
+			VehicleTypeID:    params.VehicleTypeID,
+			RegNo:            params.RegNo,
+			IsActive:         *params.IsActive,
+		})
+		if insertError != nil {
+			context.JSON(http.StatusUnprocessableEntity, gin.H{
+				"error":   true,
+				"message": "Failed to add vehicle",
+			})
+			return
+		}
+
+		context.JSON(http.StatusOK, gin.H{
+			"error":   false,
+			"message": "Successfully Added vehicle",
+			"vehicle": vehicle,
+		})
 	}
-	// If you want to return the created company as part of the response
-	context.JSON(http.StatusOK, gin.H{
-		"error":   false,
-		"message": "Successfully Added vehicle",
-		"vehicle": vehicle,
-	})
+
 }
 
-
-
 func (controller VehicleController) GetAllVehicleTypes(context *gin.Context) {
-	auth, _ := helpers.Functions{}.CurrentUserFromToken(context)
-	items, err := gen.REPO.GetAllVehicles(context, int32(auth.UserCompanyId.Int64))
+	items, err := gen.REPO.GetVehicleTypes(context)
 	if err != nil {
 		context.JSON(http.StatusUnprocessableEntity, gin.H{
 			"error":   true,
@@ -134,7 +154,7 @@ func (c VehicleController) DeleteVehicle(context *gin.Context) {
 }
 
 func (controller VehicleController) UpdateVehicleStatus(context *gin.Context) {
-	var params UpdateVehicleParams
+	var params UpdateVehicleStatusParams
 	err := context.ShouldBindJSON(&params)
 	if err != nil {
 		context.JSON(http.StatusUnprocessableEntity, gin.H{
