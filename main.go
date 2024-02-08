@@ -202,9 +202,9 @@ func runProgram() {
 	router.GET("aggregator/users", middlewares.PermissionBlockerMiddleware("view_user"), controllers.AggregatorController{}.GetUsers)
 	router.GET("aggregator/collections",collectionRequestsController.GetCollections)
 	router.GET("aggregator/collection_schedule",collectionRequestsController.GetCollectionSchedule)
-
-
 	//-------------------------------------------------------------------------------------------
+
+	router.GET("route_planner/get_routes",middlewares.PermissionBlockerMiddleware("manage_route_planning"),controllers.RoutePlanningController{}.GetRoutes)
 
 	//---------------------------Green champion ------------------------------------------------------
 	router.POST("green_champion/add", middlewares.PermissionBlockerMiddleware("add_green_champion"), controllers.GreenChampionController{}.InsertGreenChampion)

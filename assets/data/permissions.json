@@ -54,6 +54,18 @@
         ]
     },
     {
+        "module":"Route planning",
+        "key":"routeplanning",
+        "permissions":[
+            {
+                "permission_id":101,
+                "name":"Manage route planning",
+                "sub_module":"Route planning",
+                "action":"manage_route_planning"
+            }
+        ]
+    },
+    {
         "module": "Settings",
         "key": "settings",
         "permissions": [

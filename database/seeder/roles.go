@@ -85,6 +85,14 @@ func (roleSeeder RoleSeeder) Run(q *gen.Queries) {
 	})
 
 	q.CreateRole(context.Background(), gen.CreateRoleParams{
+		ID:          11,
+		Name:        "Aggregator Collector",
+		GuardName:   "Web",
+		Description: null.StringFrom("Users assigned to pick waste for the aggregator").NullString,
+	})
+
+
+	q.CreateRole(context.Background(), gen.CreateRoleParams{
 		ID:          12,
 		Name:        "TTNM super Admin",
 		GuardName:   "super_admin_web",
