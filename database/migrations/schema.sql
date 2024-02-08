@@ -80,13 +80,6 @@ CREATE TABLE organizations(
 
 ALTER TABLE organizations ADD CONSTRAINT check_organizations_type CHECK (organization_type IN (1,2)); -- make sure organization type is either 1 or 2
 
-CREATE TABLE vehicles(
-  id SERIAL PRIMARY key,
-  type VARCHAR(255) not NULL,
-  
-
-)
-
 CREATE TABLE main_organization(
   id SERIAL PRIMARY KEY,
   organization_id VARCHAR(255) NOT NULL,
@@ -166,6 +159,26 @@ CREATE TABLE users(
     last_login TIMESTAMP,
     created_at TIMESTAMP NOT NULL DEFAULT NOW(),
     updated_at TIMESTAMP NOT NULL DEFAULT NOW()
+);
+
+create table vehicle_types(
+  id SERIAL PRIMARY key,
+  name VARCHAR not NULL,
+  max_vehicle_weight FLOAT not NULL,
+  max_vehicle_height FLOAT not NULL,
+  description TEXT not NULL
+);
+
+CREATE TABLE vehicles(
+  id SERIAL PRIMARY key,
+  company_id INTEGER not null,
+  assigned_driver_id INTEGER not null,
+  vehicle_type_id INTEGER not NULL,
+  reg_no VARCHAR(255) not null UNIQUE,
+  is_active BOOLEAN not null DEFAULT TRUE,
+  FOREIGN Key (company_id) REFERENCES companies(id),
+  FOREIGN KEY(assigned_driver_id) REFERENCES users(id),
+  FOREIGN KEY(vehicle_type_id) REFERENCES vehicle_types(id)
 );
 
 -- Create "phone_verification" table

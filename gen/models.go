@@ -369,6 +369,23 @@ type User struct {
 	UpdatedAt                time.Time      `json:"updated_at"`
 }
 
+type Vehicle struct {
+	ID               int32  `json:"id"`
+	CompanyID        int32  `json:"company_id"`
+	AssignedDriverID int32  `json:"assigned_driver_id"`
+	VehicleTypeID    int32  `json:"vehicle_type_id"`
+	RegNo            string `json:"reg_no"`
+	IsActive         bool   `json:"is_active"`
+}
+
+type VehicleType struct {
+	ID               int32   `json:"id"`
+	Name             string  `json:"name"`
+	MaxVehicleWeight float64 `json:"max_vehicle_weight"`
+	MaxVehicleHeight float64 `json:"max_vehicle_height"`
+	Description      string  `json:"description"`
+}
+
 type WasteType struct {
 	ID        int32         `json:"id"`
 	Name      string        `json:"name"`

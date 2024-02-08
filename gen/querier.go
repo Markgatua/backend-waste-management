@@ -31,6 +31,7 @@ type Querier interface {
 	CreateSale(ctx context.Context, arg CreateSaleParams) (Sale, error)
 	CreateSaleItem(ctx context.Context, arg CreateSaleItemParams) (SaleItem, error)
 	CreateSupplier(ctx context.Context, arg CreateSupplierParams) (Supplier, error)
+	CreateVehicleTypes(ctx context.Context, arg CreateVehicleTypesParams) (VehicleType, error)
 	DeactivateRole(ctx context.Context, roleID int32) error
 	DeleteAggregatorWasteTypes(ctx context.Context, aggregatorID int32) error
 	DeleteBuyer(ctx context.Context, id int32) error
