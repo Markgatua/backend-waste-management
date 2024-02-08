@@ -218,7 +218,7 @@ func (aggregatorController CollectionRequestsController) GetCollectionSchedule(c
 				}
 			}
 
-			//fmt.Println(dayOfWeek)
+			fmt.Println(dayOfWeek)
 		} else {
 			//date, _ := time.Parse("2006-01-02", requestDate.(string))
 			key := requestDate.(time.Time).Format("2006-01-02")
