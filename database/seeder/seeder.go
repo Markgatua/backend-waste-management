@@ -30,6 +30,7 @@ func Run() {
 		CountiesSeeder{}.Run(queries)
 		SubCountiesSeeder{}.Run(queries)
 		PickupTimeStampsSeeder{}.Run(queries)
+		VehicleTypesSeeder{}.Run(queries)
 	}
 
 }

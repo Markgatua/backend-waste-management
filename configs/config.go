@@ -39,18 +39,7 @@ type envConfigs struct {
 	MailFromName                           string  `mapstructure:"MAIL_FROM_NAME"`
 	AccountRecoveryTokenExpirationTime     int     `mapstructure:"ACCOUNT_RECOVERY_TOKEN_EXPIRATION_TIME"`
 	AcoountVerificationTokenExpirationTime int     `mapstructure:"ACCOUNT_VERIFICATION_TOKEN_EXPIRATION_TIME"`
-	ChpterAPIKey                           string  `mapstructure:"CHPTER_API_KEY"`
-	ChpterDeveloperAPIKey                  string  `mapstructure:"CHPTER_DEVELOPER_API_KEY"`
-	ChpterDeveloperDomain                  string  `mapstructure:"CHPTER_DEVELOPER_DOMAIN"`
-	ChpterDomain                           string  `mapstructure:"CHPTER_DOMAIN"`
-	ChpterPayoutAPIBank                    string  `mapstructure:"CHPTER_PAYOUT_API_BANK"`
-	ChpterPayoutAPIMpesa                   string  `mapstructure:"CHPTER_PAYOUT_API_MPESA"`
-	ChpterCreateMerchantAPI                string  `mapstructure:"CHPTER_CREATE_MERCHANT_API"`
-	ChpterPercentageCut                    float64 `mapstructure:"CHPTER_PERCENTAGE_CUT"`
-	ChpterWebhookPayout                    string  `mapstructure:"CHPTER_WEBHOOK_PAYOUT"`
-	ChpterWebhookPayment                   string  `mapstructure:"CHPTER_WEBHOOK_PAYMENT"`
-	ChpterPaymentAPIBank                   string  `mapstructure:"CHPTER_PAYMENT_API_BANK"`
-	ChpterPaymentAPIMPesa                  string  `mapstructure:"CHPTER_PAYMENT_API_MPESA"`
+	GeoApifyRoutePlanningApiKey            string  `mapstructure:"GEO_APIFY_ROUTE_PLANNING_API_KEY"`
 }
 
 func loadEnvVariables(directory string) (config *envConfigs) {

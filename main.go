@@ -200,9 +200,11 @@ func runProgram() {
 	router.POST("aggregator/waste_types/create", middlewares.PermissionBlockerMiddleware("create_waste_type"), controllers.AggregatorController{}.SetWasteTypes)
 
 	router.GET("aggregator/users", middlewares.PermissionBlockerMiddleware("view_user"), controllers.AggregatorController{}.GetUsers)
-
-
+	router.GET("aggregator/collections",collectionRequestsController.GetCollections)
+	router.GET("aggregator/collection_schedule",collectionRequestsController.GetCollectionSchedule)
 	//-------------------------------------------------------------------------------------------
+
+	router.GET("route_planner/get_routes",middlewares.PermissionBlockerMiddleware("manage_route_planning"),controllers.RoutePlanningController{}.GetRoutes)
 
 	//---------------------------Green champion ------------------------------------------------------
 	router.POST("green_champion/add", middlewares.PermissionBlockerMiddleware("add_green_champion"), controllers.GreenChampionController{}.InsertGreenChampion)
@@ -211,6 +213,15 @@ func runProgram() {
 	router.PUT("green_champion/set_active_inactive_status", middlewares.PermissionBlockerMiddleware("edit_green_champion"), controllers.GreenChampionController{}.UpdateGreenChampionStatus)
 	router.DELETE("green_champion/delete/:id", middlewares.PermissionBlockerMiddleware("delete_green_champion"), controllers.GreenChampionController{}.DeleteGreenChampion)
 	router.PUT("green_champion/update", middlewares.PermissionBlockerMiddleware("edit_green_champion"), controllers.GreenChampionController{}.UpdateGreenChampion)
+	//-------------------------------------------------------------------------------------------
+
+	//---------------------------Vehicle ------------------------------------------------------
+	router.POST("vehicle/add", middlewares.PermissionBlockerMiddleware("add_vehicle"), controllers.VehicleController{}.InsertVehicle)
+	router.GET("vehicles", middlewares.PermissionBlockerMiddleware("view_vehicle"), controllers.VehicleController{}.GetAllVehicles)
+	router.GET("vehicle_types", middlewares.PermissionBlockerMiddleware("view_vehicle_types"), controllers.VehicleController{}.GetAllVehicleTypes)
+	router.PUT("vehicle/set_active_inactive_status", middlewares.PermissionBlockerMiddleware("edit_vehicle"), controllers.VehicleController{}.UpdateVehicleStatus)
+	router.DELETE("vehicle/delete/:id", middlewares.PermissionBlockerMiddleware("delete_vehicle"), controllers.VehicleController{}.DeleteVehicle)
+	router.PUT("vehicle/update", middlewares.PermissionBlockerMiddleware("edit_vehicle"), controllers.VehicleController{}.UpdateVehicle)
 	//-------------------------------------------------------------------------------------------
 
 	//---------------------------Roles ------------------------------------------------------

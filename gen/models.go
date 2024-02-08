@@ -72,6 +72,7 @@ type CollectionRequest struct {
 type CollectionRequestWasteItem struct {
 	ID                  int32     `json:"id"`
 	CollectionRequestID int32     `json:"collection_request_id"`
+	CollectorID         int32     `json:"collector_id"`
 	WasteTypeID         int32     `json:"waste_type_id"`
 	Weight              float64   `json:"weight"`
 	CreatedAt           time.Time `json:"created_at"`
@@ -366,6 +367,23 @@ type User struct {
 	LastLogin                sql.NullTime   `json:"last_login"`
 	CreatedAt                time.Time      `json:"created_at"`
 	UpdatedAt                time.Time      `json:"updated_at"`
+}
+
+type Vehicle struct {
+	ID               int32         `json:"id"`
+	CompanyID        int32         `json:"company_id"`
+	AssignedDriverID sql.NullInt32 `json:"assigned_driver_id"`
+	VehicleTypeID    int32         `json:"vehicle_type_id"`
+	RegNo            string        `json:"reg_no"`
+	IsActive         bool          `json:"is_active"`
+}
+
+type VehicleType struct {
+	ID               int32   `json:"id"`
+	Name             string  `json:"name"`
+	MaxVehicleWeight float64 `json:"max_vehicle_weight"`
+	MaxVehicleHeight float64 `json:"max_vehicle_height"`
+	Description      string  `json:"description"`
 }
 
 type WasteType struct {
