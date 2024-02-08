@@ -97,27 +97,27 @@ func (q *Queries) DeleteVehicle(ctx context.Context, id int32) error {
 const getAllVehicles = `-- name: GetAllVehicles :many
 select vehicles.id, vehicles.company_id, vehicles.assigned_driver_id, vehicles.vehicle_type_id, vehicles.reg_no, vehicles.is_active,users.first_name as driver_first_name,users.last_name as driver_last_name,users.calling_code as driver_calling_code,users.phone as driver_phone,users.email as driver_email, vehicle_types.description,vehicle_types.max_vehicle_height,vehicle_types.max_vehicle_weight,vehicle_types.name 
 from vehicles 
-inner join vehicle_types on vehicle_types.id=vehicles.vehicle_type_id 
-inner join users on vehicles.assigned_driver_id=users.id 
+left join vehicle_types on vehicle_types.id=vehicles.vehicle_type_id 
+left join users on vehicles.assigned_driver_id=users.id 
 where vehicles.company_id=$1
 `
 
 type GetAllVehiclesRow struct {
-	ID                int32          `json:"id"`
-	CompanyID         int32          `json:"company_id"`
-	AssignedDriverID  sql.NullInt32  `json:"assigned_driver_id"`
-	VehicleTypeID     int32          `json:"vehicle_type_id"`
-	RegNo             string         `json:"reg_no"`
-	IsActive          bool           `json:"is_active"`
-	DriverFirstName   sql.NullString `json:"driver_first_name"`
-	DriverLastName    sql.NullString `json:"driver_last_name"`
-	DriverCallingCode sql.NullString `json:"driver_calling_code"`
-	DriverPhone       sql.NullString `json:"driver_phone"`
-	DriverEmail       sql.NullString `json:"driver_email"`
-	Description       string         `json:"description"`
-	MaxVehicleHeight  float64        `json:"max_vehicle_height"`
-	MaxVehicleWeight  float64        `json:"max_vehicle_weight"`
-	Name              string         `json:"name"`
+	ID                int32           `json:"id"`
+	CompanyID         int32           `json:"company_id"`
+	AssignedDriverID  sql.NullInt32   `json:"assigned_driver_id"`
+	VehicleTypeID     int32           `json:"vehicle_type_id"`
+	RegNo             string          `json:"reg_no"`
+	IsActive          bool            `json:"is_active"`
+	DriverFirstName   sql.NullString  `json:"driver_first_name"`
+	DriverLastName    sql.NullString  `json:"driver_last_name"`
+	DriverCallingCode sql.NullString  `json:"driver_calling_code"`
+	DriverPhone       sql.NullString  `json:"driver_phone"`
+	DriverEmail       sql.NullString  `json:"driver_email"`
+	Description       sql.NullString  `json:"description"`
+	MaxVehicleHeight  sql.NullFloat64 `json:"max_vehicle_height"`
+	MaxVehicleWeight  sql.NullFloat64 `json:"max_vehicle_weight"`
+	Name              sql.NullString  `json:"name"`
 }
 
 func (q *Queries) GetAllVehicles(ctx context.Context, companyID int32) ([]GetAllVehiclesRow, error) {
