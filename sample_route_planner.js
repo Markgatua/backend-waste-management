@@ -149,13 +149,28 @@ const body = {
             { "location": [36.836300246894005, -1.2986215658416995], "duration": 300, "pickup_amount": 60 }, { "location": [36.835646691717564, -1.3002177701788864], "duration": 300, "pickup_amount": 60 }, { "location": [36.835460698903546, -1.2993007673902208], "duration": 300, "pickup_amount": 60 }, { "location": [36.835502917719, -1.299217097979198], "duration": 300, "pickup_amount": 60 }, { "location": [36.83552861685149, -1.2992738996095858], "duration": 300, "pickup_amount": 60 }, { "location": [36.8350070714392, -1.2992047710185441], "duration": 300, "pickup_amount": 60 }, { "location": [36.834907269029955, -1.2981791341853866], "duration": 300, "pickup_amount": 120 }, { "location": [36.83467719338504, -1.2983050499402153], "duration": 300, "pickup_amount": 100 }], "type": "short"
 };
 
-var apiKey = process.env.GEO_APIFY_ROUTE_PLANNING_API_KEY;
+var apiKey = '36820b7f6b774f54bccc6f91af43cbf0'// process.env.GEO_APIFY_ROUTE_PLANNING_API_KEY;
 fetch('https://api.geoapify.com/v1/routeplanner?apiKey='+apiKey, {
     method: 'POST',
     headers: {
         'Content-Type': 'application/json'
     },
-    body: JSON.stringify(body)
+    body: JSON.stringify({
+        "mode":"drive",
+        "agents":[
+           { "start_location":[ -3.6705633, 40.5172291 ], "time_windows":[ [ 0, 10800 ] ] },
+           { "start_location":[ -3.651263064675685, 40.51553235 ], "time_windows": [ [ 0, 10800 ] ] },
+           { "start_location":[ -3.660241470310801, 40.5176717 ], "time_windows":[ [ 0, 10800 ] ] }
+        ],
+        "shipments":[
+           { "id": "order_1", "pickup": { "location_index": 0, "duration": 120 }, "delivery": { "location":[ -3.67715033613878, 40.509209439673135 ], "duration":240 } },
+           { "id": "order_2", "pickup": { "location_index": 0, "duration": 120 }, "delivery": { "location":[ -3.67715033613878, 40.509209439673135 ], "duration":120 } },
+           { "id": "order_6", "delivery": { "location_index": 0, "duration":120 }, "pickup":{ "location":[ -3.6779564485281186, 40.5109186 ], "duration":120 } },
+        ],
+        "locations":[
+           { "id":"warehouse-0", "location": [-3.6716357, 40.513842 ]}
+        ]
+     })
 })
     .then(res => res.json())
     .then(res => console.log(res));

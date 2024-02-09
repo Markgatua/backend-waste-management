@@ -19,6 +19,7 @@ func (controller RoutePlanningController) GetRoutes(context *gin.Context) {
 		IsCollectionRequest *bool `json:"is_collection_request" binding:"required"`
 	}
 	type Params struct {
+		Duration   float64    `json:"duration" binding:"required"`
 		VehicleIDs []int32    `json:"vehicle_ids" binding:"required"`
 		Shipments  []Shipment `json:"shipments" binding:"required"`
 	}
@@ -65,8 +66,8 @@ func (controller RoutePlanningController) GetRoutes(context *gin.Context) {
 	}
 
 	context.JSON(http.StatusOK, gin.H{
-		"error":               false,
-		"collection_requests": collectionRequests,
+		"error":                false,
+		"collection_requests":  collectionRequests,
 		"collection_schedules": collectionSchedules,
 	})
 
