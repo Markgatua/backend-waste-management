@@ -192,6 +192,25 @@ func (q *Queries) GetDuplicateVehiclesWithoutID(ctx context.Context, arg GetDupl
 	return count, err
 }
 
+const getVehicle = `-- name: GetVehicle :one
+select id, company_id, assigned_driver_id, vehicle_type_id, reg_no, is_active, liters from vehicles where id=$1
+`
+
+func (q *Queries) GetVehicle(ctx context.Context, id int32) (Vehicle, error) {
+	row := q.db.QueryRowContext(ctx, getVehicle, id)
+	var i Vehicle
+	err := row.Scan(
+		&i.ID,
+		&i.CompanyID,
+		&i.AssignedDriverID,
+		&i.VehicleTypeID,
+		&i.RegNo,
+		&i.IsActive,
+		&i.Liters,
+	)
+	return i, err
+}
+
 const getVehicleTypes = `-- name: GetVehicleTypes :many
 select id, name, max_vehicle_weight, max_vehicle_height, description from vehicle_types
 `

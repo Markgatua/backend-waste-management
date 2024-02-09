@@ -30,6 +30,9 @@ left join vehicle_types on vehicle_types.id=vehicles.vehicle_type_id
 left join users on vehicles.assigned_driver_id=users.id 
 where vehicles.company_id=$1;
 
+-- name: GetVehicle :one
+select * from vehicles where id=$1;
+
 -- name: DeleteVehicle :exec
 delete from vehicles where id=$1;
 

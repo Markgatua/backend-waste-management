@@ -115,6 +115,7 @@ type Querier interface {
 	GetUserWithEmailWithoutID(ctx context.Context, arg GetUserWithEmailWithoutIDParams) ([]User, error)
 	GetUsersWasteType(ctx context.Context) ([]GetUsersWasteTypeRow, error)
 	GetUsersWithRole(ctx context.Context) ([]GetUsersWithRoleRow, error)
+	GetVehicle(ctx context.Context, id int32) (Vehicle, error)
 	GetVehicleTypes(ctx context.Context) ([]VehicleType, error)
 	GetWasteItemsProducerData(ctx context.Context, producerID int32) ([]GetWasteItemsProducerDataRow, error)
 	// waste_items.sql
