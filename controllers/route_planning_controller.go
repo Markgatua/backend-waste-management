@@ -85,16 +85,20 @@ func (controller RoutePlanningController) GetRoutes(context *gin.Context) {
 		Mode   string   `json:"mode"`
 		Agents []Agents `json:"agents"`
 		Jobs   []Job    `json:"jobs"`
+		Type   string   `json:"type"`
 	}
 
 	bodyContent := BodyContent{}
 	bodyContent.Mode = "drive"
+	bodyContent.Type="short"
 
 	for _, v := range params.VehicleIDs {
 		vehicle, _ := gen.REPO.GetVehicle(context, v)
+
+		
 		agents = append(agents, Agents{
-			StartLocation:  []float64{company.Lat.Float64, company.Lng.Float64},
 			EndLocation:    []float64{company.Lat.Float64, company.Lng.Float64},
+			StartLocation:  []float64{company.Lat.Float64, company.Lng.Float64},
 			PickupCapacity: vehicle.Liters.Float64,
 		})
 	}
@@ -118,6 +122,11 @@ func (controller RoutePlanningController) GetRoutes(context *gin.Context) {
 	bodyContent.Agents = agents
 	bodyContent.Jobs = jobs
 
+	//context.JSON(http.StatusOK, gin.H{
+	//	"error":    false,
+	//	"response": bodyContent,
+	//})
+	//return
 	var apiKey = configs.EnvConfigs.GeoApifyRoutePlanningApiKey
 	url := "https://api.geoapify.com/v1/routeplanner?apiKey=" + apiKey
 	method := "POST"
@@ -151,11 +160,20 @@ func (controller RoutePlanningController) GetRoutes(context *gin.Context) {
 		fmt.Println(err)
 		return
 	}
-	//fmt.Println(string(body))
+
+	var data interface{} // TopTracks
+	err = json.Unmarshal(body, &data)
+	if err != nil {
+		context.JSON(http.StatusUnprocessableEntity, gin.H{
+			"error":   true,
+			"message": err.Error(),
+		})
+		return
+	} //fmt.Println(string(body))
 
 	context.JSON(http.StatusOK, gin.H{
 		"error":    false,
-		"response": string(body),
+		"response": data,
 	})
 
 }
