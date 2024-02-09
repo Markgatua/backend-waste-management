@@ -289,12 +289,11 @@ func (requestCollectionController RequestCollectionController) GetLatestCollecti
 		//logger.Log("RequestCollectionController",insertError.Error(),logger.LOG_LEVEL_ERROR)
 	}
 
-	fmt.Println(count)
+	//fmt.Println(count)
 
 
 	context.JSON(http.StatusOK, gin.H{
 		"error":   false,
-		"message": "Successfully Updated the Collection Request",
 		"count": count,
 	})
 }

@@ -78,6 +78,8 @@ type Querier interface {
 	GetAssignedCollectorsToGreenChampion(ctx context.Context, championID int32) ([]ChampionAggregatorAssignment, error)
 	GetBranchCount(ctx context.Context) ([]GetBranchCountRow, error)
 	GetChildrenWasteTypes(ctx context.Context, parentID sql.NullInt32) ([]GetChildrenWasteTypesRow, error)
+	GetCollectionRequestsInArray(ctx context.Context, collectionids []int32) ([]GetCollectionRequestsInArrayRow, error)
+	GetCollectionScheduleInArray(ctx context.Context, pickuptimeids []int32) ([]GetCollectionScheduleInArrayRow, error)
 	GetCollectionStats(ctx context.Context, producerID int32) ([]GetCollectionStatsRow, error)
 	GetCollectorsForGreenChampion(ctx context.Context, championID int32) ([]GetCollectorsForGreenChampionRow, error)
 	GetCompany(ctx context.Context, id int32) (GetCompanyRow, error)

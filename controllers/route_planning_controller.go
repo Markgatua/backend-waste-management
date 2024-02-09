@@ -6,6 +6,7 @@ import (
 	"os"
 	"path/filepath"
 	_ "strings"
+	"ttnmwastemanagementsystem/gen"
 	"ttnmwastemanagementsystem/logger"
 	"ttnmwastemanagementsystem/utils"
 
@@ -17,25 +18,53 @@ type RoutePlanningController struct{}
 func (controller RoutePlanningController) GetRoutes(context *gin.Context) {
 	logger.Log("RoutePlanningController", fmt.Sprint("Running route planner"), logger.LOG_LEVEL_INFO)
 
-	form, _ := context.MultipartForm()
-	files := form.File["upload[]"]
-	filePaths := []string{}
-	for _, file := range files {
-		extension := filepath.Ext(file.Filename)
-		// Generate random file name for the new uploaded file so it doesn't override the old file with same name
-		newFileName := utils.NewRandStringLen(50) + extension
+	type Shipment struct {
+		ID                  int32 `json:"id" binding:"required"`
+		IsCollectionRequest *bool `json:"is_collection_request" binding:"required"`
+	}
+	type Params struct {
+		VehicleIDs []int32    `json:"vehicle_ids" binding:"required"`
+		Shipments  []Shipment `json:"shipments" binding:"required"`
+	}
 
-		logger.Log("UploadController", fmt.Sprint("Saving file to ::", newFileName), logger.LOG_LEVEL_INFO)
-		path, _ := os.Getwd()
-		err := context.SaveUploadedFile(file, path+"/uploads/"+newFileName)
-		if err != nil {
-			logger.Log("UploadController", err.Error(), logger.LOG_LEVEL_ERROR)
+	var params Params
+	err := context.ShouldBindJSON(&params)
+	if err != nil {
+		context.JSON(http.StatusUnprocessableEntity, gin.H{
+			"error":   true,
+			"message": err.Error(),
+		})
+		return
+	}
+
+	var collectionRequestsInArray []int32
+	var collectionScheduleInArray []int32
+
+	for _, v := range params.Shipments {
+		if *v.IsCollectionRequest {
+			//get lats and longs
+			collectionRequestsInArray = append(collectionRequestsInArray, v.ID)
 		} else {
-			filePaths = append(filePaths, newFileName)
+			collectionScheduleInArray = append(collectionScheduleInArray, v.ID)
+			//get lats and longs
 		}
 	}
-	context.JSON(http.StatusOK, gin.H{
-		"error":      false,
-		"file_paths": filePaths,
-	})
+
+	collectionRequests, err := gen.REPO.GetCollectionRequestsInArray(context, collectionRequestsInArray)
+	if err != nil {
+		context.JSON(http.StatusUnprocessableEntity, gin.H{
+			"error":   true,
+			"message": err.Error(),
+		})
+		return
+	}
+
+	collectionSchedules, err := gen.REPO.GetCollectionScheduleInArray(context, collectionScheduleInArray)
+	if err != nil {
+		context.JSON(http.StatusUnprocessableEntity, gin.H{
+			"error":   true,
+			"message": err.Error(),
+		})
+	}
+
 }
