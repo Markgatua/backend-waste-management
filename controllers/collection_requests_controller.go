@@ -266,7 +266,7 @@ func (aggregatorController CollectionRequestsController) GetCollectionSchedule(c
 
 	   pickup_time_stamps.stamp,
 	   pickup_time_stamps.time_range,
-	   pickup_time_stamps.position,
+	   pickup_time_stamps.position
 
 
 	   from champion_pickup_times 
