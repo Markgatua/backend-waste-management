@@ -8,17 +8,18 @@ INSERT INTO vehicle_types (id,name,max_vehicle_weight,max_vehicle_height,descrip
     ) ON CONFLICT(id) do update set name=EXCLUDED.name,max_vehicle_weight=EXCLUDED.max_vehicle_weight,max_vehicle_height=EXCLUDED.max_vehicle_height,description=EXCLUDED.description returning *;
 
 -- name: UpdateVehicle :exec
-update vehicles set assigned_driver_id=$1,vehicle_type_id=$2,reg_no=$3,is_active=$4 where id=$5;
+update vehicles set assigned_driver_id=$1,vehicle_type_id=$2,reg_no=$3,is_active=$4,liters=$5 where id=$6;
 
 -- name: GetVehicleTypes :many
 select * from vehicle_types;
 
 -- name: AddVehicle :one
-insert into vehicles(company_id,assigned_driver_id,vehicle_type_id,reg_no,is_active) VALUES(
+insert into vehicles(company_id,assigned_driver_id,vehicle_type_id,reg_no,liters,is_active) VALUES(
    sqlc.arg('company_id'),
    sqlc.arg('assigned_driver_id'),
    sqlc.arg('vehicle_type_id'),
    sqlc.arg('reg_no'),
+   sqlc.arg('liters'),
    sqlc.arg('is_active')
 )returning *;
 

@@ -370,12 +370,13 @@ type User struct {
 }
 
 type Vehicle struct {
-	ID               int32         `json:"id"`
-	CompanyID        int32         `json:"company_id"`
-	AssignedDriverID sql.NullInt32 `json:"assigned_driver_id"`
-	VehicleTypeID    int32         `json:"vehicle_type_id"`
-	RegNo            string        `json:"reg_no"`
-	IsActive         bool          `json:"is_active"`
+	ID               int32           `json:"id"`
+	CompanyID        int32           `json:"company_id"`
+	AssignedDriverID sql.NullInt32   `json:"assigned_driver_id"`
+	VehicleTypeID    int32           `json:"vehicle_type_id"`
+	RegNo            string          `json:"reg_no"`
+	IsActive         bool            `json:"is_active"`
+	Liters           sql.NullFloat64 `json:"liters"`
 }
 
 type VehicleType struct {

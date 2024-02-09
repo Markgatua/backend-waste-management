@@ -176,6 +176,7 @@ CREATE TABLE vehicles(
   vehicle_type_id INTEGER not NULL,
   reg_no VARCHAR(255) not null UNIQUE,
   is_active BOOLEAN not null DEFAULT TRUE,
+  liters FLOAT NULL,
   FOREIGN Key (company_id) REFERENCES companies(id),
   FOREIGN KEY(assigned_driver_id) REFERENCES users(id),
   FOREIGN KEY(vehicle_type_id) REFERENCES vehicle_types(id)

@@ -832,7 +832,7 @@ pickup_time_stamps.time_range from champion_pickup_times
 left join pickup_time_stamps on pickup_time_stamps.id=champion_pickup_times.pickup_time_stamp_id
 left join champion_aggregator_assignments on champion_pickup_times.champion_aggregator_assignment_id=champion_aggregator_assignments.id
 left join companies on companies.id = champion_aggregator_assignments.champion_id
-where pickup_time_id=ANY($1::int[])
+where champion_pickup_times.id=ANY($1::int[])
 `
 
 type GetCollectionScheduleInArrayRow struct {

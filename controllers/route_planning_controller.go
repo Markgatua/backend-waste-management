@@ -2,11 +2,11 @@ package controllers
 
 import (
 	"fmt"
+	"github.com/gin-gonic/gin"
 	"net/http"
 	_ "strings"
 	"ttnmwastemanagementsystem/gen"
 	"ttnmwastemanagementsystem/logger"
-	"github.com/gin-gonic/gin"
 )
 
 type RoutePlanningController struct{}
@@ -61,12 +61,13 @@ func (controller RoutePlanningController) GetRoutes(context *gin.Context) {
 			"error":   true,
 			"message": err.Error(),
 		})
+		return
 	}
 
 	context.JSON(http.StatusOK, gin.H{
-		"error":   true,
-		"collection_requests":collectionRequests,
-		"collectionSchedules":collectionSchedules,
+		"error":               false,
+		"collection_requests": collectionRequests,
+		"collection_schedules": collectionSchedules,
 	})
 
 }
