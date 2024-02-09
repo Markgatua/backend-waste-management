@@ -134,13 +134,11 @@ func (controller RoutePlanningController) GetRoutes(context *gin.Context) {
 	}
 
 	req, err := http.NewRequest(method, url, &buf)
-
 	if err != nil {
 		fmt.Println(err)
 		return
 	}
 	req.Header.Add("Content-Type", "application/json")
-
 	res, err := client.Do(req)
 	if err != nil {
 		fmt.Println(err)
@@ -157,7 +155,7 @@ func (controller RoutePlanningController) GetRoutes(context *gin.Context) {
 
 	context.JSON(http.StatusOK, gin.H{
 		"error":    false,
-		"response": body,
+		"response": string(body),
 	})
 
 }
