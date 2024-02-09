@@ -97,15 +97,15 @@ func (controller RoutePlanningController) GetRoutes(context *gin.Context) {
 
 		
 		agents = append(agents, Agents{
-			EndLocation:    []float64{company.Lat.Float64, company.Lng.Float64},
-			StartLocation:  []float64{company.Lat.Float64, company.Lng.Float64},
+			EndLocation:    []float64{company.Lng.Float64,company.Lat.Float64},
+			StartLocation:  []float64{company.Lng.Float64,company.Lat.Float64},
 			PickupCapacity: vehicle.Liters.Float64,
 		})
 	}
 
 	for _, collectionSchedule := range collectionSchedules {
 		jobs = append(jobs, Job{
-			Location:     []float64{collectionSchedule.Lat.Float64, collectionSchedule.Lng.Float64},
+			Location:     []float64{collectionSchedule.Lng.Float64,collectionSchedule.Lat.Float64},
 			Duration:     int64(params.Duration),
 			PickupAmount: 100,
 		})
@@ -113,7 +113,7 @@ func (controller RoutePlanningController) GetRoutes(context *gin.Context) {
 
 	for _, collectionRequest := range collectionRequests {
 		jobs = append(jobs, Job{
-			Location:     []float64{collectionRequest.Lat.Float64, collectionRequest.Lng.Float64},
+			Location:     []float64{collectionRequest.Lng.Float64,collectionRequest.Lat.Float64},
 			Duration:     int64(params.Duration),
 			PickupAmount: 100,
 		})
@@ -122,11 +122,11 @@ func (controller RoutePlanningController) GetRoutes(context *gin.Context) {
 	bodyContent.Agents = agents
 	bodyContent.Jobs = jobs
 
-	//context.JSON(http.StatusOK, gin.H{
-	//	"error":    false,
-	//	"response": bodyContent,
-	//})
-	//return
+	// context.JSON(http.StatusOK, gin.H{
+	// 	"error":    false,
+	// 	"response": bodyContent,
+	// })
+	// return
 	var apiKey = configs.EnvConfigs.GeoApifyRoutePlanningApiKey
 	url := "https://api.geoapify.com/v1/routeplanner?apiKey=" + apiKey
 	method := "POST"
@@ -173,6 +173,7 @@ func (controller RoutePlanningController) GetRoutes(context *gin.Context) {
 
 	context.JSON(http.StatusOK, gin.H{
 		"error":    false,
+		"input_data":bodyContent,
 		"response": data,
 	})
 
