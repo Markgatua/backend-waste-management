@@ -1,12 +1,17 @@
 package controllers
 
 import (
+	"bytes"
+	"encoding/json"
 	"fmt"
-	"github.com/gin-gonic/gin"
+	"io/ioutil"
 	"net/http"
 	_ "strings"
+	"ttnmwastemanagementsystem/configs"
 	"ttnmwastemanagementsystem/gen"
 	"ttnmwastemanagementsystem/logger"
+
+	"github.com/gin-gonic/gin"
 )
 
 type RoutePlanningController struct{}
@@ -113,10 +118,46 @@ func (controller RoutePlanningController) GetRoutes(context *gin.Context) {
 	bodyContent.Agents = agents
 	bodyContent.Jobs = jobs
 
+	var apiKey = configs.EnvConfigs.GeoApifyRoutePlanningApiKey
+	url := "https://api.geoapify.com/v1/routeplanner?apiKey=" + apiKey
+	method := "POST"
+	client := &http.Client{}
+
+	var buf bytes.Buffer
+	err = json.NewEncoder(&buf).Encode(bodyContent)
+	if err != nil {
+		context.JSON(http.StatusUnprocessableEntity, gin.H{
+			"error":   true,
+			"message": err.Error(),
+		})
+		return
+	}
+
+	req, err := http.NewRequest(method, url, &buf)
+
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+	req.Header.Add("Content-Type", "application/json")
+
+	res, err := client.Do(req)
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+	defer res.Body.Close()
+
+	body, err := ioutil.ReadAll(res.Body)
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+	//fmt.Println(string(body))
+
 	context.JSON(http.StatusOK, gin.H{
-		"error":                false,
-		"collection_requests":  collectionRequests,
-		"collection_schedules": collectionSchedules,
+		"error":    false,
+		"response": body,
 	})
 
 }
