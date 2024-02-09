@@ -218,7 +218,8 @@ CREATE TABLE champion_aggregator_assignments (
 CREATE TABLE pickup_time_stamps (
   id SERIAL PRIMARY KEY,
   stamp VARCHAR(255) NOT NULL,
-  time_range VARCHAR(255) NOT NULL
+  time_range VARCHAR(255) NOT NULL,
+  position integer not NULL DEFAULT 0
 );
 ALTER TABLE pickup_time_stamps ADD CONSTRAINT check_stamp CHECK (stamp IN ('Morning','Afternoon','Evening'));
 

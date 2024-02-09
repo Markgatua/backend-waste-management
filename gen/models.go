@@ -207,6 +207,7 @@ type PickupTimeStamp struct {
 	ID        int32  `json:"id"`
 	Stamp     string `json:"stamp"`
 	TimeRange string `json:"time_range"`
+	Position  int32  `json:"position"`
 }
 
 type Purchase struct {

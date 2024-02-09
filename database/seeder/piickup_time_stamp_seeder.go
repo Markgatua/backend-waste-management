@@ -16,11 +16,13 @@ func (pickupTimeStampsSeeder PickupTimeStampsSeeder) Run(q *gen.Queries) {
 		ID: 1,
 		Stamp: "Morning",
 		TimeRange: "8AM - 11Am",
+		Position: 1,
 	})
 	q.InsertPickupTimeStsmp(context.Background(), gen.InsertPickupTimeStsmpParams{
 		ID: 2,
 		Stamp: "Afternoon",
 		TimeRange: "12PM - 5PM",
+		Position: 2,
 	})
 }
 

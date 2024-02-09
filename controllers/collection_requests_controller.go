@@ -147,6 +147,7 @@ func (aggregatorController CollectionRequestsController) GetCollectionSchedule(c
 		collection_requests.request_date,
 		collection_requests.pickup_date,
 		collection_requests.status,
+		collection_requests.location as pickup_location,
 
 		collection_requests.lat,
 		collection_requests.lng,
@@ -259,6 +260,8 @@ func (aggregatorController CollectionRequestsController) GetCollectionSchedule(c
        companies.contact_person2_first_name,
        companies.contact_person2_last_name,
        companies.contact_person2_phone,
+	   companies.location as pickup_location,
+
 
 	   pickup_time_stamps.stamp,
 	   pickup_time_stamps.time_range
