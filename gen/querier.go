@@ -100,6 +100,7 @@ type Querier interface {
 	GetMainOrganizationUser(ctx context.Context, id int32) (User, error)
 	GetMainOrganizationUserByEmail(ctx context.Context, email sql.NullString) (User, error)
 	GetMainWasteTypes(ctx context.Context) ([]GetMainWasteTypesRow, error)
+	GetMyLatestRequests(ctx context.Context, producerID int32) ([]GetMyLatestRequestsRow, error)
 	GetMyNotifications(ctx context.Context, userID int32) ([]Notification, error)
 	GetOneWasteType(ctx context.Context, id int32) (GetOneWasteTypeRow, error)
 	GetOrganization(ctx context.Context, id int32) (GetOrganizationRow, error)

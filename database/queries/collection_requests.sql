@@ -225,16 +225,39 @@ GROUP BY
 SELECT
     collection_requests.*,
     producer.name AS producer_name,
-    producer.location AS producer_location
+    producer.location AS producer_location,
+    pickup.stamp AS pickup_stamp,
+    pickup.time_range AS pickup_time_range
 FROM
     collection_requests
 LEFT JOIN
     companies AS producer ON producer.id = collection_requests.producer_id
+LEFT JOIN
+    pickup_time_stamps AS pickup ON pickup.id = collection_requests.pickup_time_stamp_id
 WHERE
-    collection_requests.collector_id = $1 AND collection_requests.status = false
+    collection_requests.collector_id = $1 AND collection_requests.status = 1
 GROUP BY
-    collection_requests.id, producer.name, producer.location;
+    collection_requests.id, producer.name, producer.location,pickup.stamp,pickup.time_range;
 
+
+-- name: GetMyLatestRequests :many
+SELECT
+    collection_requests.*,
+    collector.name AS collector_name,
+    collector.location AS collector_location,
+    pickup.stamp AS pickup_stamp,
+    pickup.time_range AS pickup_time_range
+FROM
+    collection_requests
+LEFT JOIN
+    companies AS collector ON collector.id = collection_requests.collector_id
+LEFT JOIN
+    pickup_time_stamps AS pickup ON pickup.id = collection_requests.pickup_time_stamp_id
+WHERE
+    collection_requests.producer_id = $1 AND collection_requests.status = 1 AND CAST(collection_requests.request_date AS TIMESTAMP) >= CURRENT_DATE 
+GROUP BY
+
+    collection_requests.id, collector.name, collector.location,pickup.stamp,pickup.time_range;
 
 
 -- name: GetCollectionRequestsInArray :many
@@ -258,3 +281,4 @@ left join pickup_time_stamps on pickup_time_stamps.id=champion_pickup_times.pick
 left join champion_aggregator_assignments on champion_pickup_times.champion_aggregator_assignment_id=champion_aggregator_assignments.id
 left join companies on companies.id = champion_aggregator_assignments.champion_id
 where champion_pickup_times.id=ANY(sqlc.arg('pickupTimeIds')::int[]);
+
