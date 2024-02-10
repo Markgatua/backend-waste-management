@@ -433,7 +433,7 @@ insert into inventory_adjustments(adjusted_by,company_id,adjustment_amount,is_po
 type InsertToInventoryAdjustmentsParams struct {
 	AdjustedBy           int32          `json:"adjusted_by"`
 	CompanyID            int32          `json:"company_id"`
-	AdjustmentAmount     string         `json:"adjustment_amount"`
+	AdjustmentAmount     float64        `json:"adjustment_amount"`
 	IsPositiveAdjustment bool           `json:"is_positive_adjustment"`
 	Reason               sql.NullString `json:"reason"`
 	WasteTypeID          int32          `json:"waste_type_id"`

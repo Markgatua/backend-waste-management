@@ -1110,7 +1110,7 @@ func (aggregatorController AggregatorController) MakeInventoryAdjustments(contex
 					err = gen.REPO.InsertToInventoryAdjustments(context, gen.InsertToInventoryAdjustmentsParams{
 						AdjustedBy:           int32(auth.ID.Int64),
 						CompanyID:            int32(auth.UserCompanyId.Int64),
-						AdjustmentAmount:     fmt.Sprint(v.Adjustment),
+						AdjustmentAmount:     v.Adjustment,
 						WasteTypeID:          v.ID,
 						IsPositiveAdjustment: true,
 						Reason:               null.StringFrom(params.Reason).NullString,
@@ -1142,7 +1142,7 @@ func (aggregatorController AggregatorController) MakeInventoryAdjustments(contex
 						err = gen.REPO.InsertToInventoryAdjustments(context, gen.InsertToInventoryAdjustmentsParams{
 							AdjustedBy:           int32(auth.ID.Int64),
 							CompanyID:            int32(auth.UserCompanyId.Int64),
-							AdjustmentAmount:     fmt.Sprint(v.Adjustment),
+							AdjustmentAmount:    v.Adjustment,
 							WasteTypeID:          v.ID,
 							IsPositiveAdjustment: false,
 							Reason:               null.StringFrom(params.Reason).NullString,
@@ -1164,7 +1164,7 @@ func (aggregatorController AggregatorController) MakeInventoryAdjustments(contex
 						err = gen.REPO.InsertToInventoryAdjustments(context, gen.InsertToInventoryAdjustmentsParams{
 							AdjustedBy:           int32(auth.ID.Int64),
 							CompanyID:            int32(auth.UserCompanyId.Int64),
-							AdjustmentAmount:     fmt.Sprint(v.Adjustment),
+							AdjustmentAmount:     v.Adjustment,
 							IsPositiveAdjustment: true,
 							WasteTypeID:          v.ID,
 							Reason:               null.StringFrom(params.Reason).NullString,

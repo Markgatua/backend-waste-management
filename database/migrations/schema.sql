@@ -367,7 +367,7 @@ CREATE TABLE inventory_adjustments(
     adjusted_by INTEGER not null,
     created_at TIMESTAMP NOT NULL DEFAULT NOW(),
     company_id int not null,
-    adjustment_amount DECIMAL not NULL,
+    adjustment_amount FLOAT NOT NULL,
     waste_type_id INTEGER NOT NULL,
     is_positive_adjustment BOOLEAN not null,
     reason TEXT NULL,
