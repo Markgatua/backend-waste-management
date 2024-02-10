@@ -8,9 +8,9 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-type StatsController struct{}
+type ReportsController struct{}
 
-func (controller StatsController) GetMainOrganizationStats(context *gin.Context) {
+func (controller ReportsController) GetMainOrganizationStats(context *gin.Context) {
 	var startDate = context.Query("start_date")
 	var endDate = context.Query("end_date")
 
@@ -34,7 +34,7 @@ func (controller StatsController) GetMainOrganizationStats(context *gin.Context)
 		"error": false,
 		"content": gin.H{
 			"organization": organizationStats,
-			"branches": branchStats,
+			"branches":     branchStats,
 		},
 	})
 }
@@ -66,3 +66,63 @@ func GetWasteTypeStats(startDate string, endDate string) {
 func GetCollectionStartsByLocation(startDate string, endDate string) {
 
 }
+
+// sales reports
+func SalesOverTimeByBuyer() {
+
+}
+func SalesOverTimeByItem() {
+
+}
+func SalesOverTimeMoneyIn() {
+
+}
+func StockMovementStatement() {
+
+}
+
+//end of sales report
+
+// Purchases reports
+func PurchasesOverTimeBySupplier() {
+
+}
+func PurchasesOverTimeByItem() {
+
+}
+func PurchasesMadeOverTimeMoneyOut() {
+
+}
+
+//end of purchases report
+
+// Collection reports
+func CollectionOverTimeByCustomer() {
+
+}
+func CollectionOverTimeByLocation() {
+
+}
+func CollectionOverTimeByItem() {
+
+}
+
+//end of collection reports
+
+// Dashboard
+func SalesMadeOverTime() {
+	//line graph
+}
+
+func StockLevelsByItem() {
+	//bar chart
+}
+
+func CollectionStatus() {
+	// completed, cancelled,
+}
+
+func InventoryStatus() {
+	//low stock, in stock
+}
+//Dashboard

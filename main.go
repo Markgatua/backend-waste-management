@@ -120,7 +120,7 @@ func runProgram() {
 	//-------------------------------------------------------------------------------------------
 
 	//stats --------
-	router.GET("/main_organization_stats", middlewares.PermissionBlockerMiddleware("view_stats"), controllers.StatsController{}.GetMainOrganizationStats)
+	router.GET("/main_organization_stats", middlewares.PermissionBlockerMiddleware("view_stats"), controllers.ReportsController{}.GetMainOrganizationStats)
 	//stats -------
 
 	router.GET("/users", middlewares.PermissionBlockerMiddleware("view_user"), usersController.GetAllUsers)
