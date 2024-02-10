@@ -369,6 +369,7 @@ CREATE TABLE inventory_adjustments(
     company_id int not null,
     adjustment_amount DECIMAL not NULL,
     is_positive_adjustment BOOLEAN not null,
+    reason TEXT NULL,
     FOREIGN Key (company_id) REFERENCES companies(id),
     FOREIGN Key (adjusted_by) REFERENCES users(id)
 );

@@ -69,6 +69,7 @@ insert into purchase_transactions(ref,purchase_id,company_id,payment_method,amou
 -- name: InventoryItemCount :one
 select count(*) from inventory where waste_type_id=$1 and company_id = $2;
 
+
 -- name: GetInventoryItem :one
 select * from inventory where  waste_type_id=$1 and company_id = $2;
 
@@ -77,6 +78,11 @@ update inventory set total_weight=$1 where id =$2;
 
 -- name: InsertToInventory :exec
 insert into inventory(waste_type_id,company_id,total_weight) VALUES($1,$2,$3);
+
+
+-- name: InsertToInventoryAdjustments :exec
+insert into inventory_adjustments(adjusted_by,company_id,adjustment_amount,is_positive_adjustment,reason) VALUES($1,$2,$3,$4,$5);
+
 
 -- name: DeleteAggregatorWasteTypes :exec
 delete from aggregator_waste_types where aggregator_id =$1;

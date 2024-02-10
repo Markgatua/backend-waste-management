@@ -1045,6 +1045,7 @@ func (aggregatorController AggregatorController) MakeInventoryAdjustments(contex
 	}
 	type Param struct {
 		// CompanyID  int32       `json:"company_id"  binding:"required"`
+		Reason     string      `json:"reason"`
 		WasteItems []WasteItem `json:"waste_items"  binding:"required"`
 	}
 	var params Param
@@ -1125,6 +1126,14 @@ func (aggregatorController AggregatorController) MakeInventoryAdjustments(contex
 
 					if err != nil {
 						logger.Log("Aggregator/MakeAdjustment", err.Error(), logger.LOG_LEVEL_ERROR)
+					} else {
+						gen.REPO.InsertToInventoryAdjustments(context, gen.InsertToInventoryAdjustmentsParams{
+							AdjustedBy:           int32(auth.ID.Int64),
+							CompanyID:            int32(auth.UserCompanyId.Int64),
+							AdjustmentAmount:     fmt.Sprint(v.Adjustment),
+							IsPositiveAdjustment: false,
+							Reason:               null.StringFrom(params.Reason).NullString,
+						})
 					}
 				} else if v.AdjustmentType == "positive" {
 					remainingWeight := currentQuantity + v.Adjustment
@@ -1135,6 +1144,14 @@ func (aggregatorController AggregatorController) MakeInventoryAdjustments(contex
 					})
 					if err != nil {
 						logger.Log("Aggregator/MakeAdjustment", err.Error(), logger.LOG_LEVEL_ERROR)
+					} else {
+						gen.REPO.InsertToInventoryAdjustments(context, gen.InsertToInventoryAdjustmentsParams{
+							AdjustedBy:           int32(auth.ID.Int64),
+							CompanyID:            int32(auth.UserCompanyId.Int64),
+							AdjustmentAmount:     fmt.Sprint(v.Adjustment),
+							IsPositiveAdjustment: true,
+							Reason:               null.StringFrom(params.Reason).NullString,
+						})
 					}
 				}
 			}
@@ -1481,7 +1498,6 @@ func SellWasteToBuyerCash(param SellWasteParam, auth *models.User, date sql.Null
 				WasteTypeID: sql.NullInt32{Int32: v.ID, Valid: true},
 				CompanyID:   int32(auth.UserCompanyId.Int64)})
 
-				
 		currentQuantity := item.TotalWeight
 
 		var remainingWeight = currentQuantity - v.Weight
@@ -1656,7 +1672,6 @@ func (aggregatorController AggregatorController) GetSales(context *gin.Context) 
 	})
 }
 
-
 func (aggregatorController AggregatorController) GetUsers(context *gin.Context) {
 	auth, _ := helpers.Functions{}.CurrentUserFromToken(context)
 
@@ -1669,7 +1684,7 @@ func (aggregatorController AggregatorController) GetUsers(context *gin.Context) 
 
 	searchQuery := ""
 	companyQuery := ""
-	
+
 	limitOffset := ""
 
 	if search != "" {
@@ -1689,7 +1704,7 @@ func (aggregatorController AggregatorController) GetUsers(context *gin.Context) 
 	}
 
 	companyQuery = " and q.user_company_id=" + companyID
-	
+
 	query := `
 	 select * from 
 	 (
@@ -1713,10 +1728,10 @@ func (aggregatorController AggregatorController) GetUsers(context *gin.Context) 
 	 ) as q where q.created_at is not null and q.role_id!=3` + searchQuery + companyQuery + " order by q.created_at desc " + limitOffset
 
 	var totalCount = 0
-	err := gen.REPO.DB.Get(&totalCount, fmt.Sprint("select count(*) from users where created_at is not null and users.role_id!=3 and user_company_id=",companyID))
+	err := gen.REPO.DB.Get(&totalCount, fmt.Sprint("select count(*) from users where created_at is not null and users.role_id!=3 and user_company_id=", companyID))
 
-	if err!=nil{
-		logger.Log("AggregatorController/GetUsers",err.Error(),logger.LOG_LEVEL_ERROR)
+	if err != nil {
+		logger.Log("AggregatorController/GetUsers", err.Error(), logger.LOG_LEVEL_ERROR)
 	}
 	logger.Log("AggregatorController/GetUsers", query, logger.LOG_LEVEL_INFO)
 	results, err := utils.Select(gen.REPO.DB, query)
@@ -1734,7 +1749,6 @@ func (aggregatorController AggregatorController) GetUsers(context *gin.Context) 
 		"total_count": totalCount,
 	})
 }
-
 
 func (aggregatorController AggregatorController) GetPurchases(context *gin.Context) {
 	auth, _ := helpers.Functions{}.CurrentUserFromToken(context)

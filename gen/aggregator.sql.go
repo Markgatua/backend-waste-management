@@ -426,6 +426,29 @@ func (q *Queries) InsertToInventory(ctx context.Context, arg InsertToInventoryPa
 	return err
 }
 
+const insertToInventoryAdjustments = `-- name: InsertToInventoryAdjustments :exec
+insert into inventory_adjustments(adjusted_by,company_id,adjustment_amount,is_positive_adjustment,reason) VALUES($1,$2,$3,$4,$5)
+`
+
+type InsertToInventoryAdjustmentsParams struct {
+	AdjustedBy           int32          `json:"adjusted_by"`
+	CompanyID            int32          `json:"company_id"`
+	AdjustmentAmount     string         `json:"adjustment_amount"`
+	IsPositiveAdjustment bool           `json:"is_positive_adjustment"`
+	Reason               sql.NullString `json:"reason"`
+}
+
+func (q *Queries) InsertToInventoryAdjustments(ctx context.Context, arg InsertToInventoryAdjustmentsParams) error {
+	_, err := q.db.ExecContext(ctx, insertToInventoryAdjustments,
+		arg.AdjustedBy,
+		arg.CompanyID,
+		arg.AdjustmentAmount,
+		arg.IsPositiveAdjustment,
+		arg.Reason,
+	)
+	return err
+}
+
 const inventoryItemCount = `-- name: InventoryItemCount :one
 select count(*) from inventory where waste_type_id=$1 and company_id = $2
 `

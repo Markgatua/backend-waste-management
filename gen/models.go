@@ -142,12 +142,13 @@ type Inventory struct {
 }
 
 type InventoryAdjustment struct {
-	ID                   int32     `json:"id"`
-	AdjustedBy           int32     `json:"adjusted_by"`
-	CreatedAt            time.Time `json:"created_at"`
-	CompanyID            int32     `json:"company_id"`
-	AdjustmentAmount     string    `json:"adjustment_amount"`
-	IsPositiveAdjustment bool      `json:"is_positive_adjustment"`
+	ID                   int32          `json:"id"`
+	AdjustedBy           int32          `json:"adjusted_by"`
+	CreatedAt            time.Time      `json:"created_at"`
+	CompanyID            int32          `json:"company_id"`
+	AdjustmentAmount     string         `json:"adjustment_amount"`
+	IsPositiveAdjustment bool           `json:"is_positive_adjustment"`
+	Reason               sql.NullString `json:"reason"`
 }
 
 type MainOrganization struct {

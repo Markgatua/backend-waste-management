@@ -136,6 +136,7 @@ type Querier interface {
 	// sub_counties.sql
 	InsertSubcounties(ctx context.Context, arg InsertSubcountiesParams) error
 	InsertToInventory(ctx context.Context, arg InsertToInventoryParams) error
+	InsertToInventoryAdjustments(ctx context.Context, arg InsertToInventoryAdjustmentsParams) error
 	InsertWasteType(ctx context.Context, arg InsertWasteTypeParams) (WasteType, error)
 	InventoryItemCount(ctx context.Context, arg InventoryItemCountParams) (int64, error)
 	MakeCashPayment(ctx context.Context, arg MakeCashPaymentParams) (SaleTransaction, error)
