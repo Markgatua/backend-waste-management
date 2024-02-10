@@ -306,12 +306,13 @@ func (aggregatorController CollectionRequestsController) GetCollectionSchedule(c
 	})
 }
 
-func (aggregatorController CollectionRequestsController) GetCollectionRequests(context *gin.Context) {
+func (aggregatorController CollectionRequestsController) GetAggregatorCollectionRequests(context *gin.Context) {
 	auth, _ := helpers.Functions{}.CurrentUserFromToken(context)
 
 	search := context.Query("s")
 	itemsPerPage := context.Query("ipp")
 	page := context.Query("p")
+	status := context.Query("st")
 	//sortBy := context.Query("sort_by")
 	//orderBy := context.Query("order_by")
 	companyID := context.Query("cid")
@@ -321,10 +322,11 @@ func (aggregatorController CollectionRequestsController) GetCollectionRequests(c
 	searchQuery := ""
 	companyQuery := ""
 	dateRangeQuery := ""
+	statusQuery := ""
 	limitOffset := ""
 
 	if search != "" {
-		searchQuery = " and (q.waste_name ilike " + "'%" + search + "%'" + " or q.company_name ilike " + "'%" + search + "%'" + ")"
+		searchQuery = " and (q.champion_company_name ilike " + "'%" + search + "%'" + " or q.location ilike " + "'%" + search + "%'" + " or q.stamp ilike " + "'%" + search + "%'" + ")"
 	}
 	if itemsPerPage != "" && page != "" {
 		itemsPerPage, _ := strconv.Atoi(context.Query("ipp"))
@@ -336,40 +338,53 @@ func (aggregatorController CollectionRequestsController) GetCollectionRequests(c
 	}
 	if companyID == "" {
 		companyID = fmt.Sprint(auth.UserCompanyId.Int64)
-
-		//companyQuery = fmt.Sprint(" and  q.company_id=", auth.UserCompanyId.Int64)
 	}
-	//else {
-	//	companyQuery = " and  q.company_id=" + companyID
-	//}
 
-	companyQuery = " and q.company_id=" + companyID
+	if status != "" {
+		statusQuery = " and q.status=" + status
+	}
+
+	companyQuery = " and q.collector_id=" + companyID
 
 	if dateRangeStart != "" && dateRangeEnd != "" {
-		dateRangeQuery = " and cast(q.created_at as date)>='" + dateRangeStart + "' and cast(q.created_at as date)<='" + dateRangeEnd + "'"
+		dateRangeQuery = " and cast(q.request_date as date)>='" + dateRangeStart + "' and cast(q.request_date as date)<='" + dateRangeEnd + "'"
 	}
 	query := `
 	 select * from 
 	 (
 		select 
-		collection_request_waste_items.id,
-		collection_request_waste_items.waste_type_id,
-		collection_request_waste_items.weight,
-		collection_request_waste_items.collector_id as company_id,
-		collection_request_waste_items.created_at,
-		waste_types.name as waste_name,
-		companies.name as company_name
-		from collection_request_waste_items 
+		collection_requests.id,
+		collection_requests.request_date,
+		collection_requests.pickup_date,
+		collection_requests.collector_id,
+		collection_requests.producer_id,
+		collection_requests.status,
+		collection_requests.producer_id,
+		collection_requests.pickup_time_stamp_id,
+		collection_requests.location,
+		collection_requests.administrative_level_1_location,
+		collection_requests.lat,
+		collection_requests.lng,
+		collection_requests.first_contact_person,
+		collection_requests.second_contact_person,
+		collection_requests.created_at,
+        pickup_time_stamps.stamp,
+	    pickup_time_stamps.time_range,
+	    pickup_time_stamps.position,
+		companies.name as champion_company_name
 
-		inner join companies on companies.id=collection_request_waste_items.collector_id
-		inner join waste_types on collection_request_waste_items.waste_type_id=waste_types.id
-	 ) as q where q.created_at is not null` + dateRangeQuery + searchQuery + companyQuery + " order by q.created_at desc " + limitOffset
+		from collection_requests 
+
+		inner join companies on companies.id=collection_requests.producer_id
+		left join pickup_time_stamps on pickup_time_stamps.id=collection_requests.pickup_time_stamp_id
+
+	 ) as q where q.created_at is not null` + dateRangeQuery + searchQuery + companyQuery + statusQuery + " order by q.created_at desc " + limitOffset
 
 	var totalCount = 0
-	err := gen.REPO.DB.Get(&totalCount, fmt.Sprint("select count(*) from collection_request_waste_items where created_at is not null and collector_id=", companyID))
+	err := gen.REPO.DB.Get(&totalCount, fmt.Sprint("select count(*) from collection_requests where created_at is not null and collector_id=", companyID))
 
 	//fmt.Println(err.Error())
-	logger.Log("CollectionRequestsController/GetCollections", query, logger.LOG_LEVEL_INFO)
+	logger.Log("CollectionRequestsController/GetAggregatorCollectionRequests", query, logger.LOG_LEVEL_INFO)
 
 	results, err := utils.Select(gen.REPO.DB, query)
 	if err != nil {
@@ -378,6 +393,14 @@ func (aggregatorController CollectionRequestsController) GetCollectionRequests(c
 			"message": err.Error(),
 		})
 		return
+	}
+
+	for _, v := range results {
+		key, _ := v["id"]
+		query = fmt.Sprint(`select collection_request_waste_items*,waste_types.name from collection_request_waste_items inner join waste_types on waste_types.id=collection_request_waste_items.waste_type_id where collection_request_id=`, key)
+		//collection_request_waste_items
+		results, _ := utils.Select(gen.REPO.DB, query)
+		v["collection_waste_items"] = results
 	}
 
 	context.JSON(http.StatusOK, gin.H{
