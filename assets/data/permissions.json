@@ -54,6 +54,56 @@
         ]
     },
     {
+        "module":"Route planning",
+        "key":"routeplanning",
+        "permissions":[
+            {
+                "permission_id":101,
+                "name":"Manage route planning",
+                "sub_module":"Route planning",
+                "action":"manage_route_planning"
+            }
+        ]
+    },
+
+    {
+        "module":"Vehicles",
+        "key":"vehicles",
+        "permissions":[
+            {
+                "permission_id": 103,
+                "name": "Add vehicle",
+                "sub_module": "vehicle",
+                "action": "add_vehicle"
+            },
+            {
+                "permission_id": 103,
+                "name": "Edit vehicle",
+                "sub_module": "vehicle",
+                "action": "edit_vehicle"
+            },
+            {
+                "permission_id": 103,
+                "name": "View vehicle",
+                "sub_module": "vehicle",
+                "action": "view_vehicle"
+            },
+            {
+                "permission_id": 103,
+                "name": "Delete vehicle",
+                "sub_module": "vehicle",
+                "action": "delete_vehicle"
+            },
+            {
+                "permission_id": 103,
+                "name": "View vehicle types",
+                "sub_module": "vehicle",
+                "action": "view_vehicle_types"
+            }
+        ]
+    },
+    
+    {
         "module": "Settings",
         "key": "settings",
         "permissions": [
@@ -240,20 +290,152 @@
         ]
     },
     {
-        "module": "Request Collection",
-        "key": "requestcollection",
+        "module": "Collection requests and schedules",
+        "key": "collectionrequestsandcollection",
         "permissions": [
             {
                 "permission_id": 103,
                 "name": "Request Collection",
-                "sub_module": "Waste Collection",
+                "sub_module": "Collection requests",
                 "action": "request_collection"
             },
             {
                 "permission_id": 103,
                 "name": "View Collection Requests",
-                "sub_module": "Waste Collection",
+                "sub_module": "Collection requests",
                 "action": "view_collections"
+            },
+            {
+                "permission_id": 103,
+                "name": "Change collection request status",
+                "sub_module": "Collection requests",
+                "action": "change_collection_request_status"
+            },
+            {
+                "permission_id": 103,
+                "name": "View Collection Schedule",
+                "sub_module": "Collection schedule",
+                "action": "view_collection_schedule"
+            }
+        ]
+    },
+    {
+        "module": "Waste buyer",
+        "key": "buyer",
+        "permissions": [
+            {
+                "permission_id": 103,
+                "name": "Delete buyer",
+                "sub_module": "Buyer",
+                "action": "delete_buyer"
+            },
+            {
+                "permission_id": 103,
+                "name": "View buyer",
+                "sub_module": "Buyer",
+                "action": "view_buyer"
+            },
+            {
+                "permission_id": 103,
+                "name": "Add buyer",
+                "sub_module": "Buyer",
+                "action": "add_buyer"
+            },
+            {
+                "permission_id": 103,
+                "name": "Edit Buyer",
+                "sub_module": "Buyer",
+                "action": "edit_buyer"
+            }
+        ]
+    },
+    {
+        "module": "Waste supplier",
+        "key": "supplier",
+        "permissions": [
+            {
+                "permission_id": 103,
+                "name": "Delete supplier",
+                "sub_module": "Supplier",
+                "action": "delete_supplier"
+            },
+            {
+                "permission_id": 103,
+                "name": "View supplier",
+                "sub_module": "Supplier",
+                "action": "view_supplier"
+            },
+            {
+                "permission_id": 103,
+                "name": "Add supplier",
+                "sub_module": "Supplier",
+                "action": "add_supplier"
+            },
+            {
+                "permission_id": 103,
+                "name": "Edit supplier",
+                "sub_module": "Supplier",
+                "action": "edit_supplier"
+            }
+        ]
+    },
+    {
+        "module": "Sales",
+        "key": "sales",
+        "permissions": [
+            {
+                "permission_id": 103,
+                "name": "View sale history",
+                "sub_module": "Sales",
+                "action": "view_sale_history"
+            },
+            {
+                "permission_id": 103,
+                "name": "Sell",
+                "sub_module": "Sales",
+                "action": "sell"
+            }
+        ]
+    },
+    {
+        "module": "Purchases",
+        "key": "purchases",
+        "permissions": [
+            {
+                "permission_id": 103,
+                "name": "View purchase history",
+                "sub_module": "Purchases",
+                "action": "view_purchase_history"
+            },
+            {
+                "permission_id": 103,
+                "name": "Purchase",
+                "sub_module": "Purchase",
+                "action": "purchase"
+            }
+        ]
+    },
+    {
+        "module": "Inventory",
+        "key": "inventory",
+        "permissions": [
+            {
+                "permission_id": 103,
+                "name": "View inventory",
+                "sub_module": "inventory",
+                "action": "view_inventory"
+            },
+            {
+                "permission_id": 103,
+                "name": "Make adjustments",
+                "sub_module": "make_adjustments",
+                "action": "make_inventory_adjustment"
+            },
+            {
+                "permission_id": 103,
+                "name": "View adjustments",
+                "sub_module": "adjustments",
+                "action": "view_inventory_adjustments"
             }
         ]
     },

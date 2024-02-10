@@ -80,7 +80,6 @@ CREATE TABLE organizations(
 
 ALTER TABLE organizations ADD CONSTRAINT check_organizations_type CHECK (organization_type IN (1,2)); -- make sure organization type is either 1 or 2
 
-
 CREATE TABLE main_organization(
   id SERIAL PRIMARY KEY,
   organization_id VARCHAR(255) NOT NULL,
@@ -112,6 +111,15 @@ CREATE TABLE companies (
   lng float NULL,
   is_active BOOLEAN NOT NULL DEFAULT TRUE,
   created_at TIMESTAMP NOT NULL DEFAULT NOW(),
+  contact_person1_first_name VARCHAR NULL,
+  contact_person1_last_name VARCHAR NULL,
+  contact_person1_phone VARCHAR NULL,
+  contact_person1_email VARCHAR NULL,
+  contact_person2_email VARCHAR NULL,
+  contact_person2_first_name VARCHAR NULL,
+  contact_person2_last_name VARCHAR NULL,
+  contact_person2_phone VARCHAR NULL,
+  
   FOREIGN Key (organization_id) REFERENCES organizations(id),
   FOREIGN Key (country_id) REFERENCES countries(id)
 );
@@ -153,6 +161,27 @@ CREATE TABLE users(
     updated_at TIMESTAMP NOT NULL DEFAULT NOW()
 );
 
+create table vehicle_types(
+  id SERIAL PRIMARY key,
+  name VARCHAR not NULL,
+  max_vehicle_weight FLOAT not NULL,
+  max_vehicle_height FLOAT not NULL,
+  description TEXT not NULL
+);
+
+CREATE TABLE vehicles(
+  id SERIAL PRIMARY key,
+  company_id INTEGER not null,
+  assigned_driver_id INTEGER null,
+  vehicle_type_id INTEGER not NULL,
+  reg_no VARCHAR(255) not null UNIQUE,
+  is_active BOOLEAN not null DEFAULT TRUE,
+  liters FLOAT NULL,
+  FOREIGN Key (company_id) REFERENCES companies(id),
+  FOREIGN KEY(assigned_driver_id) REFERENCES users(id),
+  FOREIGN KEY(vehicle_type_id) REFERENCES vehicle_types(id)
+);
+
 -- Create "phone_verification" table
 CREATE TABLE phone_verification_token (
     id SERIAL PRIMARY KEY,
@@ -171,18 +200,42 @@ CREATE TABLE email_verification_token (
 );
 
 
--- Create "champion_assigned_aggregator" table
+-- Create "Champion_assigned_aggregator" table
 CREATE TABLE champion_aggregator_assignments (
   id SERIAL PRIMARY KEY,
   champion_id INTEGER NOT NULL,
   FOREIGN Key (champion_id) REFERENCES companies(id),
   collector_id INTEGER NOT NULL,
   FOREIGN Key (collector_id) REFERENCES companies(id),
-  pickup_day VARCHAR NULL,
-  pickup_time VARCHAR NULL,
+  --pickup_day VARCHAR NULL,
+  --pickup_time VARCHAR NULL,
   created_at TIMESTAMP NOT NULL DEFAULT NOW()
 );
-ALTER TABLE champion_aggregator_assignments ADD CONSTRAINT check_pickup_day CHECK (pickup_day IN ('Monday','Tuesday','Wednesday','Thursday','Friday','Saturday','Sunday')); 
+
+--ALTER TABLE champion_aggregator_assignments ADD CONSTRAINT check_pickup_day CHECK (pickup_day IN ('Monday','Tuesday','Wednesday','Thursday','Friday','Saturday','Sunday')); 
+
+
+CREATE TABLE pickup_time_stamps (
+  id SERIAL PRIMARY KEY,
+  stamp VARCHAR(255) NOT NULL,
+  time_range VARCHAR(255) NOT NULL,
+  position integer not NULL DEFAULT 0
+);
+ALTER TABLE pickup_time_stamps ADD CONSTRAINT check_stamp CHECK (stamp IN ('Morning','Afternoon','Evening'));
+
+-- Create "Champion pickup times"
+CREATE TABLE champion_pickup_times(
+  id SERIAL PRIMARY KEY,
+  champion_aggregator_assignment_id INTEGER NOT NULL,
+  pickup_time_stamp_id INTEGER NOT NULL,
+  ExactPickupTime VARCHAR(255) NULL,
+  FOREIGN Key (champion_aggregator_assignment_id) REFERENCES champion_aggregator_assignments(id) on delete cascade,
+  FOREIGN Key (pickup_time_stamp_id) REFERENCES pickup_time_stamps(id),
+  pickup_day VARCHAR NOT NULL
+);
+
+ALTER TABLE champion_pickup_times ADD CONSTRAINT champion_pickup_times_check_pickup_day CHECK (pickup_day IN ('Monday','Tuesday','Wednesday','Thursday','Friday','Saturday','Sunday')); 
+
 
 CREATE TABLE waste_types (
   id SERIAL PRIMARY KEY,
@@ -193,13 +246,6 @@ CREATE TABLE waste_types (
   created_at TIMESTAMP NOT NULL DEFAULT NOW()
 );
 
-CREATE TABLE pickup_time_stamps (
-  id SERIAL PRIMARY KEY,
-  stamp VARCHAR(255) NOT NULL,
-  time_range VARCHAR(255) NOT NULL
-);
-
-ALTER TABLE pickup_time_stamps ADD CONSTRAINT check_stamp CHECK (stamp IN ('Morning','Afternoon','Evening')); 
 
 CREATE TABLE collection_requests (
   id SERIAL PRIMARY KEY,
@@ -223,14 +269,20 @@ CREATE TABLE collection_requests (
 
 ALTER TABLE collection_requests ADD CONSTRAINT collection_requests_status CHECK (status IN (1,2,3,4,5)); 
 
-CREATE TABLE waste_items (
+CREATE TABLE collection_request_waste_items (
   id SERIAL PRIMARY KEY,
   collection_request_id INTEGER NOT NULL,
+  collector_id INTEGER NOT NULL,
   FOREIGN Key (collection_request_id) REFERENCES collection_requests(id),
   waste_type_id INTEGER NOT NULL,
   FOREIGN Key (waste_type_id) REFERENCES waste_types(id),
-  weight DECIMAL NOT NULL
+  FOREIGN Key (collector_id) REFERENCES companies(id),
+  weight FLOAT NOT NULL,
+  created_at TIMESTAMP NOT NULL DEFAULT NOW()
 );
+
+CREATE UNIQUE INDEX waste_types_unique_name_idx on waste_types (LOWER(name));  
+
 
 CREATE TABLE notifications (
   id SERIAL PRIMARY KEY,
@@ -242,8 +294,16 @@ CREATE TABLE notifications (
   created_at TIMESTAMP NOT NULL DEFAULT NOW()
 );
 
-CREATE UNIQUE INDEX waste_types_unique_name_idx on waste_types (LOWER(name));  
-
+-- CREATE TABLE "aggregator_waste_types"
+CREATE TABLE aggregator_waste_types(
+  id SERIAL PRIMARY KEY,
+  aggregator_id INTEGER NOT NULL,
+  waste_id INTEGER NOT NULL,
+  alert_level FLOAT NULL DEFAULT 0,
+  FOREIGN Key (aggregator_id) REFERENCES companies(id),
+  FOREIGN Key (waste_id) REFERENCES waste_types(id),
+  UNIQUE(aggregator_id,waste_id)
+);
 
 
 
@@ -252,9 +312,12 @@ CREATE TABLE buyers(
   id SERIAL PRIMARY KEY,
   company_id int not null,
   company VARCHAR NULL,
+  country_id INTEGER NULL,
+  FOREIGN Key (country_id) REFERENCES countries(id),
   first_name VARCHAR(255) NOT NULL,
   last_name VARCHAR(255) NOT NULL,
   is_active BOOLEAN not null, 
+  region VARCHAR(255) NULL,
   calling_code VARCHAR(6) NULL,
   location VARCHAR(255) NULL, -- the location of this company ie citadel muthithi road
   administrative_level_1_location VARCHAR(255) NULL, -- in kenya, this will be county, in uganda it will be a different value , ie Nairobi county
@@ -266,6 +329,53 @@ CREATE TABLE buyers(
   FOREIGN Key (company_id) REFERENCES companies(id)
 );
 
+-- Create "buyers" table, these are the ones that buy waste from aggregators
+CREATE TABLE suppliers(
+  id SERIAL PRIMARY KEY,
+  company_id int not null,
+  company VARCHAR NULL,
+  first_name VARCHAR(255) NOT NULL,
+  country_id INTEGER NULL,
+  FOREIGN Key (country_id) REFERENCES countries(id),
+  last_name VARCHAR(255) NOT NULL,
+  is_active BOOLEAN not null, 
+  region VARCHAR(255) NULL,
+  calling_code VARCHAR(6) NULL,
+  location VARCHAR(255) NULL, -- the location of this company ie citadel muthithi road
+  administrative_level_1_location VARCHAR(255) NULL, -- in kenya, this will be county, in uganda it will be a different value , ie Nairobi county
+  lat float NULL,
+  lng float NULL,
+  phone VARCHAR(15) NULL DEFAULT NULL,
+  created_at TIMESTAMP NOT NULL DEFAULT NOW(),
+  updated_at TIMESTAMP NOT NULL DEFAULT NOW(),
+  FOREIGN Key (company_id) REFERENCES companies(id)
+);
+
+
+
+CREATE TABLE inventory(
+      id SERIAL PRIMARY KEY,
+  company_id int not null,
+  FOREIGN Key (company_id) REFERENCES companies(id),
+  waste_type_id INTEGER NULL,
+  FOREIGN Key (waste_type_id) REFERENCES waste_types(id),
+  total_weight FLOAT not null --in kgs
+);
+
+CREATE TABLE inventory_adjustments(
+    id SERIAL PRIMARY KEY,
+    adjusted_by INTEGER not null,
+    created_at TIMESTAMP NOT NULL DEFAULT NOW(),
+    company_id int not null,
+    adjustment_amount FLOAT NOT NULL,
+    waste_type_id INTEGER NOT NULL,
+    is_positive_adjustment BOOLEAN not null,
+    reason TEXT NULL,
+    FOREIGN Key (company_id) REFERENCES companies(id),
+    FOREIGN Key (adjusted_by) REFERENCES users(id),
+    FOREIGN Key (waste_type_id) REFERENCES waste_types(id)
+);
+
 CREATE TABLE sales(
   id SERIAL PRIMARY KEY,
   ref VARCHAR not null,
@@ -273,10 +383,36 @@ CREATE TABLE sales(
   buyer_id int not null,
   FOREIGN Key (buyer_id) REFERENCES buyers(id),
   FOREIGN Key (company_id) REFERENCES companies(id),
-  total_amount_of_waste DECIMAL NULL, --in kgs
-  total_amount DECIMAL NULL, --ksh
-  date TIMESTAMP NOT NULL DEFAULT NOW(),
+  total_weight FLOAT NULL, --in kgs
+  total_amount FLOAT NULL, --ksh
+  date TIMESTAMP without time zone NOT NULL DEFAULT NOW(),
   dump json NULL
+);
+
+CREATE TABLE purchases(
+  id SERIAL PRIMARY KEY,
+  ref VARCHAR not null,
+  company_id int not null,
+  supplier_id int not null,
+  FOREIGN Key (supplier_id) REFERENCES suppliers(id),
+  FOREIGN Key (company_id) REFERENCES companies(id),
+  total_weight FLOAT NULL, --in kgs
+  total_amount FLOAT NULL, --ksh
+  date TIMESTAMP without time zone NOT NULL DEFAULT NOW(),
+  dump json NULL
+);
+
+CREATE TABLE purchase_items(
+  id SERIAL PRIMARY KEY,
+  company_id INTEGER NOT NULL,
+  purchase_id INTEGER NOT NULL,
+  FOREIGN Key (company_id) REFERENCES companies(id),
+  waste_type_id INTEGER NOT NULL,
+  FOREIGN Key (purchase_id) REFERENCES purchases(id) on delete cascade,
+  FOREIGN Key (waste_type_id) REFERENCES waste_types(id),
+  weight FLOAT NULL,
+  cost_per_kg FLOAT NULL,
+  total_amount FLOAT NOT NULL
 );
 
 CREATE TABLE sale_items(
@@ -285,18 +421,18 @@ CREATE TABLE sale_items(
   sale_id INTEGER NOT NULL,
   FOREIGN Key (company_id) REFERENCES companies(id),
   waste_type_id INTEGER NOT NULL,
-  FOREIGN Key (sale_id) REFERENCES sales(id),
+  FOREIGN Key (sale_id) REFERENCES sales(id) on delete cascade,
   FOREIGN Key (waste_type_id) REFERENCES waste_types(id),
-  amount_of_waste DECIMAL NULL,
-  cost_per_kg DECIMAL NULL
-
+  weight FLOAT NULL,
+  cost_per_kg FLOAT NULL,
+  total_amount FLOAT NOT NULL
 );
 
-CREATE TABLE sale_transactions(
-  ref VARCHAR NULL,
+CREATE TABLE purchase_transactions(
+  ref VARCHAR NOT NULL,
   id SERIAL PRIMARY KEY,
-  sale_id INTEGER not NULL,
-  FOREIGN Key (sale_id) REFERENCES sales(id),
+  purchase_id INTEGER not NULL,
+  FOREIGN Key (purchase_id) REFERENCES purchases(id) on delete cascade,
   company_id int not null,
   FOREIGN Key (company_id) REFERENCES companies(id),
   payment_method VARCHAR NOT NULL,
@@ -314,44 +450,25 @@ CREATE TABLE sale_transactions(
   updated_at TIMESTAMP NOT NULL DEFAULT NOW()
 );
 
-CREATE TABLE waste_for_sale (
-  id SERIAL PRIMARY KEY,
-  seller INTEGER,
-  FOREIGN Key (seller) REFERENCES users(id),
-  waste JSON
-);
 
-CREATE TABLE waste_buyers (
+CREATE TABLE sale_transactions(
+  ref VARCHAR NOT NULL,
   id SERIAL PRIMARY KEY,
-  buyer_id INTEGER,
-  FOREIGN Key (buyer_id) REFERENCES users(id),
-  rates JSON
-);
-
-CREATE TABLE payment_methods (
-  id SERIAL PRIMARY KEY,
-  payment_method VARCHAR(255) NOT NULL,
-  created_at TIMESTAMP NOT NULL DEFAULT NOW()
-);
-
-CREATE TABLE waste_transactions (
-  id SERIAL PRIMARY KEY,
-  date TIMESTAMP NOT NULL DEFAULT NOW(),
-  buyer_id INTEGER,
-  FOREIGN KEY (buyer_id) REFERENCES users(id),
-  seller_id INTEGER,
-  FOREIGN KEY (seller_id) REFERENCES users(id),
-  waste_products JSON,
-  total_amount VARCHAR NOT NULL,
-  payment_method_id INTEGER,
-  FOREIGN KEY (payment_method_id) REFERENCES payment_methods(id),
-  merchant_request_id VARCHAR(255) NULL,
-  checkout_request_id VARCHAR(255) NULL,
-  mpesa_result_code VARCHAR(255) NULL,
-  mpesa_result_desc VARCHAR(255) NULL,
-  mpesa_receipt_code VARCHAR(255) NULL,
-  time_paid VARCHAR(255) NULL,
-  is_paid BOOLEAN DEFAULT FALSE,
+  sale_id INTEGER not NULL,
+  FOREIGN Key (sale_id) REFERENCES sales(id) on delete cascade,
+  company_id int not null,
+  FOREIGN Key (company_id) REFERENCES companies(id),
+  payment_method VARCHAR NOT NULL,
+  checkout_request_id VARCHAR NULL,
+  merchant_request_id VARCHAR NULL,
+  card_mask VARCHAR NULL,
+  msisdn_idnum VARCHAR NULL,
+  transaction_date TIMESTAMP NULL,
+  receipt_no VARCHAR NULL,
+  amount DECIMAL not NULL,
+  mpesa_result_code VARCHAR NULL,
+  mpesa_result_desc VARCHAR NULL,
+  ipay_status VARCHAR NULL,
   created_at TIMESTAMP NOT NULL DEFAULT NOW(),
   updated_at TIMESTAMP NOT NULL DEFAULT NOW()
 );

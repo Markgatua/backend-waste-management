@@ -50,7 +50,7 @@ LEFT JOIN
     companies AS collector ON collector.id = collection_requests.collector_id
 LEFT JOIN 
     companies AS secondcollector ON secondcollector.id = collection_requests.second_collector_id
-WHERE collection_requests.status=$1;
+WHERE collection_requests.status=5;
 
 -- name: GetAllCancelledCollectionRequests :many
 SELECT 
@@ -67,6 +67,16 @@ LEFT JOIN
 LEFT JOIN 
     companies AS secondcollector ON secondcollector.id = collection_requests.second_collector_id
 WHERE collection_requests.cancelled=4;
+
+-- name: GetCollectionRequest :one
+SELECT 
+    collection_requests.*  
+FROM 
+    collection_requests
+WHERE collection_requests.id=$1;
+
+-- name: ChangeCollectionRequestStatus :exec
+update collection_requests set status = $1 where id=$2;
 
 -- name: GetAllPendingConfirmationCollectionRequests :many
 SELECT 
@@ -118,9 +128,9 @@ WHERE collection_requests.collector_id=$1;
 
 
 -- name: CollectionWeightTotals :one
-select sum(waste_items.weight) as total_weight,waste_types.name from waste_items 
-inner join waste_types on waste_types.id=waste_items.waste_type_id 
-inner join collection_requests on collection_requests.id=waste_items.collection_request_id
+select sum(collection_request_waste_items.weight) as total_weight,waste_types.name from collection_request_waste_items 
+inner join waste_types on waste_types.id=collection_request_waste_items.waste_type_id 
+inner join collection_requests on collection_requests.id=collection_request_waste_items.collection_request_id
 where collection_requests.producer_id=$1 GROUP BY waste_types.name;
 
 -- name: GetLatestCollection :one
@@ -133,7 +143,7 @@ FROM
 LEFT JOIN
     companies AS collector ON collector.id = collection_requests.collector_id
 LEFT JOIN
-    waste_items AS totals ON totals.collection_request_id = collection_requests.id
+    collection_request_waste_items AS totals ON totals.collection_request_id = collection_requests.id
 WHERE
     collection_requests.id = $1
 GROUP BY
@@ -155,7 +165,7 @@ SELECT
 FROM
     collection_requests
 LEFT JOIN
-    waste_items AS totals ON totals.collection_request_id = collection_requests.id
+    collection_request_waste_items AS totals ON totals.collection_request_id = collection_requests.id
 WHERE
     collection_requests.producer_id = $1
 GROUP BY
@@ -164,15 +174,15 @@ GROUP BY
 
 -- name: GetWasteItemsProducerData :many
 SELECT
-    CAST(SUM(waste_items.weight) AS DECIMAL(10,2)) AS total_weight,
+    CAST(SUM(collection_request_waste_items.weight) AS DECIMAL(10,2)) AS total_weight,
     waste.name AS waste_name,
     collections.status AS collection_status
 FROM
-    waste_items
+    collection_request_waste_items
 JOIN
-    waste_types AS waste ON waste_items.waste_type_id = waste.id
+    waste_types AS waste ON collection_request_waste_items.waste_type_id = waste.id
 LEFT JOIN
-    collection_requests AS collections ON collections.id = waste_items.collection_request_id
+    collection_requests AS collections ON collections.id = collection_request_waste_items.collection_request_id
 WHERE
     collections.producer_id = $1
 GROUP BY
@@ -188,7 +198,7 @@ FROM
 LEFT JOIN
     companies AS collector ON collector.id = collection_requests.collector_id
 LEFT JOIN
-    waste_items AS totals ON totals.collection_request_id = collection_requests.id
+    collection_request_waste_items AS totals ON totals.collection_request_id = collection_requests.id
 WHERE
     collection_requests.producer_id = $1 AND collection_requests.status = true
 GROUP BY
@@ -204,7 +214,7 @@ FROM
 LEFT JOIN
     companies AS collector ON collector.id = collection_requests.collector_id
 LEFT JOIN
-    waste_items AS totals ON totals.collection_request_id = collection_requests.id
+    collection_request_waste_items AS totals ON totals.collection_request_id = collection_requests.id
 WHERE
     collection_requests.producer_id = $1 AND collection_requests.status = false
 GROUP BY
@@ -246,4 +256,29 @@ LEFT JOIN
 WHERE
     collection_requests.producer_id = $1 AND collection_requests.status = 1 AND CAST(collection_requests.request_date AS TIMESTAMP) >= CURRENT_DATE 
 GROUP BY
+
     collection_requests.id, collector.name, collector.location,pickup.stamp,pickup.time_range;
+
+
+-- name: GetCollectionRequestsInArray :many
+select collection_requests.id,collection_requests.producer_id, companies.name as champion_name,collection_requests.collector_id,
+collection_requests.request_date,collection_requests.pickup_date,collection_requests.status,collection_requests.lat,
+collection_requests.lng,collection_requests.created_at,collection_requests.pickup_time_stamp_id,collection_requests.id,
+collection_requests.first_contact_person,collection_requests.second_contact_person,pickup_time_stamps.stamp,
+pickup_time_stamps.time_range from collection_requests 
+inner join pickup_time_stamps on pickup_time_stamps.id=collection_requests.pickup_time_stamp_id
+inner join companies on companies.id=collection_requests.producer_id
+where collection_requests.id=ANY(sqlc.arg('collectionIds')::int[]);
+
+-- name: GetCollectionScheduleInArray :many
+select champion_pickup_times.id as pickup_time_id,champion_pickup_times.champion_aggregator_assignment_id,champion_pickup_times.pickup_time_stamp_id,
+champion_pickup_times.pickup_day,champion_aggregator_assignments.champion_id,champion_aggregator_assignments.collector_id,companies.lat,
+companies.lng,companies.name as champion_name,companies.location,companies.contact_person1_first_name,companies.contact_person1_last_name,
+companies.contact_person1_phone,companies.contact_person1_email,companies.contact_person2_email,companies.administrative_level_1_location,
+companies.contact_person2_first_name,companies.contact_person2_last_name,companies.contact_person2_phone,pickup_time_stamps.stamp,
+pickup_time_stamps.time_range from champion_pickup_times 
+left join pickup_time_stamps on pickup_time_stamps.id=champion_pickup_times.pickup_time_stamp_id
+left join champion_aggregator_assignments on champion_pickup_times.champion_aggregator_assignment_id=champion_aggregator_assignments.id
+left join companies on companies.id = champion_aggregator_assignments.champion_id
+where champion_pickup_times.id=ANY(sqlc.arg('pickupTimeIds')::int[]);
+
