@@ -147,6 +147,7 @@ type InventoryAdjustment struct {
 	CreatedAt            time.Time      `json:"created_at"`
 	CompanyID            int32          `json:"company_id"`
 	AdjustmentAmount     string         `json:"adjustment_amount"`
+	WasteTypeID          int32          `json:"waste_type_id"`
 	IsPositiveAdjustment bool           `json:"is_positive_adjustment"`
 	Reason               sql.NullString `json:"reason"`
 }

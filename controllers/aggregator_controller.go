@@ -1111,6 +1111,7 @@ func (aggregatorController AggregatorController) MakeInventoryAdjustments(contex
 						AdjustedBy:           int32(auth.ID.Int64),
 						CompanyID:            int32(auth.UserCompanyId.Int64),
 						AdjustmentAmount:     fmt.Sprint(v.Adjustment),
+						WasteTypeID:          v.ID,
 						IsPositiveAdjustment: true,
 						Reason:               null.StringFrom(params.Reason).NullString,
 					})
@@ -1139,6 +1140,7 @@ func (aggregatorController AggregatorController) MakeInventoryAdjustments(contex
 							AdjustedBy:           int32(auth.ID.Int64),
 							CompanyID:            int32(auth.UserCompanyId.Int64),
 							AdjustmentAmount:     fmt.Sprint(v.Adjustment),
+							WasteTypeID:          v.ID,
 							IsPositiveAdjustment: false,
 							Reason:               null.StringFrom(params.Reason).NullString,
 						})
@@ -1158,6 +1160,7 @@ func (aggregatorController AggregatorController) MakeInventoryAdjustments(contex
 							CompanyID:            int32(auth.UserCompanyId.Int64),
 							AdjustmentAmount:     fmt.Sprint(v.Adjustment),
 							IsPositiveAdjustment: true,
+							WasteTypeID:          v.ID,
 							Reason:               null.StringFrom(params.Reason).NullString,
 						})
 					}
@@ -1796,6 +1799,91 @@ func (aggregatorController AggregatorController) GetPurchases(context *gin.Conte
 		purchases.id,
 		purchases.ref,
 		purchases.company_id,
+		purchases.supplier_id,
+		purchases.total_weight,
+		purchases.total_amount,
+		purchases.date as purchase_date,
+		suppliers.first_name,
+		suppliers.last_name,
+		suppliers.company as supplier_company,
+		companies.name as company_name
+		from purchases
+
+		inner join suppliers on suppliers.id=purchases.supplier_id
+		inner join companies on companies.id = purchases.company_id
+	 ) as q where q.purchase_date is not null` + dateRangeQuery + searchQuery + companyQuery + " order by q.purchase_date desc " + limitOffset
+
+	var totalCount = 0
+	err := gen.REPO.DB.Get(&totalCount, fmt.Sprint("select count(*) from purchases where date is not null and company_id=", auth.UserCompanyId.Int64))
+
+	logger.Log("AggregatorController/GetPurchases", query, logger.LOG_LEVEL_INFO)
+	results, err := utils.Select(gen.REPO.DB, query)
+	if err != nil {
+		context.JSON(http.StatusUnprocessableEntity, gin.H{
+			"error":   true,
+			"message": err.Error(),
+		})
+		return
+	}
+	for _, v := range results {
+		id, _ := v["id"]
+		//fmt.Println(id)
+		items, _ := utils.Select(gen.REPO.DB, fmt.Sprint("select *,waste_types.name as waste_name from purchase_items join waste_types on waste_types.id=purchase_items.waste_type_id where purchase_items.purchase_id=", id))
+		//fmt.Println(items)
+		v["items"] = items
+	}
+	context.JSON(http.StatusOK, gin.H{
+		"error":       false,
+		"content":     results,
+		"total_count": totalCount,
+	})
+}
+
+func (aggregatorController AggregatorController) GetInventoryAdjustments(context *gin.Context) {
+	auth, _ := helpers.Functions{}.CurrentUserFromToken(context)
+
+	search := context.Query("s")
+	itemsPerPage := context.Query("ipp")
+	page := context.Query("p")
+	//sortBy := context.Query("sort_by")
+	//orderBy := context.Query("order_by")
+	companyID := context.Query("cid")
+	dateRangeStart := context.Query("sd")
+	dateRangeEnd := context.Query("ed")
+
+	searchQuery := ""
+	companyQuery := ""
+	dateRangeQuery := ""
+	limitOffset := ""
+
+	if search != "" {
+		searchQuery = " and (q.first_name ilike " + "'%" + search + "%'" + " or q.company_name ilike " + "'%" + search + "%'" + " or q.last_name ilike " + "'%" + search + "%'" + " or q.ref ilike " + "'%" + search + "%'" + ")"
+	}
+	if itemsPerPage != "" && page != "" {
+		limitOffset = " LIMIT " + itemsPerPage + " OFFSET " + page
+	}
+	ddfdfdf
+	if companyID == "" {
+		companyQuery = fmt.Sprint(" and  q.company_id=", auth.UserCompanyId.Int64)
+	} else {
+		companyQuery = " and  q.company_id=" + companyID
+	}
+	if dateRangeStart != "" && dateRangeEnd != "" {
+		dateRangeQuery = " and cast(q.purchase_date as date)>='" + dateRangeStart + "' and cast(q.purchase_date as date)<='" + dateRangeEnd + "'"
+	}
+	query := `
+	 select * from 
+	 (
+		select 
+		inventory_adjustments.id,
+		inventory_adjustments.adjusted_by,
+		inventory_adjustments.created_at,
+		inventory_adjustments.company_id,
+		inventory_adjustments.adjustment_amount,
+		inventory_adjustments.is_positive_adjustment,
+		inventory_adjustments.reason,
+
+
 		purchases.supplier_id,
 		purchases.total_weight,
 		purchases.total_amount,

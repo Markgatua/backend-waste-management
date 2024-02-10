@@ -81,7 +81,7 @@ insert into inventory(waste_type_id,company_id,total_weight) VALUES($1,$2,$3);
 
 
 -- name: InsertToInventoryAdjustments :exec
-insert into inventory_adjustments(adjusted_by,company_id,adjustment_amount,is_positive_adjustment,reason) VALUES($1,$2,$3,$4,$5);
+insert into inventory_adjustments(adjusted_by,company_id,adjustment_amount,is_positive_adjustment,reason,waste_type_id) VALUES($1,$2,$3,$4,$5,$6);
 
 
 -- name: DeleteAggregatorWasteTypes :exec

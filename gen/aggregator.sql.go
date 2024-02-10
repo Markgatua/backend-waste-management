@@ -427,7 +427,7 @@ func (q *Queries) InsertToInventory(ctx context.Context, arg InsertToInventoryPa
 }
 
 const insertToInventoryAdjustments = `-- name: InsertToInventoryAdjustments :exec
-insert into inventory_adjustments(adjusted_by,company_id,adjustment_amount,is_positive_adjustment,reason) VALUES($1,$2,$3,$4,$5)
+insert into inventory_adjustments(adjusted_by,company_id,adjustment_amount,is_positive_adjustment,reason,waste_type_id) VALUES($1,$2,$3,$4,$5,$6)
 `
 
 type InsertToInventoryAdjustmentsParams struct {
@@ -436,6 +436,7 @@ type InsertToInventoryAdjustmentsParams struct {
 	AdjustmentAmount     string         `json:"adjustment_amount"`
 	IsPositiveAdjustment bool           `json:"is_positive_adjustment"`
 	Reason               sql.NullString `json:"reason"`
+	WasteTypeID          int32          `json:"waste_type_id"`
 }
 
 func (q *Queries) InsertToInventoryAdjustments(ctx context.Context, arg InsertToInventoryAdjustmentsParams) error {
@@ -445,6 +446,7 @@ func (q *Queries) InsertToInventoryAdjustments(ctx context.Context, arg InsertTo
 		arg.AdjustmentAmount,
 		arg.IsPositiveAdjustment,
 		arg.Reason,
+		arg.WasteTypeID,
 	)
 	return err
 }

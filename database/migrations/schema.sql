@@ -368,10 +368,12 @@ CREATE TABLE inventory_adjustments(
     created_at TIMESTAMP NOT NULL DEFAULT NOW(),
     company_id int not null,
     adjustment_amount DECIMAL not NULL,
+    waste_type_id INTEGER NOT NULL,
     is_positive_adjustment BOOLEAN not null,
     reason TEXT NULL,
     FOREIGN Key (company_id) REFERENCES companies(id),
-    FOREIGN Key (adjusted_by) REFERENCES users(id)
+    FOREIGN Key (adjusted_by) REFERENCES users(id),
+    FOREIGN Key (waste_type_id) REFERENCES waste_types(id)
 );
 
 CREATE TABLE sales(
