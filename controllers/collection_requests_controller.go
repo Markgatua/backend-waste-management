@@ -343,7 +343,7 @@ func (aggregatorController CollectionRequestsController) ChangeCollectionRequest
 		return
 	}
 	context.JSON(http.StatusOK, gin.H{
-		"error":   true,
+		"error":   false,
 		"message": "Successfully updated collection request status",
 	})
 
