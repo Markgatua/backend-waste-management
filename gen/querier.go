@@ -17,6 +17,7 @@ type Querier interface {
 	AssignPermission(ctx context.Context, arg AssignPermissionParams) error
 	AssignPermissionToRole(ctx context.Context, arg AssignPermissionToRoleParams) error
 	CancelCollectionRequest(ctx context.Context, id int32) error
+	ChangeCollectionRequestStatus(ctx context.Context, arg ChangeCollectionRequestStatusParams) error
 	CheckSubCountiesDuplicate(ctx context.Context, name string) (int64, error)
 	CollectionWeightTotals(ctx context.Context, producerID int32) (CollectionWeightTotalsRow, error)
 	CompleteCollectionRequest(ctx context.Context, id int32) error
@@ -59,7 +60,7 @@ type Querier interface {
 	GetAllChampionsForACollector(ctx context.Context, collectorID int32) ([]GetAllChampionsForACollectorRow, error)
 	GetAllCollectionRequests(ctx context.Context) ([]GetAllCollectionRequestsRow, error)
 	GetAllCollectionRequestsForACollector(ctx context.Context, collectorID int32) ([]GetAllCollectionRequestsForACollectorRow, error)
-	GetAllCompletedCollectionRequests(ctx context.Context, status int32) ([]GetAllCompletedCollectionRequestsRow, error)
+	GetAllCompletedCollectionRequests(ctx context.Context) ([]GetAllCompletedCollectionRequestsRow, error)
 	GetAllCountries(ctx context.Context) ([]Country, error)
 	GetAllGreenChampions(ctx context.Context) ([]GetAllGreenChampionsRow, error)
 	GetAllMainOrganizationUsers(ctx context.Context) ([]GetAllMainOrganizationUsersRow, error)
@@ -78,6 +79,9 @@ type Querier interface {
 	GetAssignedCollectorsToGreenChampion(ctx context.Context, championID int32) ([]ChampionAggregatorAssignment, error)
 	GetBranchCount(ctx context.Context) ([]GetBranchCountRow, error)
 	GetChildrenWasteTypes(ctx context.Context, parentID sql.NullInt32) ([]GetChildrenWasteTypesRow, error)
+	GetCollectionRequest(ctx context.Context, id int32) (CollectionRequest, error)
+	GetCollectionRequestsInArray(ctx context.Context, collectionids []int32) ([]GetCollectionRequestsInArrayRow, error)
+	GetCollectionScheduleInArray(ctx context.Context, pickuptimeids []int32) ([]GetCollectionScheduleInArrayRow, error)
 	GetCollectionStats(ctx context.Context, producerID int32) ([]GetCollectionStatsRow, error)
 	GetCollectorsForGreenChampion(ctx context.Context, championID int32) ([]GetCollectorsForGreenChampionRow, error)
 	GetCompany(ctx context.Context, id int32) (GetCompanyRow, error)
@@ -113,6 +117,7 @@ type Querier interface {
 	GetUserWithEmailWithoutID(ctx context.Context, arg GetUserWithEmailWithoutIDParams) ([]User, error)
 	GetUsersWasteType(ctx context.Context) ([]GetUsersWasteTypeRow, error)
 	GetUsersWithRole(ctx context.Context) ([]GetUsersWithRoleRow, error)
+	GetVehicle(ctx context.Context, id int32) (Vehicle, error)
 	GetVehicleTypes(ctx context.Context) ([]VehicleType, error)
 	GetWasteItemsProducerData(ctx context.Context, producerID int32) ([]GetWasteItemsProducerDataRow, error)
 	// waste_items.sql
@@ -131,6 +136,7 @@ type Querier interface {
 	// sub_counties.sql
 	InsertSubcounties(ctx context.Context, arg InsertSubcountiesParams) error
 	InsertToInventory(ctx context.Context, arg InsertToInventoryParams) error
+	InsertToInventoryAdjustments(ctx context.Context, arg InsertToInventoryAdjustmentsParams) error
 	InsertWasteType(ctx context.Context, arg InsertWasteTypeParams) (WasteType, error)
 	InventoryItemCount(ctx context.Context, arg InventoryItemCountParams) (int64, error)
 	MakeCashPayment(ctx context.Context, arg MakeCashPaymentParams) (SaleTransaction, error)

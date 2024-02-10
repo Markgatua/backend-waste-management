@@ -120,7 +120,7 @@ func runProgram() {
 	//-------------------------------------------------------------------------------------------
 
 	//stats --------
-	router.GET("/main_organization_stats", middlewares.PermissionBlockerMiddleware("view_stats"), controllers.StatsController{}.GetMainOrganizationStats)
+	router.GET("/main_organization_stats", middlewares.PermissionBlockerMiddleware("view_stats"), controllers.ReportsController{}.GetMainOrganizationStats)
 	//stats -------
 
 	router.GET("/users", middlewares.PermissionBlockerMiddleware("view_user"), usersController.GetAllUsers)
@@ -200,11 +200,14 @@ func runProgram() {
 	router.POST("aggregator/waste_types/create", middlewares.PermissionBlockerMiddleware("create_waste_type"), controllers.AggregatorController{}.SetWasteTypes)
 
 	router.GET("aggregator/users", middlewares.PermissionBlockerMiddleware("view_user"), controllers.AggregatorController{}.GetUsers)
-	router.GET("aggregator/collections",collectionRequestsController.GetCollections)
-	router.GET("aggregator/collection_schedule",collectionRequestsController.GetCollectionSchedule)
+	router.GET("aggregator/collection_requests",middlewares.PermissionBlockerMiddleware("view_collections"),collectionRequestsController.GetAggregatorCollectionRequests)
+	router.PUT("aggregator/collection_requests/change_status/:id/:status",middlewares.PermissionBlockerMiddleware("view_collections"),collectionRequestsController.ChangeCollectionRequestStatus)
+	router.GET("aggregator/collection_schedule",middlewares.PermissionBlockerMiddleware("view_collection_schedule"),collectionRequestsController.GetCollectionSchedule)
+
+	router.GET("aggregator/inventory_adjustments", middlewares.PermissionBlockerMiddleware("view_inventory_adjustments"), controllers.AggregatorController{}.GetInventoryAdjustments)
 	//-------------------------------------------------------------------------------------------
 
-	router.GET("route_planner/get_routes",middlewares.PermissionBlockerMiddleware("manage_route_planning"),controllers.RoutePlanningController{}.GetRoutes)
+	router.POST("route_planner/get_routes",middlewares.PermissionBlockerMiddleware("manage_route_planning"),controllers.RoutePlanningController{}.GetRoutes)
 
 	//---------------------------Green champion ------------------------------------------------------
 	router.POST("green_champion/add", middlewares.PermissionBlockerMiddleware("add_green_champion"), controllers.GreenChampionController{}.InsertGreenChampion)

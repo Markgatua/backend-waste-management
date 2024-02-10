@@ -1,11 +1,12 @@
 -- pickup_time_stamps.sql
 
 -- name: InsertPickupTimeStsmp :exec
-insert into pickup_time_stamps( id, stamp,time_range ) values (
+insert into pickup_time_stamps( id, stamp,time_range ,position) values (
         sqlc.arg('id'),
         sqlc.arg('stamp'),
-        sqlc.arg('time_range')
-    ) ON CONFLICT(id) do update set stamp=EXCLUDED.stamp,time_range=EXCLUDED.time_range returning *;
+        sqlc.arg('time_range'),
+        sqlc.arg('position')
+    ) ON CONFLICT(id) do update set stamp=EXCLUDED.stamp,time_range=EXCLUDED.time_range,position=EXCLUDED.position  returning *;
 
 
 -- name: GetPickupTimeStamps :many
@@ -16,9 +17,10 @@ select * from pickup_time_stamps;
 update pickup_time_stamps
 set
     stamp = $1,
-    time_range = $2
+    time_range = $2,
+    position=$3
 where
-    id = $3;
+    id = $4;
 
 -- name: DuplicatePickupTimeStamp :one
 SELECT COUNT(*) FROM pickup_time_stamps WHERE stamp=$1;

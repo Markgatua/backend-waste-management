@@ -290,20 +290,32 @@
         ]
     },
     {
-        "module": "Request Collection",
-        "key": "requestcollection",
+        "module": "Collection requests and schedules",
+        "key": "collectionrequestsandcollection",
         "permissions": [
             {
                 "permission_id": 103,
                 "name": "Request Collection",
-                "sub_module": "Waste Collection",
+                "sub_module": "Collection requests",
                 "action": "request_collection"
             },
             {
                 "permission_id": 103,
                 "name": "View Collection Requests",
-                "sub_module": "Waste Collection",
+                "sub_module": "Collection requests",
                 "action": "view_collections"
+            },
+            {
+                "permission_id": 103,
+                "name": "Change collection request status",
+                "sub_module": "Collection requests",
+                "action": "change_collection_request_status"
+            },
+            {
+                "permission_id": 103,
+                "name": "View Collection Schedule",
+                "sub_module": "Collection schedule",
+                "action": "view_collection_schedule"
             }
         ]
     },
@@ -418,6 +430,12 @@
                 "name": "Make adjustments",
                 "sub_module": "make_adjustments",
                 "action": "make_inventory_adjustment"
+            },
+            {
+                "permission_id": 103,
+                "name": "View adjustments",
+                "sub_module": "adjustments",
+                "action": "view_inventory_adjustments"
             }
         ]
     },

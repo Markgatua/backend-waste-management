@@ -142,12 +142,14 @@ type Inventory struct {
 }
 
 type InventoryAdjustment struct {
-	ID                   int32     `json:"id"`
-	AdjustedBy           int32     `json:"adjusted_by"`
-	CreatedAt            time.Time `json:"created_at"`
-	CompanyID            int32     `json:"company_id"`
-	AdjustmentAmount     string    `json:"adjustment_amount"`
-	IsPositiveAdjustment bool      `json:"is_positive_adjustment"`
+	ID                   int32          `json:"id"`
+	AdjustedBy           int32          `json:"adjusted_by"`
+	CreatedAt            time.Time      `json:"created_at"`
+	CompanyID            int32          `json:"company_id"`
+	AdjustmentAmount     float64        `json:"adjustment_amount"`
+	WasteTypeID          int32          `json:"waste_type_id"`
+	IsPositiveAdjustment bool           `json:"is_positive_adjustment"`
+	Reason               sql.NullString `json:"reason"`
 }
 
 type MainOrganization struct {
@@ -207,6 +209,7 @@ type PickupTimeStamp struct {
 	ID        int32  `json:"id"`
 	Stamp     string `json:"stamp"`
 	TimeRange string `json:"time_range"`
+	Position  int32  `json:"position"`
 }
 
 type Purchase struct {
@@ -370,12 +373,13 @@ type User struct {
 }
 
 type Vehicle struct {
-	ID               int32         `json:"id"`
-	CompanyID        int32         `json:"company_id"`
-	AssignedDriverID sql.NullInt32 `json:"assigned_driver_id"`
-	VehicleTypeID    int32         `json:"vehicle_type_id"`
-	RegNo            string        `json:"reg_no"`
-	IsActive         bool          `json:"is_active"`
+	ID               int32           `json:"id"`
+	CompanyID        int32           `json:"company_id"`
+	AssignedDriverID sql.NullInt32   `json:"assigned_driver_id"`
+	VehicleTypeID    int32           `json:"vehicle_type_id"`
+	RegNo            string          `json:"reg_no"`
+	IsActive         bool            `json:"is_active"`
+	Liters           sql.NullFloat64 `json:"liters"`
 }
 
 type VehicleType struct {

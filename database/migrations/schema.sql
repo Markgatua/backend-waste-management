@@ -176,6 +176,7 @@ CREATE TABLE vehicles(
   vehicle_type_id INTEGER not NULL,
   reg_no VARCHAR(255) not null UNIQUE,
   is_active BOOLEAN not null DEFAULT TRUE,
+  liters FLOAT NULL,
   FOREIGN Key (company_id) REFERENCES companies(id),
   FOREIGN KEY(assigned_driver_id) REFERENCES users(id),
   FOREIGN KEY(vehicle_type_id) REFERENCES vehicle_types(id)
@@ -217,7 +218,8 @@ CREATE TABLE champion_aggregator_assignments (
 CREATE TABLE pickup_time_stamps (
   id SERIAL PRIMARY KEY,
   stamp VARCHAR(255) NOT NULL,
-  time_range VARCHAR(255) NOT NULL
+  time_range VARCHAR(255) NOT NULL,
+  position integer not NULL DEFAULT 0
 );
 ALTER TABLE pickup_time_stamps ADD CONSTRAINT check_stamp CHECK (stamp IN ('Morning','Afternoon','Evening'));
 
@@ -365,10 +367,13 @@ CREATE TABLE inventory_adjustments(
     adjusted_by INTEGER not null,
     created_at TIMESTAMP NOT NULL DEFAULT NOW(),
     company_id int not null,
-    adjustment_amount DECIMAL not NULL,
+    adjustment_amount FLOAT NOT NULL,
+    waste_type_id INTEGER NOT NULL,
     is_positive_adjustment BOOLEAN not null,
+    reason TEXT NULL,
     FOREIGN Key (company_id) REFERENCES companies(id),
-    FOREIGN Key (adjusted_by) REFERENCES users(id)
+    FOREIGN Key (adjusted_by) REFERENCES users(id),
+    FOREIGN Key (waste_type_id) REFERENCES waste_types(id)
 );
 
 CREATE TABLE sales(

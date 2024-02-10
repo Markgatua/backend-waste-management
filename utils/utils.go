@@ -14,6 +14,22 @@ func GetNextTableID(table string) int32 {
 	return nextVal
 }
 
+func InArray(val string, array []string) (exists bool) {
+    exists = false
+   // index = -1;
+
+    for _, v := range array {
+        if val == v {
+           // index = i
+            exists = true
+            return
+        }   
+    }
+
+    return exists
+}
+
+
 // Package sqlmap provides functions for querying directly into
 // map[string]interface{}.
 //

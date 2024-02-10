@@ -13,18 +13,20 @@ import (
 type VehicleController struct{}
 
 type CreateVehicleParams struct {
-	VehicleTypeID    int32  `json:"vehicle_type_id" binding:"required"`
-	RegNo            string `json:"reg_no" binding:"required"`
-	AssignedDriverID *int32 `json:"assigned_driver_id"`
-	IsActive         *bool  `json:"is_active"  binding:"required"`
+	VehicleTypeID    int32   `json:"vehicle_type_id" binding:"required"`
+	Liters           float64 `json:"liters" binding:"required"`
+	RegNo            string  `json:"reg_no" binding:"required"`
+	AssignedDriverID *int32  `json:"assigned_driver_id"`
+	IsActive         *bool   `json:"is_active"  binding:"required"`
 }
 
 type UpdateVehicleParams struct {
-	ID               int    `json:"id"  binding:"required"`
-	VehicleTypeID    int32  `json:"vehicle_type_id" binding:"required"`
-	RegNo            string `json:"reg_no" binding:"required"`
-	AssignedDriverID *int32 `json:"assigned_driver_id"`
-	IsActive         *bool  `json:"is_active"  binding:"required"`
+	ID               int     `json:"id"  binding:"required"`
+	VehicleTypeID    int32   `json:"vehicle_type_id" binding:"required"`
+	Liters           float64 `json:"liters" binding:"required"`
+	RegNo            string  `json:"reg_no" binding:"required"`
+	AssignedDriverID *int32  `json:"assigned_driver_id"`
+	IsActive         *bool   `json:"is_active"  binding:"required"`
 }
 
 type UpdateVehicleStatusParams struct {
@@ -65,6 +67,7 @@ func (controller VehicleController) InsertVehicle(context *gin.Context) {
 			CompanyID:        int32(auth.UserCompanyId.Int64),
 			AssignedDriverID: sql.NullInt32{Int32: *params.AssignedDriverID, Valid: params.AssignedDriverID != nil},
 			VehicleTypeID:    params.VehicleTypeID,
+			Liters:           sql.NullFloat64{Float64: params.Liters, Valid: params.Liters != 0},
 			RegNo:            params.RegNo,
 			IsActive:         *params.IsActive,
 		})
@@ -85,6 +88,7 @@ func (controller VehicleController) InsertVehicle(context *gin.Context) {
 		vehicle, insertError := gen.REPO.AddVehicle(context, gen.AddVehicleParams{
 			CompanyID:     int32(auth.UserCompanyId.Int64),
 			VehicleTypeID: params.VehicleTypeID,
+			Liters:           sql.NullFloat64{Float64: params.Liters, Valid: params.Liters != 0},
 			RegNo:         params.RegNo,
 			IsActive:      *params.IsActive,
 		})
@@ -211,6 +215,7 @@ func (controller VehicleController) UpdateVehicle(context *gin.Context) {
 			IsActive:         *params.IsActive,
 			RegNo:            params.RegNo,
 			VehicleTypeID:    params.VehicleTypeID,
+			Liters:           sql.NullFloat64{Float64: params.Liters, Valid: params.Liters != 0},
 			AssignedDriverID: sql.NullInt32{Int32: *params.AssignedDriverID, Valid: params.AssignedDriverID != nil},
 			ID:               int32(params.ID),
 		})
@@ -223,10 +228,10 @@ func (controller VehicleController) UpdateVehicle(context *gin.Context) {
 		}
 	} else {
 		updateError := gen.REPO.UpdateVehicle(context, gen.UpdateVehicleParams{
-			IsActive:         *params.IsActive,
-			RegNo:            params.RegNo,
-			VehicleTypeID:    params.VehicleTypeID,
-			ID:               int32(params.ID),
+			IsActive:      *params.IsActive,
+			RegNo:         params.RegNo,
+			VehicleTypeID: params.VehicleTypeID,
+			ID:            int32(params.ID),
 		})
 		if updateError != nil {
 			context.JSON(http.StatusUnprocessableEntity, gin.H{

@@ -11,21 +11,23 @@ import (
 )
 
 const addVehicle = `-- name: AddVehicle :one
-insert into vehicles(company_id,assigned_driver_id,vehicle_type_id,reg_no,is_active) VALUES(
+insert into vehicles(company_id,assigned_driver_id,vehicle_type_id,reg_no,liters,is_active) VALUES(
    $1,
    $2,
    $3,
    $4,
-   $5
-)returning id, company_id, assigned_driver_id, vehicle_type_id, reg_no, is_active
+   $5,
+   $6
+)returning id, company_id, assigned_driver_id, vehicle_type_id, reg_no, is_active, liters
 `
 
 type AddVehicleParams struct {
-	CompanyID        int32         `json:"company_id"`
-	AssignedDriverID sql.NullInt32 `json:"assigned_driver_id"`
-	VehicleTypeID    int32         `json:"vehicle_type_id"`
-	RegNo            string        `json:"reg_no"`
-	IsActive         bool          `json:"is_active"`
+	CompanyID        int32           `json:"company_id"`
+	AssignedDriverID sql.NullInt32   `json:"assigned_driver_id"`
+	VehicleTypeID    int32           `json:"vehicle_type_id"`
+	RegNo            string          `json:"reg_no"`
+	Liters           sql.NullFloat64 `json:"liters"`
+	IsActive         bool            `json:"is_active"`
 }
 
 func (q *Queries) AddVehicle(ctx context.Context, arg AddVehicleParams) (Vehicle, error) {
@@ -34,6 +36,7 @@ func (q *Queries) AddVehicle(ctx context.Context, arg AddVehicleParams) (Vehicle
 		arg.AssignedDriverID,
 		arg.VehicleTypeID,
 		arg.RegNo,
+		arg.Liters,
 		arg.IsActive,
 	)
 	var i Vehicle
@@ -44,6 +47,7 @@ func (q *Queries) AddVehicle(ctx context.Context, arg AddVehicleParams) (Vehicle
 		&i.VehicleTypeID,
 		&i.RegNo,
 		&i.IsActive,
+		&i.Liters,
 	)
 	return i, err
 }
@@ -95,7 +99,7 @@ func (q *Queries) DeleteVehicle(ctx context.Context, id int32) error {
 }
 
 const getAllVehicles = `-- name: GetAllVehicles :many
-select vehicles.id, vehicles.company_id, vehicles.assigned_driver_id, vehicles.vehicle_type_id, vehicles.reg_no, vehicles.is_active,users.first_name as driver_first_name,users.last_name as driver_last_name,users.calling_code as driver_calling_code,users.phone as driver_phone,users.email as driver_email, vehicle_types.description,vehicle_types.max_vehicle_height,vehicle_types.max_vehicle_weight,vehicle_types.name 
+select vehicles.id, vehicles.company_id, vehicles.assigned_driver_id, vehicles.vehicle_type_id, vehicles.reg_no, vehicles.is_active, vehicles.liters,users.first_name as driver_first_name,users.last_name as driver_last_name,users.calling_code as driver_calling_code,users.phone as driver_phone,users.email as driver_email, vehicle_types.description,vehicle_types.max_vehicle_height,vehicle_types.max_vehicle_weight,vehicle_types.name 
 from vehicles 
 left join vehicle_types on vehicle_types.id=vehicles.vehicle_type_id 
 left join users on vehicles.assigned_driver_id=users.id 
@@ -109,6 +113,7 @@ type GetAllVehiclesRow struct {
 	VehicleTypeID     int32           `json:"vehicle_type_id"`
 	RegNo             string          `json:"reg_no"`
 	IsActive          bool            `json:"is_active"`
+	Liters            sql.NullFloat64 `json:"liters"`
 	DriverFirstName   sql.NullString  `json:"driver_first_name"`
 	DriverLastName    sql.NullString  `json:"driver_last_name"`
 	DriverCallingCode sql.NullString  `json:"driver_calling_code"`
@@ -136,6 +141,7 @@ func (q *Queries) GetAllVehicles(ctx context.Context, companyID int32) ([]GetAll
 			&i.VehicleTypeID,
 			&i.RegNo,
 			&i.IsActive,
+			&i.Liters,
 			&i.DriverFirstName,
 			&i.DriverLastName,
 			&i.DriverCallingCode,
@@ -186,6 +192,25 @@ func (q *Queries) GetDuplicateVehiclesWithoutID(ctx context.Context, arg GetDupl
 	return count, err
 }
 
+const getVehicle = `-- name: GetVehicle :one
+select id, company_id, assigned_driver_id, vehicle_type_id, reg_no, is_active, liters from vehicles where id=$1
+`
+
+func (q *Queries) GetVehicle(ctx context.Context, id int32) (Vehicle, error) {
+	row := q.db.QueryRowContext(ctx, getVehicle, id)
+	var i Vehicle
+	err := row.Scan(
+		&i.ID,
+		&i.CompanyID,
+		&i.AssignedDriverID,
+		&i.VehicleTypeID,
+		&i.RegNo,
+		&i.IsActive,
+		&i.Liters,
+	)
+	return i, err
+}
+
 const getVehicleTypes = `-- name: GetVehicleTypes :many
 select id, name, max_vehicle_weight, max_vehicle_height, description from vehicle_types
 `
@@ -220,15 +245,16 @@ func (q *Queries) GetVehicleTypes(ctx context.Context) ([]VehicleType, error) {
 }
 
 const updateVehicle = `-- name: UpdateVehicle :exec
-update vehicles set assigned_driver_id=$1,vehicle_type_id=$2,reg_no=$3,is_active=$4 where id=$5
+update vehicles set assigned_driver_id=$1,vehicle_type_id=$2,reg_no=$3,is_active=$4,liters=$5 where id=$6
 `
 
 type UpdateVehicleParams struct {
-	AssignedDriverID sql.NullInt32 `json:"assigned_driver_id"`
-	VehicleTypeID    int32         `json:"vehicle_type_id"`
-	RegNo            string        `json:"reg_no"`
-	IsActive         bool          `json:"is_active"`
-	ID               int32         `json:"id"`
+	AssignedDriverID sql.NullInt32   `json:"assigned_driver_id"`
+	VehicleTypeID    int32           `json:"vehicle_type_id"`
+	RegNo            string          `json:"reg_no"`
+	IsActive         bool            `json:"is_active"`
+	Liters           sql.NullFloat64 `json:"liters"`
+	ID               int32           `json:"id"`
 }
 
 func (q *Queries) UpdateVehicle(ctx context.Context, arg UpdateVehicleParams) error {
@@ -237,6 +263,7 @@ func (q *Queries) UpdateVehicle(ctx context.Context, arg UpdateVehicleParams) er
 		arg.VehicleTypeID,
 		arg.RegNo,
 		arg.IsActive,
+		arg.Liters,
 		arg.ID,
 	)
 	return err

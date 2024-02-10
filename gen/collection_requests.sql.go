@@ -9,6 +9,8 @@ import (
 	"context"
 	"database/sql"
 	"time"
+
+	"github.com/lib/pq"
 )
 
 const cancelCollectionRequest = `-- name: CancelCollectionRequest :exec
@@ -17,6 +19,20 @@ update collection_requests set status = 4 where id = $1
 
 func (q *Queries) CancelCollectionRequest(ctx context.Context, id int32) error {
 	_, err := q.db.ExecContext(ctx, cancelCollectionRequest, id)
+	return err
+}
+
+const changeCollectionRequestStatus = `-- name: ChangeCollectionRequestStatus :exec
+update collection_requests set status = $1 where id=$2
+`
+
+type ChangeCollectionRequestStatusParams struct {
+	Status int32 `json:"status"`
+	ID     int32 `json:"id"`
+}
+
+func (q *Queries) ChangeCollectionRequestStatus(ctx context.Context, arg ChangeCollectionRequestStatusParams) error {
+	_, err := q.db.ExecContext(ctx, changeCollectionRequestStatus, arg.Status, arg.ID)
 	return err
 }
 
@@ -378,7 +394,7 @@ LEFT JOIN
     companies AS collector ON collector.id = collection_requests.collector_id
 LEFT JOIN 
     companies AS secondcollector ON secondcollector.id = collection_requests.second_collector_id
-WHERE collection_requests.status=$1
+WHERE collection_requests.status=5
 `
 
 type GetAllCompletedCollectionRequestsRow struct {
@@ -401,8 +417,8 @@ type GetAllCompletedCollectionRequestsRow struct {
 	SecondCollectorName          sql.NullString  `json:"second_collector_name"`
 }
 
-func (q *Queries) GetAllCompletedCollectionRequests(ctx context.Context, status int32) ([]GetAllCompletedCollectionRequestsRow, error) {
-	rows, err := q.db.QueryContext(ctx, getAllCompletedCollectionRequests, status)
+func (q *Queries) GetAllCompletedCollectionRequests(ctx context.Context) ([]GetAllCompletedCollectionRequestsRow, error) {
+	rows, err := q.db.QueryContext(ctx, getAllCompletedCollectionRequests)
 	if err != nil {
 		return nil, err
 	}
@@ -736,6 +752,188 @@ func (q *Queries) GetAllProducerPendingCollectionRequests(ctx context.Context, p
 			&i.CreatedAt,
 			&i.CollectorName,
 			&i.TotalWeight,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const getCollectionRequest = `-- name: GetCollectionRequest :one
+SELECT 
+    collection_requests.id, collection_requests.producer_id, collection_requests.collector_id, collection_requests.request_date, collection_requests.pickup_time_stamp_id, collection_requests.location, collection_requests.administrative_level_1_location, collection_requests.lat, collection_requests.lng, collection_requests.pickup_date, collection_requests.status, collection_requests.first_contact_person, collection_requests.second_contact_person, collection_requests.created_at  
+FROM 
+    collection_requests
+WHERE collection_requests.id=$1
+`
+
+func (q *Queries) GetCollectionRequest(ctx context.Context, id int32) (CollectionRequest, error) {
+	row := q.db.QueryRowContext(ctx, getCollectionRequest, id)
+	var i CollectionRequest
+	err := row.Scan(
+		&i.ID,
+		&i.ProducerID,
+		&i.CollectorID,
+		&i.RequestDate,
+		&i.PickupTimeStampID,
+		&i.Location,
+		&i.AdministrativeLevel1Location,
+		&i.Lat,
+		&i.Lng,
+		&i.PickupDate,
+		&i.Status,
+		&i.FirstContactPerson,
+		&i.SecondContactPerson,
+		&i.CreatedAt,
+	)
+	return i, err
+}
+
+const getCollectionRequestsInArray = `-- name: GetCollectionRequestsInArray :many
+select collection_requests.id,collection_requests.producer_id, companies.name as champion_name,collection_requests.collector_id,
+collection_requests.request_date,collection_requests.pickup_date,collection_requests.status,collection_requests.lat,
+collection_requests.lng,collection_requests.created_at,collection_requests.pickup_time_stamp_id,collection_requests.id,
+collection_requests.first_contact_person,collection_requests.second_contact_person,pickup_time_stamps.stamp,
+pickup_time_stamps.time_range from collection_requests 
+inner join pickup_time_stamps on pickup_time_stamps.id=collection_requests.pickup_time_stamp_id
+inner join companies on companies.id=collection_requests.producer_id
+where collection_requests.id=ANY($1::int[])
+`
+
+type GetCollectionRequestsInArrayRow struct {
+	ID                  int32           `json:"id"`
+	ProducerID          int32           `json:"producer_id"`
+	ChampionName        string          `json:"champion_name"`
+	CollectorID         int32           `json:"collector_id"`
+	RequestDate         time.Time       `json:"request_date"`
+	PickupDate          sql.NullTime    `json:"pickup_date"`
+	Status              int32           `json:"status"`
+	Lat                 sql.NullFloat64 `json:"lat"`
+	Lng                 sql.NullFloat64 `json:"lng"`
+	CreatedAt           time.Time       `json:"created_at"`
+	PickupTimeStampID   int32           `json:"pickup_time_stamp_id"`
+	ID_2                int32           `json:"id_2"`
+	FirstContactPerson  string          `json:"first_contact_person"`
+	SecondContactPerson sql.NullString  `json:"second_contact_person"`
+	Stamp               string          `json:"stamp"`
+	TimeRange           string          `json:"time_range"`
+}
+
+func (q *Queries) GetCollectionRequestsInArray(ctx context.Context, collectionids []int32) ([]GetCollectionRequestsInArrayRow, error) {
+	rows, err := q.db.QueryContext(ctx, getCollectionRequestsInArray, pq.Array(collectionids))
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	items := []GetCollectionRequestsInArrayRow{}
+	for rows.Next() {
+		var i GetCollectionRequestsInArrayRow
+		if err := rows.Scan(
+			&i.ID,
+			&i.ProducerID,
+			&i.ChampionName,
+			&i.CollectorID,
+			&i.RequestDate,
+			&i.PickupDate,
+			&i.Status,
+			&i.Lat,
+			&i.Lng,
+			&i.CreatedAt,
+			&i.PickupTimeStampID,
+			&i.ID_2,
+			&i.FirstContactPerson,
+			&i.SecondContactPerson,
+			&i.Stamp,
+			&i.TimeRange,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const getCollectionScheduleInArray = `-- name: GetCollectionScheduleInArray :many
+select champion_pickup_times.id as pickup_time_id,champion_pickup_times.champion_aggregator_assignment_id,champion_pickup_times.pickup_time_stamp_id,
+champion_pickup_times.pickup_day,champion_aggregator_assignments.champion_id,champion_aggregator_assignments.collector_id,companies.lat,
+companies.lng,companies.name as champion_name,companies.location,companies.contact_person1_first_name,companies.contact_person1_last_name,
+companies.contact_person1_phone,companies.contact_person1_email,companies.contact_person2_email,companies.administrative_level_1_location,
+companies.contact_person2_first_name,companies.contact_person2_last_name,companies.contact_person2_phone,pickup_time_stamps.stamp,
+pickup_time_stamps.time_range from champion_pickup_times 
+left join pickup_time_stamps on pickup_time_stamps.id=champion_pickup_times.pickup_time_stamp_id
+left join champion_aggregator_assignments on champion_pickup_times.champion_aggregator_assignment_id=champion_aggregator_assignments.id
+left join companies on companies.id = champion_aggregator_assignments.champion_id
+where champion_pickup_times.id=ANY($1::int[])
+`
+
+type GetCollectionScheduleInArrayRow struct {
+	PickupTimeID                   int32           `json:"pickup_time_id"`
+	ChampionAggregatorAssignmentID int32           `json:"champion_aggregator_assignment_id"`
+	PickupTimeStampID              int32           `json:"pickup_time_stamp_id"`
+	PickupDay                      string          `json:"pickup_day"`
+	ChampionID                     sql.NullInt32   `json:"champion_id"`
+	CollectorID                    sql.NullInt32   `json:"collector_id"`
+	Lat                            sql.NullFloat64 `json:"lat"`
+	Lng                            sql.NullFloat64 `json:"lng"`
+	ChampionName                   sql.NullString  `json:"champion_name"`
+	Location                       sql.NullString  `json:"location"`
+	ContactPerson1FirstName        sql.NullString  `json:"contact_person1_first_name"`
+	ContactPerson1LastName         sql.NullString  `json:"contact_person1_last_name"`
+	ContactPerson1Phone            sql.NullString  `json:"contact_person1_phone"`
+	ContactPerson1Email            sql.NullString  `json:"contact_person1_email"`
+	ContactPerson2Email            sql.NullString  `json:"contact_person2_email"`
+	AdministrativeLevel1Location   sql.NullString  `json:"administrative_level_1_location"`
+	ContactPerson2FirstName        sql.NullString  `json:"contact_person2_first_name"`
+	ContactPerson2LastName         sql.NullString  `json:"contact_person2_last_name"`
+	ContactPerson2Phone            sql.NullString  `json:"contact_person2_phone"`
+	Stamp                          sql.NullString  `json:"stamp"`
+	TimeRange                      sql.NullString  `json:"time_range"`
+}
+
+func (q *Queries) GetCollectionScheduleInArray(ctx context.Context, pickuptimeids []int32) ([]GetCollectionScheduleInArrayRow, error) {
+	rows, err := q.db.QueryContext(ctx, getCollectionScheduleInArray, pq.Array(pickuptimeids))
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	items := []GetCollectionScheduleInArrayRow{}
+	for rows.Next() {
+		var i GetCollectionScheduleInArrayRow
+		if err := rows.Scan(
+			&i.PickupTimeID,
+			&i.ChampionAggregatorAssignmentID,
+			&i.PickupTimeStampID,
+			&i.PickupDay,
+			&i.ChampionID,
+			&i.CollectorID,
+			&i.Lat,
+			&i.Lng,
+			&i.ChampionName,
+			&i.Location,
+			&i.ContactPerson1FirstName,
+			&i.ContactPerson1LastName,
+			&i.ContactPerson1Phone,
+			&i.ContactPerson1Email,
+			&i.ContactPerson2Email,
+			&i.AdministrativeLevel1Location,
+			&i.ContactPerson2FirstName,
+			&i.ContactPerson2LastName,
+			&i.ContactPerson2Phone,
+			&i.Stamp,
+			&i.TimeRange,
 		); err != nil {
 			return nil, err
 		}
