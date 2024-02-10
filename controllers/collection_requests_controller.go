@@ -323,7 +323,7 @@ func (aggregatorController CollectionRequestsController) ChangeCollectionRequest
 		})
 		return
 	}
-	collectionRequest, err := gen.REPO.GetCollectionRequest(context, id32)
+	_, err := gen.REPO.GetCollectionRequest(context, id32)
 	if err != nil {
 		context.JSON(http.StatusUnprocessableEntity, gin.H{
 			"error":   true,

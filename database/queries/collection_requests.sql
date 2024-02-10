@@ -70,18 +70,9 @@ WHERE collection_requests.cancelled=4;
 
 -- name: GetCollectionRequest :one
 SELECT 
-    collection_requests.*,
-    champion.name AS aggregator_name,
-    collector.name AS champion_name,
-    secondcollector.name as second_collector_name
+    collection_requests.*  
 FROM 
     collection_requests
-LEFT JOIN 
-    companies AS champion ON champion.id = collection_requests.champion_id
-LEFT JOIN 
-    companies AS collector ON collector.id = collection_requests.collector_id
-LEFT JOIN 
-    companies AS secondcollector ON secondcollector.id = collection_requests.second_collector_id
 WHERE collection_requests.id=$1;
 
 -- name: ChangeCollectionRequestStatus :exec

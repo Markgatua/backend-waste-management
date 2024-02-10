@@ -201,7 +201,7 @@ func runProgram() {
 
 	router.GET("aggregator/users", middlewares.PermissionBlockerMiddleware("view_user"), controllers.AggregatorController{}.GetUsers)
 	router.GET("aggregator/collection_requests",middlewares.PermissionBlockerMiddleware("view_collections"),collectionRequestsController.GetAggregatorCollectionRequests)
-	router.GET("aggregator/collection_requests/change_status/:id/:status",middlewares.PermissionBlockerMiddleware("view_collections"),collectionRequestsController.ChangeCollectionRequestStatus)
+	router.PUT("aggregator/collection_requests/change_status/:id/:status",middlewares.PermissionBlockerMiddleware("view_collections"),collectionRequestsController.ChangeCollectionRequestStatus)
 	router.GET("aggregator/collection_schedule",middlewares.PermissionBlockerMiddleware("view_collection_schedule"),collectionRequestsController.GetCollectionSchedule)
 	//-------------------------------------------------------------------------------------------
 

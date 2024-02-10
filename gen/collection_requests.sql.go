@@ -768,44 +768,15 @@ func (q *Queries) GetAllProducerPendingCollectionRequests(ctx context.Context, p
 
 const getCollectionRequest = `-- name: GetCollectionRequest :one
 SELECT 
-    collection_requests.id, collection_requests.producer_id, collection_requests.collector_id, collection_requests.request_date, collection_requests.pickup_time_stamp_id, collection_requests.location, collection_requests.administrative_level_1_location, collection_requests.lat, collection_requests.lng, collection_requests.pickup_date, collection_requests.status, collection_requests.first_contact_person, collection_requests.second_contact_person, collection_requests.created_at,
-    champion.name AS aggregator_name,
-    collector.name AS champion_name,
-    secondcollector.name as second_collector_name
+    collection_requests.id, collection_requests.producer_id, collection_requests.collector_id, collection_requests.request_date, collection_requests.pickup_time_stamp_id, collection_requests.location, collection_requests.administrative_level_1_location, collection_requests.lat, collection_requests.lng, collection_requests.pickup_date, collection_requests.status, collection_requests.first_contact_person, collection_requests.second_contact_person, collection_requests.created_at  
 FROM 
     collection_requests
-LEFT JOIN 
-    companies AS champion ON champion.id = collection_requests.champion_id
-LEFT JOIN 
-    companies AS collector ON collector.id = collection_requests.collector_id
-LEFT JOIN 
-    companies AS secondcollector ON secondcollector.id = collection_requests.second_collector_id
 WHERE collection_requests.id=$1
 `
 
-type GetCollectionRequestRow struct {
-	ID                           int32           `json:"id"`
-	ProducerID                   int32           `json:"producer_id"`
-	CollectorID                  int32           `json:"collector_id"`
-	RequestDate                  time.Time       `json:"request_date"`
-	PickupTimeStampID            int32           `json:"pickup_time_stamp_id"`
-	Location                     sql.NullString  `json:"location"`
-	AdministrativeLevel1Location sql.NullString  `json:"administrative_level_1_location"`
-	Lat                          sql.NullFloat64 `json:"lat"`
-	Lng                          sql.NullFloat64 `json:"lng"`
-	PickupDate                   sql.NullTime    `json:"pickup_date"`
-	Status                       int32           `json:"status"`
-	FirstContactPerson           string          `json:"first_contact_person"`
-	SecondContactPerson          sql.NullString  `json:"second_contact_person"`
-	CreatedAt                    time.Time       `json:"created_at"`
-	AggregatorName               sql.NullString  `json:"aggregator_name"`
-	ChampionName                 sql.NullString  `json:"champion_name"`
-	SecondCollectorName          sql.NullString  `json:"second_collector_name"`
-}
-
-func (q *Queries) GetCollectionRequest(ctx context.Context, id int32) (GetCollectionRequestRow, error) {
+func (q *Queries) GetCollectionRequest(ctx context.Context, id int32) (CollectionRequest, error) {
 	row := q.db.QueryRowContext(ctx, getCollectionRequest, id)
-	var i GetCollectionRequestRow
+	var i CollectionRequest
 	err := row.Scan(
 		&i.ID,
 		&i.ProducerID,
@@ -821,9 +792,6 @@ func (q *Queries) GetCollectionRequest(ctx context.Context, id int32) (GetCollec
 		&i.FirstContactPerson,
 		&i.SecondContactPerson,
 		&i.CreatedAt,
-		&i.AggregatorName,
-		&i.ChampionName,
-		&i.SecondCollectorName,
 	)
 	return i, err
 }
