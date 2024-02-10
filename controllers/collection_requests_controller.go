@@ -301,12 +301,12 @@ func (aggregatorController CollectionRequestsController) GetCollectionSchedule(c
 	}
 
 	context.JSON(http.StatusOK, gin.H{
-		"error":               false,
-		"content":             group,
+		"error":   false,
+		"content": group,
 	})
 }
 
-func (aggregatorController CollectionRequestsController) GetCollections(context *gin.Context) {
+func (aggregatorController CollectionRequestsController) GetCollectionRequests(context *gin.Context) {
 	auth, _ := helpers.Functions{}.CurrentUserFromToken(context)
 
 	search := context.Query("s")
