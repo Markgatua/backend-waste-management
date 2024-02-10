@@ -1857,17 +1857,23 @@ func (aggregatorController AggregatorController) GetInventoryAdjustments(context
 	limitOffset := ""
 
 	if search != "" {
-		searchQuery = " and (q.first_name ilike " + "'%" + search + "%'" + " or q.company_name ilike " + "'%" + search + "%'" + " or q.last_name ilike " + "'%" + search + "%'" + " or q.ref ilike " + "'%" + search + "%'" + ")"
+		searchQuery = " and (q.adjusted_by_first_name ilike " + "'%" + search + "%'" + " or q.adjusted_by_last_name ilike " + "'%" + search + "%'" + " or q.waste_name ilike " + "'%" + search + "%'" + " or q.reason ilike " + "'%" + search + "%'" + ")"
 	}
 	if itemsPerPage != "" && page != "" {
-		limitOffset = " LIMIT " + itemsPerPage + " OFFSET " + page
+		itemsPerPage, _ := strconv.Atoi(context.Query("ipp"))
+		page, _ := strconv.Atoi(context.Query("p"))
+
+		offset := (page - 1) * itemsPerPage
+
+		limitOffset = fmt.Sprint(" LIMIT ", itemsPerPage, " OFFSET ", offset)
 	}
-	ddfdfdf
+
 	if companyID == "" {
-		companyQuery = fmt.Sprint(" and  q.company_id=", auth.UserCompanyId.Int64)
-	} else {
-		companyQuery = " and  q.company_id=" + companyID
+		companyID = fmt.Sprint(auth.UserCompanyId.Int64)
 	}
+
+	companyQuery = " and q.company_id=" + companyID
+
 	if dateRangeStart != "" && dateRangeEnd != "" {
 		dateRangeQuery = " and cast(q.purchase_date as date)>='" + dateRangeStart + "' and cast(q.purchase_date as date)<='" + dateRangeEnd + "'"
 	}
@@ -1882,26 +1888,24 @@ func (aggregatorController AggregatorController) GetInventoryAdjustments(context
 		inventory_adjustments.adjustment_amount,
 		inventory_adjustments.is_positive_adjustment,
 		inventory_adjustments.reason,
+		inventory_adjustments.waste_type_id,
 
+		users.first_name as adjusted_by_first_name,
+		users.last_name as adjusted_by_last_name,
+		companies.name as company_name,
+		waste_types.name as waste_name
 
-		purchases.supplier_id,
-		purchases.total_weight,
-		purchases.total_amount,
-		purchases.date as purchase_date,
-		suppliers.first_name,
-		suppliers.last_name,
-		suppliers.company as supplier_company,
-		companies.name as company_name
-		from purchases
+		from inventory_adjustments
 
-		inner join suppliers on suppliers.id=purchases.supplier_id
-		inner join companies on companies.id = purchases.company_id
-	 ) as q where q.purchase_date is not null` + dateRangeQuery + searchQuery + companyQuery + " order by q.purchase_date desc " + limitOffset
+		inner join waste_types on waste_types.id = inventory_adjustments.waste_type_id
+		inner join users on  users.id=inventory_adjustments.adjusted_by
+		inner join companies on companies.id = inventory_adjustments.company_id
+	 ) as q where q.created_at is not null` + dateRangeQuery + searchQuery + companyQuery + " order by q.created_at desc " + limitOffset
 
 	var totalCount = 0
-	err := gen.REPO.DB.Get(&totalCount, fmt.Sprint("select count(*) from purchases where date is not null and company_id=", auth.UserCompanyId.Int64))
+	err := gen.REPO.DB.Get(&totalCount, fmt.Sprint("select count(*) from inventory_adjustments where created_at is not null and company_id=", companyID))
 
-	logger.Log("AggregatorController/GetPurchases", query, logger.LOG_LEVEL_INFO)
+	logger.Log("AggregatorController/GetInventoryAdjustments", query, logger.LOG_LEVEL_INFO)
 	results, err := utils.Select(gen.REPO.DB, query)
 	if err != nil {
 		context.JSON(http.StatusUnprocessableEntity, gin.H{
@@ -1909,13 +1913,6 @@ func (aggregatorController AggregatorController) GetInventoryAdjustments(context
 			"message": err.Error(),
 		})
 		return
-	}
-	for _, v := range results {
-		id, _ := v["id"]
-		//fmt.Println(id)
-		items, _ := utils.Select(gen.REPO.DB, fmt.Sprint("select *,waste_types.name as waste_name from purchase_items join waste_types on waste_types.id=purchase_items.waste_type_id where purchase_items.purchase_id=", id))
-		//fmt.Println(items)
-		v["items"] = items
 	}
 	context.JSON(http.StatusOK, gin.H{
 		"error":       false,

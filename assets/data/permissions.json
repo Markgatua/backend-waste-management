@@ -430,6 +430,12 @@
                 "name": "Make adjustments",
                 "sub_module": "make_adjustments",
                 "action": "make_inventory_adjustment"
+            },
+            {
+                "permission_id": 103,
+                "name": "View adjustments",
+                "sub_module": "adjustments",
+                "action": "view_inventory_adjustments"
             }
         ]
     },

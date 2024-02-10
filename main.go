@@ -203,6 +203,8 @@ func runProgram() {
 	router.GET("aggregator/collection_requests",middlewares.PermissionBlockerMiddleware("view_collections"),collectionRequestsController.GetAggregatorCollectionRequests)
 	router.PUT("aggregator/collection_requests/change_status/:id/:status",middlewares.PermissionBlockerMiddleware("view_collections"),collectionRequestsController.ChangeCollectionRequestStatus)
 	router.GET("aggregator/collection_schedule",middlewares.PermissionBlockerMiddleware("view_collection_schedule"),collectionRequestsController.GetCollectionSchedule)
+
+	router.GET("aggregator/inventory_adjustments", middlewares.PermissionBlockerMiddleware("view_inventory_adjustments"), controllers.AggregatorController{}.GetInventoryAdjustments)
 	//-------------------------------------------------------------------------------------------
 
 	router.POST("route_planner/get_routes",middlewares.PermissionBlockerMiddleware("manage_route_planning"),controllers.RoutePlanningController{}.GetRoutes)
