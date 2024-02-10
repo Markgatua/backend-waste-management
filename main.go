@@ -200,8 +200,9 @@ func runProgram() {
 	router.POST("aggregator/waste_types/create", middlewares.PermissionBlockerMiddleware("create_waste_type"), controllers.AggregatorController{}.SetWasteTypes)
 
 	router.GET("aggregator/users", middlewares.PermissionBlockerMiddleware("view_user"), controllers.AggregatorController{}.GetUsers)
-	router.GET("aggregator/collection_requests",collectionRequestsController.GetAggregatorCollectionRequests)
-	router.GET("aggregator/collection_schedule",collectionRequestsController.GetCollectionSchedule)
+	router.GET("aggregator/collection_requests",middlewares.PermissionBlockerMiddleware("view_collections"),collectionRequestsController.GetAggregatorCollectionRequests)
+	router.GET("aggregator/collection_requests/change_status/:id/:status",middlewares.PermissionBlockerMiddleware("view_collections"),collectionRequestsController.ChangeCollectionRequestStatus)
+	router.GET("aggregator/collection_schedule",middlewares.PermissionBlockerMiddleware("view_collection_schedule"),collectionRequestsController.GetCollectionSchedule)
 	//-------------------------------------------------------------------------------------------
 
 	router.POST("route_planner/get_routes",middlewares.PermissionBlockerMiddleware("manage_route_planning"),controllers.RoutePlanningController{}.GetRoutes)

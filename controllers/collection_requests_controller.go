@@ -306,6 +306,49 @@ func (aggregatorController CollectionRequestsController) GetCollectionSchedule(c
 	})
 }
 
+func (aggregatorController CollectionRequestsController) ChangeCollectionRequestStatus(context *gin.Context) {
+	collectionRequestID := context.Param("id")
+	status := context.Param("status")
+
+	var id32 int32
+	fmt.Sscan(collectionRequestID, &id32)
+
+	var status_ int32
+	fmt.Sscan(status, &status_)
+
+	if !utils.InArray(status, []string{"1", "2", "3", "4", "5"}) {
+		context.JSON(http.StatusUnprocessableEntity, gin.H{
+			"error":   true,
+			"message": "Invalid status",
+		})
+		return
+	}
+	collectionRequest, err := gen.REPO.GetCollectionRequest(context, id32)
+	if err != nil {
+		context.JSON(http.StatusUnprocessableEntity, gin.H{
+			"error":   true,
+			"message": err.Error(),
+		})
+		return
+	}
+	err = gen.REPO.ChangeCollectionRequestStatus(context, gen.ChangeCollectionRequestStatusParams{
+		Status: status_,
+		ID:     id32,
+	})
+	if err != nil {
+		context.JSON(http.StatusUnprocessableEntity, gin.H{
+			"error":   true,
+			"message": err.Error(),
+		})
+		return
+	}
+	context.JSON(http.StatusOK, gin.H{
+		"error":   true,
+		"message": "Successfully updated collection request status",
+	})
+
+}
+
 func (aggregatorController CollectionRequestsController) GetAggregatorCollectionRequests(context *gin.Context) {
 	auth, _ := helpers.Functions{}.CurrentUserFromToken(context)
 
@@ -402,8 +445,8 @@ func (aggregatorController CollectionRequestsController) GetAggregatorCollection
 
 		//fmt.Print(query)
 		results, err := utils.Select(gen.REPO.DB, query)
-		if err!=nil{
-			logger.Log("CollectionRequestsController/GetAggregatorCollectionRequests/[wasteitems]",err.Error(),logger.LOG_LEVEL_ERROR)
+		if err != nil {
+			logger.Log("CollectionRequestsController/GetAggregatorCollectionRequests/[wasteitems]", err.Error(), logger.LOG_LEVEL_ERROR)
 		}
 		v["collection_waste_items"] = results
 	}
