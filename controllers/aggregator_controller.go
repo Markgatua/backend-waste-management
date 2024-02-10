@@ -1106,6 +1106,14 @@ func (aggregatorController AggregatorController) MakeInventoryAdjustments(contex
 				})
 				if err != nil {
 					logger.Log("Aggregator/MakeAdjustment", err.Error(), logger.LOG_LEVEL_ERROR)
+				} else {
+					gen.REPO.InsertToInventoryAdjustments(context, gen.InsertToInventoryAdjustmentsParams{
+						AdjustedBy:           int32(auth.ID.Int64),
+						CompanyID:            int32(auth.UserCompanyId.Int64),
+						AdjustmentAmount:     fmt.Sprint(v.Adjustment),
+						IsPositiveAdjustment: true,
+						Reason:               null.StringFrom(params.Reason).NullString,
+					})
 				}
 			} else {
 				//insert
