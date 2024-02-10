@@ -75,7 +75,7 @@ func (permissionsSeeder PermissionsSeeder) Run(q *gen.Queries) {
 		//insert super admin permissions
 		for _, v := range permissionIDs {
 			q.AssignPermissionToRole(context.Background(), gen.AssignPermissionToRoleParams{
-				RoleID:       1,
+				RoleID:       3,
 				PermissionID: v,
 			})
 			q.AssignPermissionToRole(context.Background(), gen.AssignPermissionToRoleParams{

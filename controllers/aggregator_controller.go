@@ -1107,7 +1107,7 @@ func (aggregatorController AggregatorController) MakeInventoryAdjustments(contex
 				if err != nil {
 					logger.Log("Aggregator/MakeAdjustment", err.Error(), logger.LOG_LEVEL_ERROR)
 				} else {
-					gen.REPO.InsertToInventoryAdjustments(context, gen.InsertToInventoryAdjustmentsParams{
+					err = gen.REPO.InsertToInventoryAdjustments(context, gen.InsertToInventoryAdjustmentsParams{
 						AdjustedBy:           int32(auth.ID.Int64),
 						CompanyID:            int32(auth.UserCompanyId.Int64),
 						AdjustmentAmount:     fmt.Sprint(v.Adjustment),
@@ -1115,6 +1115,9 @@ func (aggregatorController AggregatorController) MakeInventoryAdjustments(contex
 						IsPositiveAdjustment: true,
 						Reason:               null.StringFrom(params.Reason).NullString,
 					})
+					if err != nil {
+						logger.Log("Aggregator/MakeAdjustment", err.Error(), logger.LOG_LEVEL_ERROR)
+					}
 				}
 			} else {
 				//insert
@@ -1136,7 +1139,7 @@ func (aggregatorController AggregatorController) MakeInventoryAdjustments(contex
 					if err != nil {
 						logger.Log("Aggregator/MakeAdjustment", err.Error(), logger.LOG_LEVEL_ERROR)
 					} else {
-						gen.REPO.InsertToInventoryAdjustments(context, gen.InsertToInventoryAdjustmentsParams{
+						err = gen.REPO.InsertToInventoryAdjustments(context, gen.InsertToInventoryAdjustmentsParams{
 							AdjustedBy:           int32(auth.ID.Int64),
 							CompanyID:            int32(auth.UserCompanyId.Int64),
 							AdjustmentAmount:     fmt.Sprint(v.Adjustment),
@@ -1144,6 +1147,9 @@ func (aggregatorController AggregatorController) MakeInventoryAdjustments(contex
 							IsPositiveAdjustment: false,
 							Reason:               null.StringFrom(params.Reason).NullString,
 						})
+						if err != nil {
+							logger.Log("Aggregator/MakeAdjustment", err.Error(), logger.LOG_LEVEL_ERROR)
+						}
 					}
 				} else if v.AdjustmentType == "positive" {
 					remainingWeight := currentQuantity + v.Adjustment
@@ -1155,7 +1161,7 @@ func (aggregatorController AggregatorController) MakeInventoryAdjustments(contex
 					if err != nil {
 						logger.Log("Aggregator/MakeAdjustment", err.Error(), logger.LOG_LEVEL_ERROR)
 					} else {
-						gen.REPO.InsertToInventoryAdjustments(context, gen.InsertToInventoryAdjustmentsParams{
+						err = gen.REPO.InsertToInventoryAdjustments(context, gen.InsertToInventoryAdjustmentsParams{
 							AdjustedBy:           int32(auth.ID.Int64),
 							CompanyID:            int32(auth.UserCompanyId.Int64),
 							AdjustmentAmount:     fmt.Sprint(v.Adjustment),
@@ -1163,6 +1169,9 @@ func (aggregatorController AggregatorController) MakeInventoryAdjustments(contex
 							WasteTypeID:          v.ID,
 							Reason:               null.StringFrom(params.Reason).NullString,
 						})
+						if err != nil {
+							logger.Log("Aggregator/MakeAdjustment", err.Error(), logger.LOG_LEVEL_ERROR)
+						}
 					}
 				}
 			}
