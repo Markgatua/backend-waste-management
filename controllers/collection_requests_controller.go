@@ -397,9 +397,14 @@ func (aggregatorController CollectionRequestsController) GetAggregatorCollection
 
 	for _, v := range results {
 		key, _ := v["id"]
-		query = fmt.Sprint(`select collection_request_waste_items*,waste_types.name from collection_request_waste_items inner join waste_types on waste_types.id=collection_request_waste_items.waste_type_id where collection_request_id=`, key)
+		query = fmt.Sprint(`select collection_request_waste_items.*,waste_types.name from collection_request_waste_items inner join waste_types on waste_types.id=collection_request_waste_items.waste_type_id where collection_request_id=`, key)
 		//collection_request_waste_items
-		results, _ := utils.Select(gen.REPO.DB, query)
+
+		//fmt.Print(query)
+		results, err := utils.Select(gen.REPO.DB, query)
+		if err!=nil{
+			logger.Log("CollectionRequestsController/GetAggregatorCollectionRequests/[wasteitems]",err.Error(),logger.LOG_LEVEL_ERROR)
+		}
 		v["collection_waste_items"] = results
 	}
 
