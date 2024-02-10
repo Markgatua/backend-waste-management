@@ -1708,7 +1708,7 @@ func (aggregatorController AggregatorController) GetUsers(context *gin.Context) 
 	limitOffset := ""
 
 	if search != "" {
-		searchQuery = " and (q.first_name ilike " + "'%" + search + "%'" + " or q.company_name ilike " + "'%" + search + "%'" + " or q.last_name ilike " + "'%" + search + "%'" + " or q.ref ilike " + "'%" + search + "%'" + ")"
+		searchQuery = " and (q.first_name ilike " + "'%" + search + "%'" + " or q.email ilike " + "'%" + search + "%'" + " or q.last_name ilike " + "'%" + search + "%'" + " or q.role_name ilike " + "'%" + search + "%'" + ")"
 	}
 
 	if itemsPerPage != "" && page != "" {
@@ -1884,7 +1884,7 @@ func (aggregatorController AggregatorController) GetInventoryAdjustments(context
 	companyQuery = " and q.company_id=" + companyID
 
 	if dateRangeStart != "" && dateRangeEnd != "" {
-		dateRangeQuery = " and cast(q.purchase_date as date)>='" + dateRangeStart + "' and cast(q.purchase_date as date)<='" + dateRangeEnd + "'"
+		dateRangeQuery = " and cast(q.created_at as date)>='" + dateRangeStart + "' and cast(q.created_at as date)<='" + dateRangeEnd + "'"
 	}
 	query := `
 	 select * from 
