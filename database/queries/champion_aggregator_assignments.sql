@@ -68,3 +68,4 @@ LEFT JOIN
     companies AS collector ON collector.id = champion_aggregator_assignments.collector_id
 where champion_id=$1;
 
+
